@@ -15,7 +15,11 @@ INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number 
 ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
 
 EQUALS : '=';
-SEMI : ';' ;
+IMPORT : 'import';
+EXTENDS : 'extends';
+SEMI : ';';
+DOT : '.';
+
 LCURLY : '{' ;
 RCURLY : '}' ;
 LPAREN : '(' ;
@@ -30,15 +34,16 @@ RETURN : 'return' ;
 
 
 program
-    : classDecl EOF
+    : (importDecl)* classDecl EOF
     ;
 
+importDecl
+    : IMPORT name+=ID (DOT name+=ID)* SEMI #ImportStatement
+    ;
 
 classDecl
-    : CLASS name=ID
-        LCURLY
-        methodDecl*
-        RCURLY
+    : CLASS name=ID (EXTENDS parent=ID)? LCURLY
+    (varDecl)* (methodDecl)* RCURLY
     ;
 
 varDecl
