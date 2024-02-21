@@ -4,6 +4,10 @@ grammar Javamm;
     package pt.up.fe.comp2024;
 }
 
+SINGLE_LINE_COMMENT : '//' .*? ('\n'|EOF) -> skip;
+MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
+
+
 EQUALS : '=';
 SEMI : ';' ;
 LCURLY : '{' ;
