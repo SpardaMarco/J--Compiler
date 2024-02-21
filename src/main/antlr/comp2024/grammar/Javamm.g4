@@ -9,12 +9,6 @@ SINGLE_LINE_COMMENT : '//' .*? ('\n'|EOF) -> skip;
 MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
 WS : [ \t\n\r\f]+ -> skip ;
 
-// Basic Tokens
-LETTER : [a-zA-Z];
-DIGIT : [0-9];
-
-INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
-ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
 
 // Symbols
 EQUALS : '=';
@@ -61,6 +55,12 @@ BOOLEAN : 'boolean';
 ARRAYTYPESUFFIX : LBRACKET RBRACKET;
 VARARGSUFFIX : '...';
 VOID : 'void' ;
+
+// Basic Tokens
+INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
+ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
+LETTER : [a-zA-Z];
+DIGIT : [0-9];
 
 // Rules
 program
@@ -123,8 +123,8 @@ expr
     | expr op=LT expr #BinaryOp
     | expr op=AND expr #BinaryOp
     | value=ID #Identifier
-    | value=INTEGER #Integer
-    | value=TRUE #Boolean
-    | value=FALSE #Boolean
+    | value=INTEGER #IntegerLiteral
+    | value=TRUE #BooleanLiteral
+    | value=FALSE #BooleanLiteral
     | value=THIS #This
     ;
