@@ -20,23 +20,39 @@ ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
 EQUALS : '=';
 SEMI : ';';
 DOT : '.';
+COMMA : ',';
 LCURLY : '{' ;
 RCURLY : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
 LBRACKET : '[' ;
 RBRACKET : ']' ;
+
+// Operators
 MUL : '*' ;
+DIV : '/' ;
 ADD : '+' ;
+SUB : '-' ;
+AND : '&&' ;
+LT : '<' ;
+NOT : '!' ;
 
 // Keywords
 IMPORT : 'import';
 EXTENDS : 'extends';
 STATIC : 'static';
 MAIN : 'main';
-CLASS : 'class' ;
-PUBLIC : 'public' ;
-RETURN : 'return' ;
+CLASS : 'class';
+PUBLIC : 'public';
+RETURN : 'return';
+IF : 'if';
+ELSE : 'else';
+WHILE : 'while';
+LENGTH : 'length';
+THIS : 'this';
+NEW : 'new';
+TRUE : 'true';
+FALSE : 'false';
 
 // Types
 INT : 'int' ;
@@ -46,7 +62,7 @@ ARRAYTYPESUFFIX : LBRACKET RBRACKET;
 VARARGSUFFIX : '...';
 VOID : 'void' ;
 
-
+// Rules
 program
     : (importDecl)* classDecl EOF
     ;
@@ -80,23 +96,35 @@ type
     | name=ID #NamedType
     ;
 
-
-
 param
     : type name=ID
     ;
 
 stmt
-    : expr EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt
+    : LCURLY (stmt)* RCURLY #ScopeStmt
+    | IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt
+    | WHILE LPAREN expr RPAREN stmt #WhileStmt
+    | expr SEMI #ExprStmt
+    | name=ID EQUALS expr SEMI #AssignStmt
+    | name=ID LBRACKET expr RBRACKET EQUALS expr SEMI #ArrayAssignStmt
     ;
 
 expr
-    : expr op= MUL expr #BinaryExpr //
-    | expr op= ADD expr #BinaryExpr //
-    | value=INTEGER #IntegerLiteral //
-    | name=ID #VarRefExpr //
+    : LPAREN expr RPAREN #ParenExpr
+    | expr LBRACKET expr RBRACKET #ArrayAccessOp
+    | NEW INT LBRACKET expr RBRACKET #ArrayDeclaration
+    | NEW name=ID LPAREN RPAREN #ObjectDeclaration
+    | expr DOT LENGTH #Length
+    | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
+    | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
+    | NOT expr #UnaryOp
+    | expr op=(MUL | DIV) expr #BinaryOp
+    | expr op=(ADD | SUB) expr #BinaryOp
+    | expr op=LT expr #BinaryOp
+    | expr op=AND expr #BinaryOp
+    | value=ID #Identifier
+    | value=INTEGER #Integer
+    | value=TRUE #Boolean
+    | value=FALSE #Boolean
+    | value=THIS #This
     ;
-
-
-
