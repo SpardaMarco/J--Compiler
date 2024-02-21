@@ -6,7 +6,13 @@ grammar Javamm;
 
 SINGLE_LINE_COMMENT : '//' .*? ('\n'|EOF) -> skip;
 MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
+WS : [ \t\n\r\f]+ -> skip ;
 
+LETTER : [a-zA-Z];
+DIGIT : [0-9];
+
+INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
+ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
 
 EQUALS : '=';
 SEMI : ';' ;
@@ -22,10 +28,6 @@ INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 
-INTEGER : [0-9] ;
-ID : [a-zA-Z]+ ;
-
-WS : [ \t\n\r\f]+ -> skip ;
 
 program
     : classDecl EOF
