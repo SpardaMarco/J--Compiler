@@ -7,10 +7,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
@@ -19,17 +16,61 @@ public class JmmSymbolTableBuilder {
 
 
     public static JmmSymbolTable build(JmmNode root) {
+        var imports = buildImports(root);
 
-        var classDecl = root.getJmmChild(0);
+        int classDeclIndex = root.getNumChildren()-1;
+        var classDecl = root.getJmmChild(classDeclIndex);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("name");
 
+        var superClass = buildSuper(classDecl);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
 
-        return new JmmSymbolTable(className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(imports, className, superClass, methods, returnTypes, params, locals);
+    }
+
+    private static List<String> buildImports(JmmNode root) {
+        int numImports = root.getNumChildren()-1;
+        List<String> imports = new ArrayList<>();
+
+        for (int i = 0; i < numImports; i++) {
+            imports.add(root.getJmmChild(i).get("name"));
+        }
+
+        return imports;
+    }
+
+    private static String buildSuper(JmmNode classDecl) {
+        return classDecl.get("parent");
+    }
+
+    private static List<Symbol> buildFields(JmmNode classDecl) {
+        List<Symbol> fields = new ArrayList<>();
+
+        for (JmmNode child : classDecl.getChildren()) {
+            if (child.getKind() != "VarDeclaration") continue;
+
+            String name = "";
+            Boolean isArray = false;
+
+            if (child.getChild(0).getKind() != "ArrayType") {
+                name = child.getChild(0).get("name");
+            }
+
+            else {
+                isArray = true;
+                name = child.getChild(0).getChild(0).get("name");
+            }
+
+            Type type = new Type(name, isArray);
+            Symbol field = new Symbol(type, child.get("name"));
+            fields.add(field);
+        }
+
+        return fields;
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {

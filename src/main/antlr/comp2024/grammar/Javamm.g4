@@ -81,7 +81,7 @@ varDecl
     ;
 
 methodDecl
-    : (PUBLIC)? type name=ID LPAREN (param (COMMA param)*)? RPAREN LCURLY
+    : (PUBLIC)? type name=ID LPAREN params?  RPAREN LCURLY
     (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
     | (PUBLIC)? STATIC VOID name=MAIN LPAREN STRING ARRAYTYPESUFFIX paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
@@ -89,15 +89,15 @@ methodDecl
 
 type
     : type ARRAYTYPESUFFIX #ArrayType
-    | type VARARGSUFFIX #VarArgType
     | name=INT #IntType
     | name=STRING #StringType
     | name=BOOLEAN #BooleanType
     | name=ID #NamedType
     ;
 
-param
-    : type name=ID
+params
+    : (type name=ID) params
+    | type VARARGSUFFIX? name=ID
     ;
 
 stmt
