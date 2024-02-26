@@ -96,8 +96,9 @@ type
     ;
 
 params
-    : (type name=ID) params
-    | type VARARGSUFFIX? name=ID
+    : (type name=ID) COMMA params
+    | type name=ID
+    | INT VARARGSUFFIX name=ID
     ;
 
 stmt
