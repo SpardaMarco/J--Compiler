@@ -7,6 +7,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
@@ -14,23 +15,11 @@ import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
 
 public class JmmSymbolTableBuilder {
 
-
     public static JmmSymbolTable build(JmmNode root) {
         var imports = buildImports(root);
+        var declaredClass = buildClass(root);
 
-        int classDeclIndex = root.getNumChildren()-1;
-        var classDecl = root.getJmmChild(classDeclIndex);
-        SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
-        String className = classDecl.get("name");
-
-        var superclass = buildSuper(classDecl);
-        var fields = buildFields(classDecl);
-        var methods = buildMethods(classDecl);
-        var returnTypes = buildReturnTypes(classDecl);
-        var params = buildParams(classDecl);
-        var locals = buildLocals(classDecl);
-
-        return new JmmSymbolTable(imports, className, superclass, fields, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(imports, declaredClass);
     }
 
     private static List<String> buildImports(JmmNode root) {
@@ -44,8 +33,22 @@ public class JmmSymbolTableBuilder {
         return imports;
     }
 
+    private static ClassSymbol buildClass(JmmNode root) {
+
+        int classDeclIndex = root.getNumChildren()-1;
+        var classDecl = root.getJmmChild(classDeclIndex);
+        //SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
+        String className = classDecl.get("name");
+
+        var superclass = buildSuper(classDecl);
+        var fields = buildFields(classDecl);
+        var methods = buildMethods(classDecl);
+
+        return new ClassSymbol(className, superclass, fields, methods);
+    }
+
     private static String buildSuper(JmmNode classDecl) {
-        return classDecl.get("parent");
+        return classDecl.hasAttribute("parent") ? classDecl.get("parent") : null;
     }
 
     private static List<Symbol> buildFields(JmmNode classDecl) {
@@ -54,17 +57,8 @@ public class JmmSymbolTableBuilder {
         for (JmmNode child : classDecl.getChildren()) {
             if (child.getKind() != "VarDeclaration") continue;
 
-            String name = "";
-            Boolean isArray = false;
-
-            if (child.getChild(0).getKind() != "ArrayType") {
-                name = child.getChild(0).get("name");
-            }
-
-            else {
-                isArray = true;
-                name = child.getChild(0).getChild(0).get("name");
-            }
+            String name = child.getChild(0).getChild(0).get("name");
+            Boolean isArray = child.getChild(0).getKind() == "ArrayType";
 
             Type type = new Type(name, isArray);
             Symbol field = new Symbol(type, child.get("name"));
@@ -72,6 +66,15 @@ public class JmmSymbolTableBuilder {
         }
 
         return fields;
+    }
+
+    private static Map<String, MethodSymbol> buildMethods(JmmNode classDecl) {
+
+
+        //return classDecl.getChildren(METHOD_DECL).stream()
+        //        .map(method -> method.get("name"))
+        //       .toList();
+        return new HashMap<>();
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
@@ -109,14 +112,6 @@ public class JmmSymbolTableBuilder {
 
         return map;
     }
-
-    private static List<String> buildMethods(JmmNode classDecl) {
-
-        return classDecl.getChildren(METHOD_DECL).stream()
-                .map(method -> method.get("name"))
-                .toList();
-    }
-
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
         // TODO: Simple implementation that needs to be expanded

@@ -88,8 +88,12 @@ methodDecl
     ;
 
 type
-    : type ARRAYTYPESUFFIX #ArrayType
-    | name=INT #IntType
+   : literal ARRAYTYPESUFFIX #ArrayType
+   | literal #PrimitiveType
+   ;
+
+literal
+    : name=INT #IntType
     | name=STRING #StringType
     | name=BOOLEAN #BooleanType
     | name=ID #NamedType

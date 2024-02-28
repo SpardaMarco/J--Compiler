@@ -4,7 +4,6 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,47 +11,13 @@ import java.util.Map;
 
 public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
-    private final String className;
-    private final String superclass;
-    private final List<Symbol> fields;
-    private final List<String> methods;
-    private final Map<String, Type> returnTypes;
-    private final Map<String, List<Symbol>> params;
-    private final Map<String, List<Symbol>> locals;
+
+    private final ClassSymbol declaredClass;
 
     public JmmSymbolTable(List<String> imports,
-                          String className,
-                          String superclass,
-                          List<Symbol> fields,
-                          List<String> methods,
-                          Map<String, Type> returnTypes,
-                          Map<String, List<Symbol>> params,
-                          Map<String, List<Symbol>> locals) {
+                          ClassSymbol declaredClass) {
         this.imports = imports;
-        this.className = className;
-        this.superclass = superclass;
-        this.fields = fields;
-        this.methods = methods;
-        this.returnTypes = returnTypes;
-        this.params = params;
-        this.locals = locals;
-    }
-
-    public JmmSymbolTable(List<String> imports,
-                          String className,
-                          List<Symbol> fields,
-                          List<String> methods,
-                          Map<String, Type> returnTypes,
-                          Map<String, List<Symbol>> params,
-                          Map<String, List<Symbol>> locals) {
-        this.imports = imports;
-        this.className = className;
-        this.superclass = null;
-        this.fields = fields;
-        this.methods = methods;
-        this.returnTypes = returnTypes;
-        this.params = params;
-        this.locals = locals;
+        this.declaredClass = declaredClass;
     }
 
     @Override
@@ -62,20 +27,20 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public String getClassName() {
-        return className;
+        return declaredClass.getClassName();
     }
 
     @Override
-    public String getSuper() { return superclass; }
+    public String getSuper() { return declaredClass.getSuperclass(); }
 
     @Override
     public List<Symbol> getFields() {
-        return fields;
+        return declaredClass.getFields();
     }
 
     @Override
     public List<String> getMethods() {
-        return Collections.unmodifiableList(methods);
+        return Collections.unmodifiableList(declaredClass.getMethods());
     }
 
     @Override
@@ -86,12 +51,12 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public List<Symbol> getParameters(String methodSignature) {
-        return Collections.unmodifiableList(params.get(methodSignature));
+        return Collections.unmodifiableList(declaredClass.getParams(methodSignature));
     }
 
     @Override
     public List<Symbol> getLocalVariables(String methodSignature) {
-        return Collections.unmodifiableList(locals.get(methodSignature));
+        return Collections.unmodifiableList(declaredClass.getLocals(methodSignature));
     }
 
 }

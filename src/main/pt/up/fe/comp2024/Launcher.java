@@ -2,6 +2,7 @@ package pt.up.fe.comp2024;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
@@ -9,6 +10,7 @@ import pt.up.fe.comp2024.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2024.backend.JasminBackendImpl;
 import pt.up.fe.comp2024.optimization.JmmOptimizationImpl;
 import pt.up.fe.comp2024.parser.JmmParserImpl;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
 
@@ -33,32 +35,36 @@ public class Launcher {
         for (var report : parserResult.getReports()) {
             System.out.println(report);
         }
-        TestUtils.noErrors(parserResult.getReports());
+        //TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        System.out.println(parserResult.getRootNode().toTree());
+        // System.out.println(parserResult.getRootNode().toTree());
+        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+
+        System.out.println(table.getClassName());
+        System.out.println(table.getSuper());
 
         // Semantic Analysis stage
-        JmmAnalysisImpl sema = new JmmAnalysisImpl();
-        JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
-        TestUtils.noErrors(semanticsResult.getReports());
+        //JmmAnalysisImpl sema = new JmmAnalysisImpl();
+        //JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
+        //TestUtils.noErrors(semanticsResult.getReports());
 
 
         // Optimization stage
-        JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
-        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
-        TestUtils.noErrors(ollirResult.getReports());
+        //JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+        //OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
+        //TestUtils.noErrors(ollirResult.getReports());
 
         // Print OLLIR code
-        System.out.println(ollirResult.getOllirCode());
+        //System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
-         JasminBackendImpl jasminGen = new JasminBackendImpl();
-         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-         TestUtils.noErrors(jasminResult.getReports());
+         //JasminBackendImpl jasminGen = new JasminBackendImpl();
+         //JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+         //TestUtils.noErrors(jasminResult.getReports());
 
         // Print Jasmin code
-        System.out.println(jasminResult.getJasminCode());
+        //System.out.println(jasminResult.getJasminCode());
     }
 
 }
