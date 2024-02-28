@@ -1,11 +1,11 @@
 import Math.Algebra;
 import Math2;
 
-class Main {
+class Sain {
 
     public static void main (String[] args) {
 
-        x = 2;
+        $x = 2;
 
         y = 2 + x;
 

@@ -30,32 +30,35 @@ public class Launcher {
         // Parsing stage
         JmmParserImpl parser = new JmmParserImpl();
         JmmParserResult parserResult = parser.parse(code, config);
+        for (var report : parserResult.getReports()) {
+            System.out.println(report);
+        }
         TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
         System.out.println(parserResult.getRootNode().toTree());
 
         // Semantic Analysis stage
-        // JmmAnalysisImpl sema = new JmmAnalysisImpl();
-        //JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
-        //TestUtils.noErrors(semanticsResult.getReports());
+        JmmAnalysisImpl sema = new JmmAnalysisImpl();
+        JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
+        TestUtils.noErrors(semanticsResult.getReports());
 
 
         // Optimization stage
-        //JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
-        //OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
-        //TestUtils.noErrors(ollirResult.getReports());
+        JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
+        TestUtils.noErrors(ollirResult.getReports());
 
         // Print OLLIR code
-        //System.out.println(ollirResult.getOllirCode());
+        System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
-        // JasminBackendImpl jasminGen = new JasminBackendImpl();
-        // JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        // TestUtils.noErrors(jasminResult.getReports());
+         JasminBackendImpl jasminGen = new JasminBackendImpl();
+         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+         TestUtils.noErrors(jasminResult.getReports());
 
         // Print Jasmin code
-        //System.out.println(jasminResult.getJasminCode());
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }
