@@ -58,7 +58,7 @@ public class JmmSymbolTableBuilder {
             if (!child.getKind().equals("VarDeclaration")) continue;
 
             String name = child.getChild(0).getChild(0).get("name");
-            Boolean isArray = child.getChild(0).getKind() == "ArrayType";
+            Boolean isArray = child.getChild(0).getKind().equals("ArrayType");
 
             Type type = new Type(name, isArray);
             Symbol field = new Symbol(type, child.get("name"));

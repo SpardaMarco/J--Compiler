@@ -43,7 +43,7 @@ public class Launcher {
 
 
         System.out.printf("Class: %s\n",table.getClassName());
-        System.out.printf("Superclass %s\n", table.getSuper());
+        System.out.printf("Superclass: %s\n", table.getSuper());
 
         for (var field: table.getFields()){
             if (field.getType().isArray())
