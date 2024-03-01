@@ -19,7 +19,6 @@ public class MethodSymbol {
 
     private final List<Symbol> locals;
 
-
     public MethodSymbol(String name, Type type, Boolean isStatic, Boolean isPublic, List<Symbol> params, List<Symbol> locals) {
         this.name = name;
         this.type = type;

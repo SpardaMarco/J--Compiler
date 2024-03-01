@@ -54,7 +54,7 @@ public class JmmSymbolTableBuilder {
     private static List<Symbol> buildFields(JmmNode classDecl) {
         List<Symbol> fields = new ArrayList<>();
 
-        for (JmmNode child : classDecl.getChildren()) {
+        for (JmmNode child: classDecl.getChildren()) {
             if (!child.getKind().equals("VarDeclaration")) continue;
 
             String name = child.getChild(0).getChild(0).get("name");
@@ -71,10 +71,33 @@ public class JmmSymbolTableBuilder {
     private static Map<String, MethodSymbol> buildMethods(JmmNode classDecl) {
 
 
-        //return classDecl.getChildren(METHOD_DECL).stream()
-        //        .map(method -> method.get("name"))
-        //       .toList();
-        return new HashMap<>();
+        Map<String, MethodSymbol> methodSymbols = new HashMap<>();
+
+        for (JmmNode method: classDecl.getChildren()) {
+
+            if (!method.getKind().equals("MethodDeclaration")) continue;
+
+            String name = method.get("name");
+
+            JmmNode returnTypeNode = method.getChild(0);
+            Boolean isReturnTypeArray = returnTypeNode.getKind().equals("ArrayType");
+            String returnTypeName = returnTypeNode.getChild(0).get("name");
+            Type returnType = new Type(returnTypeName, isReturnTypeArray);
+
+
+            MethodSymbol methodSymbol = new MethodSymbol(
+                    name,
+                    returnType,
+                    false,
+                    true,
+                    new ArrayList<>(),
+                    new ArrayList<>()
+            );
+
+            methodSymbols.put(name, methodSymbol);
+        }
+
+        return methodSymbols;
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {

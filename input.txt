@@ -15,4 +15,8 @@ class QuantumMechanics extends Physics  {
 
 
     }
+
+    public boolean collapseState(){
+        return False;
+    }
 }

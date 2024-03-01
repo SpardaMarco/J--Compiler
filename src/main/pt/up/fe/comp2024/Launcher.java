@@ -38,9 +38,8 @@ public class Launcher {
         //TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        // System.out.println(parserResult.getRootNode().toTree());
+        System.out.println(parserResult.getRootNode().toTree());
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-
 
         System.out.printf("Class: %s\n",table.getClassName());
         System.out.printf("Superclass: %s\n", table.getSuper());
@@ -50,6 +49,17 @@ public class Launcher {
                 System.out.printf("Field: %s[] %s\n", field.getType().getName(), field.getName());
             else
                 System.out.printf("Field: %s %s\n", field.getType().getName(), field.getName());
+        }
+
+        System.out.println();
+        for (var method: table.getMethods()) {
+            System.out.printf("Method %s\n", method);
+            var type = table.getReturnType(method);
+            if (type.isArray())
+                System.out.printf("Return Type: %s[]\n", type.getName());
+            else
+                System.out.printf("Return Type: %s\n", type.getName());
+            System.out.println();
         }
 
         // Semantic Analysis stage
