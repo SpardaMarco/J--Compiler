@@ -1,15 +1,15 @@
 import Math.Algebra;
 import Math2;
 
-class Sain {
+class QuantumMechanics extends Physics  {
 
-    int x;
+    int phi;
 
-    int[] y;
+    int[] stateVector;
 
-    boolean a;
+    boolean isCatDead;
 
-    Object c;
+    Schrodinger blud;
 
     public static void main (String[] args) {
 

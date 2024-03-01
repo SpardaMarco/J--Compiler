@@ -55,7 +55,7 @@ public class JmmSymbolTableBuilder {
         List<Symbol> fields = new ArrayList<>();
 
         for (JmmNode child : classDecl.getChildren()) {
-            if (child.getKind() != "VarDeclaration") continue;
+            if (!child.getKind().equals("VarDeclaration")) continue;
 
             String name = child.getChild(0).getChild(0).get("name");
             Boolean isArray = child.getChild(0).getKind() == "ArrayType";

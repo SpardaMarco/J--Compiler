@@ -41,8 +41,16 @@ public class Launcher {
         // System.out.println(parserResult.getRootNode().toTree());
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
 
-        System.out.println(table.getClassName());
-        System.out.println(table.getSuper());
+
+        System.out.printf("Class: %s\n",table.getClassName());
+        System.out.printf("Superclass %s\n", table.getSuper());
+
+        for (var field: table.getFields()){
+            if (field.getType().isArray())
+                System.out.printf("Field: %s[] %s\n", field.getType().getName(), field.getName());
+            else
+                System.out.printf("Field: %s %s\n", field.getType().getName(), field.getName());
+        }
 
         // Semantic Analysis stage
         //JmmAnalysisImpl sema = new JmmAnalysisImpl();
