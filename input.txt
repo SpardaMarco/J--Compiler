@@ -13,10 +13,15 @@ class QuantumMechanics extends Physics  {
 
     public static void main (String[] args) {
 
-
+        int[] stateVector;
+        boolean isCatDead;
+        Schrodinger blud;
     }
 
-    public boolean collapseState(){
+    public boolean[] collapseState(int a, int b, int... c){
+        int[] stateVector;
+        boolean isCatDead;
+        Schrodinger blud;
         return False;
     }
 }

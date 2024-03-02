@@ -38,9 +38,15 @@ public class Launcher {
         //TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        System.out.println(parserResult.getRootNode().toTree());
+        //System.out.println(parserResult.getRootNode().toTree());
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
 
+
+        System.out.println("Symbol Table:");
+        System.out.println("Imports:");
+        for (var imp: table.getImports()){
+            System.out.println(imp);
+        }
         System.out.printf("Class: %s\n",table.getClassName());
         System.out.printf("Superclass: %s\n", table.getSuper());
 
@@ -60,6 +66,22 @@ public class Launcher {
             else
                 System.out.printf("Return Type: %s\n", type.getName());
             System.out.println();
+
+            System.out.println("Parameters:");
+            for (var param: table.getParameters(method)){
+                if (param.getType().isArray())
+                    System.out.printf("%s[] %s\n", param.getType().getName(), param.getName());
+                else
+                    System.out.printf("%s %s\n", param.getType().getName(), param.getName());
+            }
+
+            System.out.println("Local Variables:");
+            for (var local: table.getLocalVariables(method)){
+                if (local.getType().isArray())
+                    System.out.printf("%s[] %s\n", local.getType().getName(), local.getName());
+                else
+                    System.out.printf("%s %s\n", local.getType().getName(), local.getName());
+            }
         }
 
         // Semantic Analysis stage

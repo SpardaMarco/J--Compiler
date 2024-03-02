@@ -40,13 +40,12 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public List<String> getMethods() {
-        return Collections.unmodifiableList(declaredClass.getMethods());
+        return declaredClass.getMethods();
     }
 
     @Override
     public Type getReturnType(String methodSignature) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(TypeUtils.getIntTypeName(), false);
+        return declaredClass.getMethodType(methodSignature);
     }
 
     @Override

@@ -80,10 +80,10 @@ varDecl
     : type name=ID SEMI #VarDeclaration
     ;
 
-methodDecl
-    : (PUBLIC)? type name=ID LPAREN params?  RPAREN LCURLY
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+    : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
     (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
-    | (PUBLIC)? STATIC VOID name=MAIN LPAREN STRING ARRAYTYPESUFFIX paramName=ID RPAREN LCURLY
+    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=MAIN LPAREN STRING ARRAYTYPESUFFIX paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
     ;
 
@@ -99,10 +99,10 @@ literal
     | name=ID #NamedType
     ;
 
-params
+params locals[boolean isVarArg=false]
     : (type name=ID) COMMA params
     | type name=ID
-    | INT VARARGSUFFIX name=ID
+    | INT (VARARGSUFFIX {$isVarArg=true;}) name=ID
     ;
 
 stmt
