@@ -67,14 +67,12 @@ public class Launcher {
 
     public static void main(String[] args) {
         SpecsSystem.programStandardInit();
-
         Map<String, String> config = CompilerConfig.parseArgs(args);
 
         var inputFile = CompilerConfig.getInputFile(config).orElseThrow();
         if (!inputFile.isFile()) {
             throw new RuntimeException("Option '-i' expects a path to an existing input file, got '" + args[0] + "'.");
         }
-
         String code = SpecsIo.read(inputFile);
 
         // Parsing stage

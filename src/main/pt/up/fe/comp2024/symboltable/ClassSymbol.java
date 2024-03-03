@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassSymbol {
-
     private final String className;
     private final String superclass;
     private final List<Symbol> fields;
@@ -28,6 +27,7 @@ public class ClassSymbol {
         this.fields = fields;
         this.methods = methods;
     }
+
     public String getClassName() {
         return className;
     }

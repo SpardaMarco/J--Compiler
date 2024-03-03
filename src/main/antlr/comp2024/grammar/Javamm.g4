@@ -9,7 +9,6 @@ SINGLE_LINE_COMMENT : '//' .*? ('\n'|EOF) -> skip;
 MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
 WS : [ \t\n\r\f]+ -> skip ;
 
-
 // Symbols
 EQUALS : '=';
 SEMI : ';';

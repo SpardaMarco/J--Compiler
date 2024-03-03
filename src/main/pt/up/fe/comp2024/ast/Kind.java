@@ -19,7 +19,6 @@ public enum Kind {
     INTEGER_LITERAL,
     VAR_REF_EXPR;
 
-
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);
 
@@ -34,7 +33,6 @@ public enum Kind {
     }
 
     public static Kind fromString(String kind) {
-
         for (Kind k : Kind.values()) {
             if (k.getNodeName().equals(kind)) {
                 return k;

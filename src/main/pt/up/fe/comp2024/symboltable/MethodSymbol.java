@@ -6,7 +6,6 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import java.util.List;
 
 public class MethodSymbol {
-
     private final String name;
 
     private final Type type;
