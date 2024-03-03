@@ -6,11 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CompilerConfig {
-
     private static final String INPUT_FILE = "inputFile";
     private static final String OPTIMIZE = "optimize";
     private static final String REGISTER = "registerAllocation";
-
 
     static Map<String, String> shortToLong = new HashMap<>();
 
@@ -19,7 +17,6 @@ public class CompilerConfig {
         shortToLong.put("o", CompilerConfig.OPTIMIZE);
         shortToLong.put("r", CompilerConfig.REGISTER);
     }
-
 
     public static Optional<File> getInputFile(Map<String, String> config) {
         var inputFile = config.get(INPUT_FILE);
@@ -39,7 +36,6 @@ public class CompilerConfig {
     public static int getRegisterAllocation(Map<String, String> config) {
         return Integer.parseInt(config.getOrDefault(REGISTER, "-1"));
     }
-
 
     public static Map<String, String> getDefault() {
 
@@ -109,6 +105,4 @@ public class CompilerConfig {
 
         return config;
     }
-
-
 }

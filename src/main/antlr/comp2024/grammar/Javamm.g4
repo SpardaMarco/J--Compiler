@@ -4,66 +4,131 @@ grammar Javamm;
     package pt.up.fe.comp2024;
 }
 
+// Comments
+SINGLE_LINE_COMMENT : '//' .*? ('\n'|EOF) -> skip;
+MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
+WS : [ \t\n\r\f]+ -> skip ;
+
+// Symbols
 EQUALS : '=';
-SEMI : ';' ;
+SEMI : ';';
+DOT : '.';
+COMMA : ',';
 LCURLY : '{' ;
 RCURLY : '}' ;
 LPAREN : '(' ;
 RPAREN : ')' ;
+LBRACKET : '[' ;
+RBRACKET : ']' ;
+
+// Operators
 MUL : '*' ;
+DIV : '/' ;
 ADD : '+' ;
+SUB : '-' ;
+AND : '&&' ;
+LT : '<' ;
+NOT : '!' ;
 
-CLASS : 'class' ;
+// Keywords
+IMPORT : 'import';
+EXTENDS : 'extends';
+STATIC : 'static';
+MAIN : 'main';
+CLASS : 'class';
+PUBLIC : 'public';
+RETURN : 'return';
+IF : 'if';
+ELSE : 'else';
+WHILE : 'while';
+LENGTH : 'length';
+THIS : 'this';
+NEW : 'new';
+TRUE : 'true';
+FALSE : 'false';
+
+// Types
 INT : 'int' ;
-PUBLIC : 'public' ;
-RETURN : 'return' ;
+STRING : 'String';
+BOOLEAN : 'boolean';
+ARRAYTYPESUFFIX : LBRACKET RBRACKET;
+VARARGSUFFIX : '...';
+VOID : 'void' ;
 
-INTEGER : [0-9] ;
-ID : [a-zA-Z]+ ;
+// Basic Tokens
+INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
+ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
+LETTER : [a-zA-Z];
+DIGIT : [0-9];
 
-WS : [ \t\n\r\f]+ -> skip ;
-
+// Rules
 program
-    : classDecl EOF
+    : (importDecl)* classDecl EOF
     ;
 
+importDecl
+    : IMPORT name+=ID (DOT name+=ID)* SEMI #ImportDeclaration
+    ;
 
 classDecl
-    : CLASS name=ID
-        LCURLY
-        methodDecl*
-        RCURLY
+    : CLASS name=ID (EXTENDS parent=ID)? LCURLY
+    (varDecl)* (methodDecl)* RCURLY #ClassDeclaration
     ;
 
 varDecl
-    : type name=ID SEMI
+    : type name=ID SEMI #VarDeclaration
+    ;
+
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+    : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
+    (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
+    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=MAIN LPAREN STRING ARRAYTYPESUFFIX paramName=ID RPAREN LCURLY
+    (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
     ;
 
 type
-    : name= INT ;
+   : literal ARRAYTYPESUFFIX #ArrayType
+   | literal #PrimitiveType
+   ;
 
-methodDecl locals[boolean isPublic=false]
-    : (PUBLIC {$isPublic=true;})?
-        type name=ID
-        LPAREN param RPAREN
-        LCURLY varDecl* stmt* RCURLY
+literal
+    : name=INT #IntType
+    | name=STRING #StringType
+    | name=BOOLEAN #BooleanType
+    | name=ID #NamedType
     ;
 
-param
-    : type name=ID
+params locals[boolean isVarArg=false]
+    : (type name=ID) COMMA params
+    | type name=ID
+    | INT (VARARGSUFFIX {$isVarArg=true;}) name=ID
     ;
 
 stmt
-    : expr EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt
+    : LCURLY (stmt)* RCURLY #ScopeStmt
+    | IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt
+    | WHILE LPAREN expr RPAREN stmt #WhileStmt
+    | expr SEMI #ExprStmt
+    | name=ID EQUALS expr SEMI #AssignStmt
+    | name=ID LBRACKET expr RBRACKET EQUALS expr SEMI #ArrayAssignStmt
     ;
 
 expr
-    : expr op= MUL expr #BinaryExpr //
-    | expr op= ADD expr #BinaryExpr //
-    | value=INTEGER #IntegerLiteral //
-    | name=ID #VarRefExpr //
+    : LPAREN expr RPAREN #ParenExpr
+    | expr LBRACKET expr RBRACKET #ArrayAccessOp
+    | NEW INT LBRACKET expr RBRACKET #ArrayDeclaration
+    | NEW name=ID LPAREN RPAREN #ObjectDeclaration
+    | expr DOT LENGTH #Length
+    | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
+    | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
+    | NOT expr #UnaryOp
+    | expr op=(MUL | DIV) expr #BinaryOp
+    | expr op=(ADD | SUB) expr #BinaryOp
+    | expr op=LT expr #BinaryOp
+    | expr op=AND expr #BinaryOp
+    | value=ID #Identifier
+    | value=INTEGER #IntegerLiteral
+    | value=TRUE #BooleanLiteral
+    | value=FALSE #BooleanLiteral
+    | value=THIS #This
     ;
-
-
-

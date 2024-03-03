@@ -1,0 +1,27 @@
+import Math.Algebra;
+import Math2;
+
+class QuantumMechanics extends Physics  {
+
+    int phi;
+
+    int[] stateVector;
+
+    boolean isCatDead;
+
+    Schrodinger blud;
+
+    public static void main (String[] args) {
+
+        int[] stateVector;
+        boolean isCatDead;
+        Schrodinger blud;
+    }
+
+    public boolean[] collapseState(int a, int b, int... c){
+        int[] stateVector;
+        boolean isCatDead;
+        Schrodinger blud;
+        return False;
+    }
+}

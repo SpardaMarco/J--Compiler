@@ -7,10 +7,13 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
     }
+
+    public static String getVoidTypeName() { return VOID_TYPE_NAME; }
 
     /**
      * Gets the {@link Type} of an arbitrary expression.
@@ -25,6 +28,7 @@ public class TypeUtils {
         var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
+            case METHOD_DECL -> getMethodDeclType(expr);
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
@@ -61,5 +65,9 @@ public class TypeUtils {
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
         // TODO: Simple implementation that needs to be expanded
         return sourceType.getName().equals(destinationType.getName());
+    }
+
+    private static Type getMethodDeclType(JmmNode methodDecl) {
+        return new Type(VOID_TYPE_NAME, false);
     }
 }
