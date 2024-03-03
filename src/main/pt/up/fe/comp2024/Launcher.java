@@ -17,37 +17,16 @@ import pt.up.fe.specs.util.SpecsSystem;
 import java.util.Map;
 
 public class Launcher {
-
-    public static void main(String[] args) {
-        SpecsSystem.programStandardInit();
-
-        Map<String, String> config = CompilerConfig.parseArgs(args);
-
-        var inputFile = CompilerConfig.getInputFile(config).orElseThrow();
-        if (!inputFile.isFile()) {
-            throw new RuntimeException("Option '-i' expects a path to an existing input file, got '" + args[0] + "'.");
-        }
-        String code = SpecsIo.read(inputFile);
-
-        // Parsing stage
-        JmmParserImpl parser = new JmmParserImpl();
-        JmmParserResult parserResult = parser.parse(code, config);
-        for (var report : parserResult.getReports()) {
-            System.out.println(report);
-        }
-        //TestUtils.noErrors(parserResult.getReports());
-
-        // Print AST
-        //System.out.println(parserResult.getRootNode().toTree());
-        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-
-
+    public static void printSymbolTable(SymbolTable table) {
         System.out.println("Symbol Table:");
+
         System.out.println("Imports:");
         for (var imp: table.getImports()){
             System.out.println(imp);
         }
+
         System.out.printf("Class: %s\n",table.getClassName());
+
         System.out.printf("Superclass: %s\n", table.getSuper());
 
         for (var field: table.getFields()){
@@ -58,6 +37,7 @@ public class Launcher {
         }
 
         System.out.println();
+
         for (var method: table.getMethods()) {
             System.out.printf("Method %s\n", method);
             var type = table.getReturnType(method);
@@ -83,12 +63,38 @@ public class Launcher {
                     System.out.printf("%s %s\n", local.getType().getName(), local.getName());
             }
         }
+    }
+
+    public static void main(String[] args) {
+        SpecsSystem.programStandardInit();
+
+        Map<String, String> config = CompilerConfig.parseArgs(args);
+
+        var inputFile = CompilerConfig.getInputFile(config).orElseThrow();
+        if (!inputFile.isFile()) {
+            throw new RuntimeException("Option '-i' expects a path to an existing input file, got '" + args[0] + "'.");
+        }
+
+        String code = SpecsIo.read(inputFile);
+
+        // Parsing stage
+        JmmParserImpl parser = new JmmParserImpl();
+        JmmParserResult parserResult = parser.parse(code, config);
+        for (var report : parserResult.getReports()) {
+            System.out.println(report);
+        }
+        //TestUtils.noErrors(parserResult.getReports());
+
+        // Print AST
+        //System.out.println(parserResult.getRootNode().toTree());
+
+        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+        printSymbolTable(table);
 
         // Semantic Analysis stage
         //JmmAnalysisImpl sema = new JmmAnalysisImpl();
         //JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         //TestUtils.noErrors(semanticsResult.getReports());
-
 
         // Optimization stage
         //JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
@@ -106,5 +112,4 @@ public class Launcher {
         // Print Jasmin code
         //System.out.println(jasminResult.getJasminCode());
     }
-
 }
