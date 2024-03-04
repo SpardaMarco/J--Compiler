@@ -51,12 +51,11 @@ FALSE : 'false';
 INT : 'int' ;
 STRING : 'String';
 BOOLEAN : 'boolean';
-ARRAYTYPESUFFIX : LBRACKET RBRACKET;
 VARARGSUFFIX : '...';
 VOID : 'void' ;
 
 // Basic Tokens
-INTEGER : ('0'|[1-9]) DIGIT*; // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
+INTEGER : ('0'|[1-9] DIGIT*); // 0 or any non-zero digit followed by any number of digits so we have numbers in base 10
 ID : (LETTER | '$' | '_') (LETTER|DIGIT| '_' | '$')*;
 LETTER : [a-zA-Z];
 DIGIT : [0-9];
@@ -82,12 +81,12 @@ varDecl
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
     (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
-    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=MAIN LPAREN STRING ARRAYTYPESUFFIX paramName=ID RPAREN LCURLY
+    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=MAIN LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
     ;
 
 type
-   : literal ARRAYTYPESUFFIX #ArrayType
+   : literal LBRACKET RBRACKET #ArrayType
    | literal #PrimitiveType
    ;
 
