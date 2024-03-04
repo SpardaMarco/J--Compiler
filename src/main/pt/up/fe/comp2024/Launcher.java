@@ -81,7 +81,7 @@ public class Launcher {
         for (var report : parserResult.getReports()) {
             System.out.println(report);
         }
-        //TestUtils.noErrors(parserResult.getReports());
+        TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
         //System.out.println(parserResult.getRootNode().toTree());
