@@ -34,14 +34,12 @@ NOT : '!' ;
 IMPORT : 'import';
 EXTENDS : 'extends';
 STATIC : 'static';
-MAIN : 'main';
 CLASS : 'class';
 PUBLIC : 'public';
 RETURN : 'return';
 IF : 'if';
 ELSE : 'else';
 WHILE : 'while';
-LENGTH : 'length';
 THIS : 'this';
 NEW : 'new';
 TRUE : 'true';
@@ -81,7 +79,7 @@ varDecl
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
     (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
-    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=MAIN LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
+    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=ID LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
     ;
 
@@ -117,7 +115,7 @@ expr
     | expr LBRACKET expr RBRACKET #ArrayAccessOp
     | NEW INT LBRACKET expr RBRACKET #ArrayDeclaration
     | NEW name=ID LPAREN RPAREN #ObjectDeclaration
-    | expr DOT LENGTH #Length
+    | expr DOT ID #Length
     | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
     | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
     | NOT expr #UnaryOp

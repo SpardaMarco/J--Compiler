@@ -2,7 +2,6 @@ import Math.Algebra;
 import Math2;
 
 class QuantumMechanics extends Physics  {
-
     int phi;
 
     int[] stateVector;
