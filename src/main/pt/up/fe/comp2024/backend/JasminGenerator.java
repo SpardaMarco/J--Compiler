@@ -48,6 +48,7 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(Field.class, this::generateField);
     }
 
     public List<Report> getReports() {
@@ -73,8 +74,17 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL).append(NL);
 
-        // TODO: Hardcoded to Object, needs to be expanded
-        code.append(".super java/lang/Object").append(NL);
+        if (ollirResult.getOllirClass().getSuperClass() != null) {
+            code.append(".super ").append(ollirResult.getOllirClass().getSuperClass()).append(NL);
+        }
+        else {
+            code.append(".super java/lang/Object").append(NL);
+        }
+
+        // generate fields
+        for (var field : ollirResult.getOllirClass().getFields()) {
+            code.append(generators.apply(field));
+        }
 
         // generate a single constructor method
         var defaultConstructor = """
@@ -112,14 +122,21 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // calculate modifier
-        var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
-                method.getMethodAccessModifier().name().toLowerCase() + " " :
-                "";
+        String modifier = getAccessModifier(method.getMethodAccessModifier());
+        String isStatic = method.isStaticMethod() ? " static " : " ";
 
-        var methodName = method.getMethodName();
+        String methodName = method.getMethodName();
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
+        String descriptor = getTypeDescriptor(method.getReturnType());
+        StringBuilder params = new StringBuilder();
+
+        // Params
+        for (Element param : method.getParams()) {
+            if (params.isEmpty()) params.append(getTypeDescriptor(param.getType()));
+            else params.append(" ").append(getTypeDescriptor(param.getType()));
+        }
+
+        code.append("\n.method ").append(modifier).append(isStatic).append(methodName).append("(").append(params).append(")").append(descriptor).append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
@@ -200,12 +217,47 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: Hardcoded to int return type, needs to be expanded
+        /*// TODO: Hardcoded to int return type, needs to be expanded
 
         code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);
+        code.append("ireturn").append(NL);*/
 
         return code.toString();
+    }
+
+    private String generateField(Field field) {
+        var code = new StringBuilder();
+
+        String access = getAccessModifier(field.getFieldAccessModifier());
+        String name = field.getFieldName();
+        String descriptor = getTypeDescriptor(field.getFieldType());
+
+        code.append(".field ").append(access).append(" ").append(name).append(" ").append(descriptor).append(NL);
+
+        return code.toString();
+    }
+
+    private String getAccessModifier(AccessModifier accessModifier) {
+        return accessModifier != AccessModifier.DEFAULT ?
+                accessModifier.name().toLowerCase():
+                "";
+    }
+
+    private String getTypeDescriptor(Type type) {
+        switch (type.getTypeOfElement()) {
+            case ARRAYREF:
+                return "[" + getTypeDescriptor(((ArrayType) type).getElementType());
+/*            case OBJECTREF:
+                return "L" + type.getClassName() + ";";*/
+        }
+        return switch (type.toString()) {
+
+            case "INT32" -> "I";
+            case "BOOLEAN" -> "Z";
+            case "STRING" -> "Ljava/lang/String;";
+            case "VOID" -> "V";
+            default -> throw new NotImplementedException(type);
+        };
     }
 
 }

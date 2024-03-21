@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024;
 
+import org.specs.comp.ollir.ClassUnit;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
@@ -14,6 +15,7 @@ import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
 
+import java.io.File;
 import java.util.Map;
 
 public class Launcher {
@@ -87,7 +89,7 @@ public class Launcher {
         //System.out.println(parserResult.getRootNode().toTree());
 
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-        printSymbolTable(table);
+//        printSymbolTable(table);
 
         // Semantic Analysis stage
         //JmmAnalysisImpl sema = new JmmAnalysisImpl();
@@ -102,10 +104,14 @@ public class Launcher {
         // Print OLLIR code
         //System.out.println(ollirResult.getOllirCode());
 
+        String ollirCode = SpecsIo.read("src/main/pt/up/fe/comp2024/jasmin/OllirToJasminBasic.ollir");
+        OllirResult ollirResult = new OllirResult(ollirCode, config);
+
         // Code generation stage
-         //JasminBackendImpl jasminGen = new JasminBackendImpl();
-         //JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-         //TestUtils.noErrors(jasminResult.getReports());
+         JasminBackendImpl jasminGen = new JasminBackendImpl();
+         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+         System.out.println(jasminResult.getJasminCode());
+         /*TestUtils.noErrors(jasminResult.getReports());*/
 
         // Print Jasmin code
         //System.out.println(jasminResult.getJasminCode());
