@@ -104,7 +104,7 @@ public class Launcher {
         // Print OLLIR code
         //System.out.println(ollirResult.getOllirCode());
 
-        String ollirCode = SpecsIo.read("src/main/pt/up/fe/comp2024/jasmin/OllirToJasminBasic.ollir");
+        String ollirCode = SpecsIo.read("src/main/pt/up/fe/comp2024/jasmin/OllirToJasminArithmetics.ollir");
         OllirResult ollirResult = new OllirResult(ollirCode, config);
 
         // Code generation stage

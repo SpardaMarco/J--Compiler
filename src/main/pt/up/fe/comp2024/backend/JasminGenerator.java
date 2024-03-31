@@ -144,7 +144,7 @@ public class JasminGenerator {
 
         for (var inst : method.getInstructions()) {
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
-                    .collect(Collectors.joining(NL + TAB, TAB, NL));
+                    .collect(Collectors.joining(NL + TAB, NL+TAB, NL));
 
             code.append(instCode);
         }
@@ -186,13 +186,41 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        return "ldc " + literal.getLiteral() + NL;
+        ElementType type = literal.getType().getTypeOfElement();
+        if (type == ElementType.INT32 || type == ElementType.BOOLEAN) {
+            int value = Integer.parseInt(literal.getLiteral());
+            if (value >= 0 && value <= 5) {
+                return "iconst_" + value + NL;
+            }
+            else if (value == -1) {
+                return "iconst_m1" + NL;
+            }
+            else if (value >= -128 && value <= 127) {
+                return "bipush " + value + NL;
+            }
+            else if (value >= -32768 && value <= 32767) {
+                return "sipush " + value + NL;
+            }
+            else {
+                return "ldc " + value + NL;
+            }
+        }
+        else {
+            return "ldc " + literal.getLiteral() + NL;
+        }
     }
 
     private String generateOperand(Operand operand) {
-        // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        switch (operand.getType().getTypeOfElement()) {
+            case INT32, BOOLEAN -> {
+                return "iload " + reg + NL;
+            }
+            case ARRAYREF, OBJECTREF -> {
+                return "aload " + reg + NL;
+            }
+            default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
+        }
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -217,10 +245,14 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        /*// TODO: Hardcoded to int return type, needs to be expanded
-
-        code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);*/
+        if (returnInst.hasReturnValue()) {
+            code.append(generators.apply(returnInst.getOperand())).append(NL);
+            code.append(returnInst.getOperand().getType().getTypeOfElement() == ElementType.INT32
+                    || returnInst.getOperand().getType().getTypeOfElement() == ElementType.BOOLEAN ? "ireturn" : "areturn").append(NL);
+        }
+        else {
+            code.append("return").append(NL);
+        }
 
         return code.toString();
     }
@@ -247,7 +279,7 @@ public class JasminGenerator {
         switch (type.getTypeOfElement()) {
             case ARRAYREF:
                 return "[" + getTypeDescriptor(((ArrayType) type).getElementType());
-/*            case OBJECTREF:
+            /*case OBJECTREF:
                 return "L" + type.getClassName() + ";";*/
         }
         return switch (type.toString()) {
