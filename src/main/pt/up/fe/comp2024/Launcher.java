@@ -104,14 +104,14 @@ public class Launcher {
         // Print OLLIR code
         //System.out.println(ollirResult.getOllirCode());
 
-        String ollirCode = SpecsIo.read("src/main/pt/up/fe/comp2024/jasmin/OllirToJasminArithmetics.ollir");
+        String ollirCode = SpecsIo.read("src/main/pt/up/fe/comp2024/jasmin/OllirToJasminBasic.ollir");
         OllirResult ollirResult = new OllirResult(ollirCode, config);
 
         // Code generation stage
          JasminBackendImpl jasminGen = new JasminBackendImpl();
          JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
          System.out.println(jasminResult.getJasminCode());
-         /*TestUtils.noErrors(jasminResult.getReports());*/
+         TestUtils.noErrors(jasminResult.getReports());
 
         // Print Jasmin code
         //System.out.println(jasminResult.getJasminCode());

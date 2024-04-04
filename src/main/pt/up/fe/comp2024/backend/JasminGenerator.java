@@ -103,7 +103,7 @@ public class JasminGenerator {
             // Ignore constructor, since there is always one constructor
             // that receives no arguments, and has been already added
             // previously
-            if (method.isConstructMethod()) {
+            if (method.isConstructMethod() || method.getMethodName().equals("<init>")) {
                 continue;
             }
 
@@ -174,10 +174,22 @@ public class JasminGenerator {
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-
-        // TODO: Hardcoded for int type, needs to be expanded
-        code.append("istore ").append(reg).append(NL);
-
+        switch (operand.getType().getTypeOfElement()) {
+            case INT32, BOOLEAN -> {
+                // TODO: check if this is correct
+                if (operand instanceof ArrayOperand) {
+                    code.append("iastore").append(NL);
+                }
+                else {
+                    code.append("istore").append(reg < 4 ? "_" : " ").append(reg).append(NL);
+                }
+                break;
+            }
+            case ARRAYREF, OBJECTREF -> {
+                code.append("astore ").append(reg < 4 ? "_" : " ").append(reg).append(NL);
+            }
+            default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
+        }
         return code.toString();
     }
 
