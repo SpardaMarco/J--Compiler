@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -20,8 +21,11 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
+
+        addVisit("MethodDeclaration", this::visitMethodDecl);
+        addVisit("MainMethodDeclaration", this::visitMethodDecl);
+        addVisit("AssignStmt", this::visitAssignment);
+        addVisit("Identifier", this::visitIdentifier);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -29,36 +33,69 @@ public class UndeclaredVariable extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
-        SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+    private Void visitAssignment(JmmNode assignment, SymbolTable table) {
 
-        // Check if exists a parameter or variable declaration with the same name as the variable reference
-        var varRefName = varRefExpr.get("name");
+        String variable = assignment.get("name");
+
+        // Var is a declared variable, return
+        if (table.getLocalVariables(currentMethod).stream()
+                .anyMatch(varDecl -> varDecl.getName().equals(variable))) {
+            return null;
+        }
 
         // Var is a field, return
         if (table.getFields().stream()
-                .anyMatch(param -> param.getName().equals(varRefName))) {
+                .anyMatch(param -> param.getName().equals(variable))) {
             return null;
         }
 
         // Var is a parameter, return
         if (table.getParameters(currentMethod).stream()
-                .anyMatch(param -> param.getName().equals(varRefName))) {
-            return null;
-        }
-
-        // Var is a declared variable, return
-        if (table.getLocalVariables(currentMethod).stream()
-                .anyMatch(varDecl -> varDecl.getName().equals(varRefName))) {
+                .anyMatch(param -> param.getName().equals(variable))) {
             return null;
         }
 
         // Create error report
-        var message = String.format("Variable '%s' does not exist.", varRefName);
+        var message = String.format("Variable '%s' does not exist.", variable);
         addReport(Report.newError(
                 Stage.SEMANTIC,
-                NodeUtils.getLine(varRefExpr),
-                NodeUtils.getColumn(varRefExpr),
+                NodeUtils.getLine(assignment),
+                NodeUtils.getColumn(assignment),
+                message,
+                null)
+        );
+
+        return null;
+    }
+
+    private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
+
+        String variable = identifier.get("value");
+
+        // Var is a declared variable, return
+        if (table.getLocalVariables(currentMethod).stream()
+                .anyMatch(varDecl -> varDecl.getName().equals(variable))) {
+            return null;
+        }
+
+        // Var is a field, return
+        if (table.getFields().stream()
+                .anyMatch(param -> param.getName().equals(variable))) {
+            return null;
+        }
+
+        // Var is a parameter, return
+        if (table.getParameters(currentMethod).stream()
+                .anyMatch(param -> param.getName().equals(variable))) {
+            return null;
+        }
+
+        // Create error report
+        var message = String.format("Variable '%s' does not exist.", variable);
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(identifier),
+                NodeUtils.getColumn(identifier),
                 message,
                 null)
         );

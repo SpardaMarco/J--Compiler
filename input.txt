@@ -15,12 +15,16 @@ class QuantumMechanics extends Physics  {
         int[] stateVector;
         boolean isCatDead;
         Schrodinger blud;
+
+        phi = blud.getWaveFunction(1);
+        phi2 = blud.getWaveFunction(2);
+        phi3 = phi + phi2;
     }
 
     public boolean[] collapseState(int a, int b, int... c){
         int[] stateVector;
         boolean isCatDead;
         Schrodinger blud;
-        return False;
+        return false;
     }
 }

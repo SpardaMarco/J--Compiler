@@ -7,7 +7,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
+import pt.up.fe.comp2024.analysis.passes.*;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -20,7 +20,22 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
     public JmmAnalysisImpl() {
 
-        this.analysisPasses = List.of(new UndeclaredVariable());
+        this.analysisPasses = List.of(
+                //new ArithmeticArrayOp(),
+                //new IncompatibleAssignment(),
+                //new IncompatibleMethodArguments(),
+                //new IncompatibleOperands(),
+                //new InvalidArrayAccess(),
+                //new InvalidArrayIndex(),
+                //new InvalidThisObjectUse(),
+                //new InvalidVarargArgument(),
+                //new MethodFromNonImportedClass(),
+                //new NonArgumentVarargUse(),
+                //new NonBooleanCondition(),
+                //new StaticThisReference(),
+                new UndeclaredVariable()
+                //new UnknownMethodInNonChildClass()
+        );
 
     }
 
@@ -46,7 +61,6 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                         e)
                 );
             }
-
         }
 
         return new JmmSemanticsResult(parserResult, table, reports);
