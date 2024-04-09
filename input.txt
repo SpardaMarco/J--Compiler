@@ -17,8 +17,8 @@ class QuantumMechanics extends Physics  {
         Schrodinger blud;
 
         phi = blud.getWaveFunction(1);
-        phi2 = blud.getWaveFunction(2);
-        phi3 = phi + phi2;
+        phi2 = stateVector + 2;
+        phi3 = phi2 + [1, 2];
     }
 
     public boolean[] collapseState(int a, int b, int... c){

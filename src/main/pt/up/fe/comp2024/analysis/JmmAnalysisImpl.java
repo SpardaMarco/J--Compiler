@@ -21,7 +21,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     public JmmAnalysisImpl() {
 
         this.analysisPasses = List.of(
-                //new ArithmeticArrayOp(),
+                new ArithmeticArrayOp(),
                 //new IncompatibleAssignment(),
                 //new IncompatibleMethodArguments(),
                 //new IncompatibleOperands(),
