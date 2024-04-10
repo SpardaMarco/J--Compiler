@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
@@ -57,4 +58,6 @@ public class JmmSymbolTable implements SymbolTable {
     public List<Symbol> getLocalVariables(String methodSignature) {
         return Collections.unmodifiableList(declaredClass.getLocals(methodSignature));
     }
+
+
 }

@@ -37,23 +37,8 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         String variable = assignment.get("name");
 
-        // Var is a declared variable, return
-        if (table.getLocalVariables(currentMethod).stream()
-                .anyMatch(varDecl -> varDecl.getName().equals(variable))) {
+        if (getVarDeclaration(variable, currentMethod, table) != null)
             return null;
-        }
-
-        // Var is a parameter, return
-        if (table.getParameters(currentMethod).stream()
-                .anyMatch(param -> param.getName().equals(variable))) {
-            return null;
-        }
-
-        // Var is a field, return
-        if (table.getFields().stream()
-                .anyMatch(param -> param.getName().equals(variable))) {
-            return null;
-        }
 
         // Create error report
         var message = String.format("Variable '%s' does not exist.", variable);

@@ -8,9 +8,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.NodeUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 public class ArithmeticArrayOp extends AnalysisVisitor {
@@ -48,7 +46,6 @@ public class ArithmeticArrayOp extends AnalysisVisitor {
     private Void validateOperand(JmmNode operand, SymbolTable table) {
 
         if (isArrayType(operand, table)) {
-            // Create error report
             var message = String.format("Invalid use of array in arithmetic expression.");
             addReport(Report.newError(
                     Stage.SEMANTIC,
@@ -68,24 +65,12 @@ public class ArithmeticArrayOp extends AnalysisVisitor {
 
         if (operand.getKind().equals("Identifier")) {
 
-            String variable = operand.get("value");
+            String varName = operand.get("value");
 
-            Optional<Symbol> declaration;
+            Symbol declaration = getVarDeclaration(varName, currentMethod, table);
 
-            declaration = table.getLocalVariables(currentMethod).stream()
-                    .filter(varDecl -> varDecl.getName().equals(variable)).findFirst();
-            if (declaration.isPresent() && declaration.get().getType().isArray())
-                return true;
-
-            declaration = table.getParameters(currentMethod).stream()
-                    .filter(varDecl -> varDecl.getName().equals(variable)).findFirst();
-            if (declaration.isPresent() && declaration.get().getType().isArray())
-                return true;
-
-            declaration = table.getFields().stream()
-                    .filter(varDecl -> varDecl.getName().equals(variable)).findFirst();
-            if (declaration.isPresent() && declaration.get().getType().isArray())
-                return true;
+            if (declaration != null)
+                return declaration.getType().isArray();
         }
 
         return false;

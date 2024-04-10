@@ -22,7 +22,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         this.analysisPasses = List.of(
                 new ArithmeticArrayOp(),
-                //new IncompatibleAssignment(),
+                new IncompatibleAssignment(),
                 //new IncompatibleMethodArguments(),
                 //new IncompatibleOperands(),
                 //new InvalidArrayAccess(),

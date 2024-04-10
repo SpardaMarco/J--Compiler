@@ -115,8 +115,9 @@ expr
     | expr LBRACKET expr RBRACKET #ArrayAccessOp
     | NEW INT LBRACKET expr RBRACKET #ArrayDeclaration
     | NEW name=ID LPAREN RPAREN #ObjectDeclaration
-    | expr DOT ID #Length
+    | expr DOT ID #Attribute
     | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
+    | name=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
     | NOT expr #UnaryOp
     | expr op=(MUL | DIV) expr #BinaryOp

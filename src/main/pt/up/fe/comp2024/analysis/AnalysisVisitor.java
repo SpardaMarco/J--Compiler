@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
@@ -35,5 +36,25 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
 
         // Return reports
         return getReports();
+    }
+
+    protected Symbol getVarDeclaration(String varName, String currentMethod, SymbolTable table) {
+
+        for (Symbol varDecl : table.getLocalVariables(currentMethod)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : table.getParameters(currentMethod)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : table.getFields()) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        return null;
     }
 }

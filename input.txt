@@ -2,29 +2,20 @@ import Math.Algebra;
 import Math2;
 
 class QuantumMechanics extends Physics  {
-    int phi;
 
-    int[] stateVector;
-
-    boolean isCatDead;
-
-    Schrodinger blud;
+    Astro[] y;
+    boolean z;
 
     public static void main (String[] args) {
 
-        int[] stateVector;
-        boolean isCatDead;
-        Schrodinger blud;
+        int x;
 
-        phi = blud.getWaveFunction(1);
-        phi2 = stateVector + 2;
-        phi3 = phi2 + [1, 2];
+        new int [2];
+
+        x = (z < 2) && z < this.sum(2,3);
     }
 
-    public boolean[] collapseState(int a, int b, int... c){
-        int[] stateVector;
-        boolean isCatDead;
-        Schrodinger blud;
-        return false;
+    public int sum (int x, int z) {
+        return x + y;
     }
 }

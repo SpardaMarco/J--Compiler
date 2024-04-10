@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2024.analysis.ASTAnnotator;
 import pt.up.fe.comp2024.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2024.backend.JasminBackendImpl;
 import pt.up.fe.comp2024.optimization.JmmOptimizationImpl;
@@ -16,6 +17,7 @@ import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class Launcher {
     public static void printSymbolTable(SymbolTable table) {
@@ -86,18 +88,30 @@ public class Launcher {
 
         // Print AST
         System.out.println(parserResult.getRootNode().toTree());
+        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+        new ASTAnnotator().visit(parserResult.getRootNode(), table);
+        System.out.println(parserResult.getRootNode().toTree());
 
-        // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-        // printSymbolTable(table);
+//        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+//        printSymbolTable(table);
 
         // Semantic Analysis stage
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
+        System.out.println(parserResult.getRootNode().toTree());
+
+
         System.out.println("Number of reports: " + semanticsResult.getReports().size());
         for (Report report: semanticsResult.getReports()) {
+
+            Optional<Exception> exception = report.getException();
+            String msgExc = "";
+            if (exception.isPresent())
+                msgExc = exception.get().getMessage();
             System.out.println(String.format(
-                    "Report: %s (%s,%s)", report.getMessage(), report.getLine(), report.getColumn()
+                    "Report: %s (%s,%s)\n%s\n",
+                    report.getMessage(), report.getLine(), report.getColumn(), msgExc
             ));
         }
         //TestUtils.noErrors(semanticsResult.getReports());
