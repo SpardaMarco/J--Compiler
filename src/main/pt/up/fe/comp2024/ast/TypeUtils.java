@@ -4,15 +4,18 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-public class TypeUtils {
+import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
+import static pt.up.fe.comp2024.ast.Kind.METHOD_DECLARATION;
 
+public class TypeUtils {
     private static final String INT_TYPE_NAME = "int";
+    private static final String BOOLEAN_TYPE_NAME = "boolean";
     private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
     }
-
+    public static String getBooleanTypeName() { return BOOLEAN_TYPE_NAME; }
     public static String getVoidTypeName() { return VOID_TYPE_NAME; }
 
     /**
@@ -28,10 +31,12 @@ public class TypeUtils {
         var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
-            case METHOD_DECL -> getMethodDeclType(expr);
-            case BINARY_EXPR -> getBinExprType(expr);
-            case VAR_REF_EXPR -> getVarExprType(expr, table);
+            case METHOD_DECLARATION -> getMethodDeclType(expr);
+            case BINARY_OP -> getBinExprType(expr);
+            case IDENTIFIER, ASSIGN_STMT -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
+            case METHOD_CALL ->getMethodDeclType(expr);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -44,7 +49,9 @@ public class TypeUtils {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*" -> new Type(INT_TYPE_NAME, false);
+            case "+", "*", "/", "-" -> new Type(INT_TYPE_NAME, false);
+            case "<", "&&", "!" -> new Type(BOOLEAN_TYPE_NAME, false);
+
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
@@ -52,8 +59,34 @@ public class TypeUtils {
 
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(INT_TYPE_NAME, false);
+        String methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
+        String name;
+
+        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) name = varRefExpr.get("name");
+        else name = varRefExpr.get("value");
+
+        var locals = table.getLocalVariables(methodName);
+        for (var local : locals) {
+            if (name.equals(local.getName())) {
+                return local.getType();
+            }
+        }
+
+        var params = table.getParameters(methodName);
+        for (var param : params) {
+            if (varRefExpr.get("value").equals(param.getName())) {
+                return param.getType();
+            }
+        }
+
+        var fields = table.getFields();
+        for (var field : fields) {
+            if (varRefExpr.get("value").equals(field.getName())) {
+                return field.getType();
+            }
+        }
+
+        return new Type(VOID_TYPE_NAME, false);
     }
 
 

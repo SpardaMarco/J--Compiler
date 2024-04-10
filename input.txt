@@ -1,26 +1,18 @@
-import Math.Algebra;
-import Math2;
+import io;
 
-class QuantumMechanics extends Physics  {
-    int phi;
+class CompileMethodInvocation {
 
-    int[] stateVector;
+    public static void main(String[] args) {
 
-    boolean isCatDead;
-
-    Schrodinger blud;
-
-    public static void main (String[] args) {
-
-        int[] stateVector;
-        boolean isCatDead;
-        Schrodinger blud;
     }
 
-    public boolean[] collapseState(int a, int b, int... c){
-        int[] stateVector;
-        boolean isCatDead;
-        Schrodinger blud;
-        return False;
+    public int foo() {
+        int a;
+
+        a = 1;
+
+        io.println(a);
+
+        return 0;
     }
 }

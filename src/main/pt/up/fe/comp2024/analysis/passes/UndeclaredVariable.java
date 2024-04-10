@@ -20,8 +20,8 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
+        addVisit(Kind.METHOD_DECLARATION, this::visitMethodDecl);
+        addVisit(Kind.IDENTIFIER, this::visitVarRefExpr);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -33,7 +33,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
-        var varRefName = varRefExpr.get("name");
+        var varRefName = varRefExpr.get("value");
 
         // Var is a field, return
         if (table.getFields().stream()

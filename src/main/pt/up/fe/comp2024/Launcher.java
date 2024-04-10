@@ -87,20 +87,20 @@ public class Launcher {
         //System.out.println(parserResult.getRootNode().toTree());
 
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-        printSymbolTable(table);
+        //printSymbolTable(table);
 
         // Semantic Analysis stage
-        //JmmAnalysisImpl sema = new JmmAnalysisImpl();
-        //JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
+        JmmAnalysisImpl sema = new JmmAnalysisImpl();
+        JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         //TestUtils.noErrors(semanticsResult.getReports());
 
         // Optimization stage
-        //JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
-        //OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
+        JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         //TestUtils.noErrors(ollirResult.getReports());
 
         // Print OLLIR code
-        //System.out.println(ollirResult.getOllirCode());
+        System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
          //JasminBackendImpl jasminGen = new JasminBackendImpl();

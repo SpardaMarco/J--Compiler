@@ -7,10 +7,8 @@ import pt.up.fe.comp.jmm.ollir.OllirResult;
 import java.util.Collections;
 
 public class JmmOptimizationImpl implements JmmOptimization {
-
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
-
         var visitor = new OllirGeneratorVisitor(semanticsResult.getSymbolTable());
         var ollirCode = visitor.visit(semanticsResult.getRootNode());
 

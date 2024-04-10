@@ -10,8 +10,8 @@ import pt.up.fe.specs.util.SpecsCheck;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
-import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2024.ast.Kind.METHOD_DECLARATION;
+import static pt.up.fe.comp2024.ast.Kind.VAR_DECLARATION;
 
 public class JmmSymbolTableBuilder {
     public static JmmSymbolTable build(JmmNode root) {
