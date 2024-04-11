@@ -1,21 +1,34 @@
 import Math.Algebra;
-import Math2;
+import Math2.sqrt;
+import Noob.hello;
 
 class QuantumMechanics extends Physics  {
 
-    Astro[] y;
-    boolean z;
+    int x;
+    boolean y;
+    Astro z;
 
     public static void main (String[] args) {
 
-        int x;
+        Algebra algebra;
+        Vector v1;
+        Vector v2;
 
-        new int [2];
+        algebra = new Algebra();
 
-        x = (z < 2) && z < this.sum(2,3);
+        sqrt(3);
+        x = sum(2,x);
+
+
+        v1 = new int[5] + new Vector();
+        v2 = algebra.vector;
+        v3 = this.z;
+        v4 = algebra.vector;
+
+        !hello() && algebra.multVector(v1, v2);
     }
 
     public int sum (int x, int z) {
-        return x + y;
+        return x + z;
     }
 }

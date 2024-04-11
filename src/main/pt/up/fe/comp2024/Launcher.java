@@ -89,6 +89,7 @@ public class Launcher {
         // Print AST
         System.out.println(parserResult.getRootNode().toTree());
         SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+        printSymbolTable(table);
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
         System.out.println(parserResult.getRootNode().toTree());
 

@@ -46,10 +46,16 @@ class TypeAnnotator extends PostorderJmmVisitor<SymbolTable, Void> {
         addVisit("ArrayExpression", this::visitArrayExpression);
         addVisit("Identifier", this::visitIdentifier);
         addVisit("BinaryOp", this::visitBinaryOp);
-        addVisit("ExprStmt", this::visitExpr);
-        addVisit("ParenExpr", this::visitExpr);
+        addVisit("UnaryOp", this::visitUnaryOp);
+        addVisit("ExprStmt", this::visitExprStmt);
+        addVisit("ParenExpr", this::visitExprStmt);
         addVisit("ArrayAccessOp", this::visitArrayAccessOp);
         addVisit("MethodCall", this::visitMethodCall);
+        addVisit("FunctionCall", this::visitFunctionCall);
+        addVisit("This", this::visitThis);
+        addVisit("Attribute", this::visitAttribute);
+        addVisit("ObjectDeclaration", this::visitObjectDeclaration);
+        addVisit("ArrayDeclaration", this::visitArrayDeclaration);
     }
 
     protected Symbol getVarDeclaration(String varName, String currentMethod, SymbolTable table) {
@@ -108,31 +114,52 @@ class TypeAnnotator extends PostorderJmmVisitor<SymbolTable, Void> {
         return null;
     }
 
+    private void updateUndefinedOperand(JmmNode operand, String type) {
+        if (operand.get("type") == "undefined") {
+            operand.put("type", type);
+        }
+    }
+
+    private void updateUndefinedBinaryOperands(JmmNode binaryOp, String type) {
+        JmmNode leftOperand = binaryOp.getChild(0);
+        JmmNode rightOperand = binaryOp.getChild(1);
+        updateUndefinedOperand(leftOperand, type);
+        updateUndefinedOperand(rightOperand, type);
+    }
+
     private Void visitBinaryOp(JmmNode binaryOp, SymbolTable table) {
 
         switch (binaryOp.get("op")){
-            case "+":
+            case "+", "-", "*", "/" -> {
+                updateUndefinedBinaryOperands(binaryOp, "int");
                 binaryOp.put("type", "int");
                 break;
-            case "-":
-                binaryOp.put("type", "int");
-                break;
-            case "*":
-                binaryOp.put("type", "int");
-                break;
-            case "/":
-                binaryOp.put("type", "int");
-                break;
-            case "&&":
+            }
+            case "<" -> {
+                updateUndefinedBinaryOperands(binaryOp, "int");
                 binaryOp.put("type", "boolean");
                 break;
-            case "<":
+            }
+            case "&&" -> {
+                updateUndefinedBinaryOperands(binaryOp, "boolean");
                 binaryOp.put("type", "boolean");
                 break;
+            }
         }
 
         binaryOp.put("isArray", "false");
 
+        return null;
+    }
+
+    private Void visitUnaryOp(JmmNode unaryOp, SymbolTable table) {
+
+        switch (unaryOp.get("op")) {
+            case "!":
+                updateUndefinedOperand(unaryOp.getChild(0), "boolean");
+                unaryOp.put("type", "boolean");
+
+        }
         return null;
     }
     private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
@@ -150,13 +177,20 @@ class TypeAnnotator extends PostorderJmmVisitor<SymbolTable, Void> {
         return null;
     }
 
-    private Void visitExpr(JmmNode expr, SymbolTable table) {
+    private Void visitExprStmt(JmmNode exprStmt, SymbolTable table) {
 
-        String type = expr.getChild(0).get("type");
-        expr.put("type", type);
+        String type = exprStmt.getChild(0).get("type");
+
+        if (type == "undefined") {
+            exprStmt.getChild(0).put("type", "void");
+            exprStmt.put("type", "void");
+            return null;
+        }
+        exprStmt.put("type", type);
+
         if (type != "invalid") {
-            String isArray = expr.getChild(0).get("isArray");
-            expr.put("isArray", isArray);
+            String isArray = exprStmt.getChild(0).get("isArray");
+            exprStmt.put("isArray", isArray);
         }
         return null;
     }
@@ -200,7 +234,90 @@ class TypeAnnotator extends PostorderJmmVisitor<SymbolTable, Void> {
                     methodCall.put("isArray", isArray);
                 }
             }
+        } else {
+
+            methodCall.put("type", "undefined");
         }
+        return null;
+    }
+
+    private Void visitFunctionCall(JmmNode functionCall, SymbolTable table){
+
+        String functionName = functionCall.get("name");
+
+        for (String method: table.getMethods()) {
+
+            if (method.equals(functionName)) {
+
+                Type type = table.getReturnType(method);
+
+                functionCall.put("type", type.getName());
+                functionCall.put("isArray", type.isArray() ? "true" : "false");
+
+                return null;
+            }
+        }
+
+        for (String importList: table.getImports()) {
+
+            String[] words = importList.replaceAll("[\\[\\]]", "").split(", ");
+            String importedFunction = words[words.length - 1];
+
+            if (importedFunction.equals(functionName)){
+                functionCall.put("type", "undefined");
+                return null;
+            }
+        }
+
+        functionCall.put("type", "invalid");
+
+        return null;
+    }
+
+    private Void visitThis(JmmNode thisNode, SymbolTable table) {
+
+        thisNode.put("type", table.getClassName());
+        thisNode.put("isArray", "false");
+
+        return null;
+    }
+
+    private Void visitAttribute(JmmNode attribute, SymbolTable table) {
+
+        JmmNode object = attribute.getChild(0);
+
+        String attributeName = attribute.get("name");
+
+        if (object.get("type").equals(table.getClassName()) || object.isInstance("This")) {
+
+            for (Symbol field: table.getFields()) {
+                if (field.getName().equals(attributeName)) {
+
+                    attribute.put("type", field.getType().getName());
+                    attribute.put("isArray", field.getType().isArray() ? "true" : "false");
+                    return null;
+                }
+            }
+        }
+
+        attribute.put("type", "undefined");
+
+        return null;
+    }
+
+    public Void visitObjectDeclaration (JmmNode objectDeclaration, SymbolTable table) {
+
+        objectDeclaration.put("type", objectDeclaration.get("name"));
+        objectDeclaration.put("isArray", "false");
+
+        return null;
+    }
+
+    public Void visitArrayDeclaration (JmmNode arrayDeclaration, SymbolTable table) {
+
+        arrayDeclaration.put("type", arrayDeclaration.getChild(0).get("type"));
+        arrayDeclaration.put("isArray", "true");
+
         return null;
     }
 }
