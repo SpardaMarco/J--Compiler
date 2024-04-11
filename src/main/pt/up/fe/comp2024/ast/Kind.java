@@ -11,21 +11,22 @@ public enum Kind {
     IMPORT_DECLARATION,
     CLASS_DECLARATION,
     VAR_DECLARATION,
-    PRIMITIVE_TYPE,
     METHOD_DECLARATION,
     MAIN_METHOD_DECLARATION,
-    METHOD_CALL,
+    RETURN,
+    PRIMITIVE_TYPE,
     PARAMS,
     EXPR_STMT,
     ASSIGN_STMT,
-    RETURN,
+    METHOD_CALL,
     BINARY_OP,
+    IDENTIFIER,
     INTEGER_LITERAL,
-    BOOLEAN_LITERAL,
-    IDENTIFIER;
+    BOOLEAN_LITERAL
+    ;
 
-    private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN);
-    private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_OP, INTEGER_LITERAL, IDENTIFIER);
+    private static final Set<Kind> STATEMENTS = Set.of(RETURN, EXPR_STMT, ASSIGN_STMT);
+    private static final Set<Kind> EXPRESSIONS = Set.of(METHOD_CALL, BINARY_OP, IDENTIFIER, INTEGER_LITERAL, BOOLEAN_LITERAL);
 
     private final String name;
 

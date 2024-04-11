@@ -15,17 +15,14 @@ public class OptUtils {
     private static int tempNumber = -1;
 
     public static String getTemp() {
-
         return getTemp("tmp");
     }
 
     public static String getTemp(String prefix) {
-
         return prefix + getNextTempNum();
     }
 
     public static int getNextTempNum() {
-
         tempNumber += 1;
         return tempNumber;
     }

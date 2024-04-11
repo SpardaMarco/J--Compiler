@@ -4,8 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECLARATION;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class TypeUtils {
     private static final String INT_TYPE_NAME = "int";
@@ -26,31 +25,32 @@ public class TypeUtils {
      * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-
         var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
-            case METHOD_DECLARATION -> getMethodDeclType(expr);
+            case METHOD_CALL -> getMethodCallType(expr);
             case BINARY_OP -> getBinExprType(expr);
             case IDENTIFIER, ASSIGN_STMT -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
-            case METHOD_CALL ->getMethodDeclType(expr);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
         return type;
     }
 
-    private static Type getBinExprType(JmmNode binaryExpr) {
-        // TODO: Simple implementation that needs to be expanded
+    private static Type getMethodCallType(JmmNode methodCall) {
+        //Type methodCallType = new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
+        Type methodCallType =  new Type(VOID_TYPE_NAME, false);
+        return methodCallType;
+    }
 
+    private static Type getBinExprType(JmmNode binaryExpr) {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*", "/", "-" -> new Type(INT_TYPE_NAME, false);
-            case "<", "&&", "!" -> new Type(BOOLEAN_TYPE_NAME, false);
+            case "*", "/", "+", "-" -> new Type(INT_TYPE_NAME, false);
+            case  "<", "&&" -> new Type(BOOLEAN_TYPE_NAME, false);
 
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
@@ -59,15 +59,20 @@ public class TypeUtils {
 
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        String methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
-        String name;
+        String methodName;
 
-        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) name = varRefExpr.get("name");
-        else name = varRefExpr.get("value");
+        if (varRefExpr.getAncestor(METHOD_DECLARATION).isPresent()) methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
+
+        else methodName = varRefExpr.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
+
+        String id;
+
+        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) id = varRefExpr.get("name");
+        else id = varRefExpr.get("value");
 
         var locals = table.getLocalVariables(methodName);
         for (var local : locals) {
-            if (name.equals(local.getName())) {
+            if (id.equals(local.getName())) {
                 return local.getType();
             }
         }
@@ -89,7 +94,6 @@ public class TypeUtils {
         return new Type(VOID_TYPE_NAME, false);
     }
 
-
     /**
      * @param sourceType
      * @param destinationType
@@ -98,9 +102,5 @@ public class TypeUtils {
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
         // TODO: Simple implementation that needs to be expanded
         return sourceType.getName().equals(destinationType.getName());
-    }
-
-    private static Type getMethodDeclType(JmmNode methodDecl) {
-        return new Type(VOID_TYPE_NAME, false);
     }
 }

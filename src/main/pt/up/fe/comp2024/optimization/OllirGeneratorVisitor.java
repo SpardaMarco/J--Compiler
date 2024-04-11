@@ -24,6 +24,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String NL = "\n";
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
+    private final String PUBLIC = "public";
+    private final String METHOD = ".method";
+    private final String STATIC = "static";
+    private final String RETURN = "ret";
 
     private final SymbolTable table;
 
@@ -41,149 +45,39 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(CLASS_DECLARATION, this::visitClass);
         addVisit(METHOD_DECLARATION, this::visitMethodDecl);
         addVisit(MAIN_METHOD_DECLARATION, this::visitMainMethodDecl);
-        addVisit(PARAMS, this::visitParam);
         addVisit(RETURN, this::visitReturn);
+        addVisit(PARAMS, this::visitParam);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
 
-    private String visitMainMethodDecl(JmmNode node, Void unused) {
-        StringBuilder code = new StringBuilder(".method");
-        code.append(SPACE);
-        code.append("public");
-        code.append(SPACE);
-        code.append("static");
-        code.append(SPACE);
-        code.append("main");
+    private String visitProgram(JmmNode programNode, Void unused) {
+        StringBuilder code = new StringBuilder();
 
-        List<Symbol> parameters = table.getParameters("main");
-        var paramCode = parameters.stream()
-                .map(symbol -> symbol.getName() + OptUtils.toOllirType(symbol.getType()))
-                .collect(Collectors.joining(", "));
+        programNode.getChildren().stream()
+                .map(this::visit)
+                .forEach(code::append);
 
-        code.append("(" + paramCode + ")");
+        return code.toString();
+    }
 
-        var retType = table.getReturnType("main");
-        code.append(OptUtils.toOllirType(retType));
+    private String visitImport(JmmNode importNode, Void unused) {
+        StringBuilder code = new StringBuilder("import");
+        List<String> imports = table.getImports();
 
-        code.append(L_BRACKET);
-
-        for (var i = 1; i < node.getNumChildren(); i++) {
-            if (!PARAMS.check(node.getJmmChild(i))) {
-                code.append(visit(node.getJmmChild(i)));
+        for (var importDecl : imports) {
+            if (importDecl.contains(importNode.get("ID"))) {
+                code.append(SPACE);
+                code.append(importNode.get("ID"));
+                code.append(END_STMT);
             }
         }
 
-        code.append("ret.V");
-        code.append(SPACE);
-        code.append(END_STMT);
-        code.append(R_BRACKET);
-
         return code.toString();
     }
 
-    private String visitAssignStmt(JmmNode node, Void unused) {
-        var lhs = node.get("name");
-        var rhs = exprVisitor.visit(node.getJmmChild(0));
-
-        StringBuilder code = new StringBuilder(lhs);
-
-        // code to compute the children
-
-        // code to compute self
-        // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(node, table);
-        String typeString = OptUtils.toOllirType(thisType);
-
-        code.append(typeString);
-        code.append(SPACE);
-
-        code.append(ASSIGN);
-        code.append(typeString);
-        code.append(SPACE);
-
-        code.append(rhs.getCode());
-
-        code.append(END_STMT);
-
-        return code.toString();
-    }
-
-    private String visitReturn(JmmNode node, Void unused) {
-        String methodName = node.getAncestor(METHOD_DECLARATION).get().get("name");
-        Type retType = table.getReturnType(methodName);
-
-        StringBuilder code = new StringBuilder("ret");
-        code.append(OptUtils.toOllirType(retType));
-
-        var expr = OllirExprResult.EMPTY;
-
-        if (node.getNumChildren() > 0) {
-            code = new StringBuilder();
-            expr = exprVisitor.visit(node.getJmmChild(0));
-        }
-
-        code.append(expr.getComputation());
-        code.append("ret");
-        code.append(OptUtils.toOllirType(retType));
-        code.append(SPACE);
-        code.append(expr.getCode());
-        code.append(END_STMT);
-        return code.toString();
-    }
-
-    private String visitParam(JmmNode node, Void unused) {
-        var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
-        var id = node.get("name");
-
-        String code = id + typeCode;
-
-        return code;
-    }
-
-    private String visitMethodDecl(JmmNode node, Void unused) {
-        StringBuilder code = new StringBuilder(".method ");
-
-        boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
-
-        if (isPublic) {
-            code.append("public ");
-        }
-
-        var name = node.get("name");
-        code.append(name);
-
-        List<Symbol> parameters = table.getParameters(name);
-        var paramCode = parameters.stream()
-                        .map(symbol -> symbol.getName() + OptUtils.toOllirType(symbol.getType()))
-                        .collect(Collectors.joining(", "));
-
-        code.append("(" + paramCode + ")");
-
-        var retType = table.getReturnType(name);
-        code.append(OptUtils.toOllirType(retType));
-        code.append(L_BRACKET);
-
-        for (var i = 1; i < node.getNumChildren(); i++) {
-            if (EXPR_STMT.check(node.getJmmChild(i))) {
-                OllirExprResult expr = exprVisitor.visit(node.getJmmChild(i));
-
-                code.append(expr.getCode());
-            }
-
-            if (!PARAMS.check(node.getJmmChild(i))) {
-                code.append(visit(node.getJmmChild(i)));
-            }
-        }
-
-        code.append(NL);
-        code.append(R_BRACKET);
-
-        return code.toString();
-    }
-
-    private String visitClass(JmmNode node, Void unused) {
+    private String visitClass(JmmNode classNode, Void unused) {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
@@ -204,14 +98,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         for (var field : table.getFields()) {
             code.append(".field");
             code.append(SPACE);
-            code.append("public");
+            code.append(PUBLIC);
             code.append(SPACE);
             code.append(field.getName());
             code.append(OptUtils.toOllirType(field.getType()));
             code.append(END_STMT);
         }
 
-        for (var child : node.getChildren()) {
+        for (var child : classNode.getChildren()) {
             var result = visit(child);
 
             if (METHOD_DECLARATION.check(child) && needNl) {
@@ -228,35 +122,135 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String buildConstructor() {
+    private String visitMethodDecl(JmmNode methodDeclNode, Void unused) {
+        StringBuilder code = new StringBuilder(METHOD);
 
-        return ".construct " + table.getClassName() + "().V {\n" +
-                "invokespecial(this, \"<init>\").V;\n" +
-                "}\n";
-    }
+        boolean isPublic = NodeUtils.getBooleanAttribute(methodDeclNode, "isPublic", "false");
 
-    private String visitProgram(JmmNode node, Void unused) {
+        if (isPublic) {
+            code.append(PUBLIC);
+            code.append(SPACE);
+        }
 
-        StringBuilder code = new StringBuilder();
+        var name = methodDeclNode.get("name");
+        code.append(name);
 
-        node.getChildren().stream()
-                .map(this::visit)
-                .forEach(code::append);
+        List<Symbol> parameters = table.getParameters(name);
+        var paramCode = parameters.stream()
+                .map(symbol -> symbol.getName() + OptUtils.toOllirType(symbol.getType()))
+                .collect(Collectors.joining(", "));
+
+        code.append("(" + paramCode + ")");
+
+        var retType = table.getReturnType(name);
+        code.append(OptUtils.toOllirType(retType));
+        code.append(L_BRACKET);
+
+        for (var i = 1; i < methodDeclNode.getNumChildren(); i++) {
+            if (EXPR_STMT.check(methodDeclNode.getJmmChild(i))) {
+                OllirExprResult expr = exprVisitor.visit(methodDeclNode.getJmmChild(i));
+
+                code.append(expr.getCode());
+            }
+
+            if (!PARAMS.check(methodDeclNode.getJmmChild(i))) {
+                code.append(visit(methodDeclNode.getJmmChild(i)));
+            }
+        }
+
+        code.append(NL);
+        code.append(R_BRACKET);
 
         return code.toString();
     }
 
-    private String visitImport(JmmNode node, Void unused) {
-        StringBuilder code = new StringBuilder("import");
-        List<String> imports = table.getImports();
+    private String visitMainMethodDecl(JmmNode mainMethodDeclNode, Void unused) {
+        StringBuilder code = new StringBuilder(METHOD);
+        code.append(SPACE);
+        code.append(PUBLIC);
+        code.append(SPACE);
+        code.append(STATIC);
+        code.append(SPACE);
+        code.append("main");
 
-        for (var importDecl : imports) {
-            if (importDecl.contains(node.get("ID"))) {
-                code.append(SPACE);
-                code.append(node.get("ID"));
-                code.append(END_STMT);
+        List<Symbol> parameters = table.getParameters("main");
+        var paramCode = parameters.stream()
+                .map(symbol -> symbol.getName() + OptUtils.toOllirType(symbol.getType()))
+                .collect(Collectors.joining(", "));
+
+        code.append("(" + paramCode + ")");
+
+        var retType = table.getReturnType("main");
+        code.append(OptUtils.toOllirType(retType));
+
+        code.append(L_BRACKET);
+
+        for (var i = 1; i < mainMethodDeclNode.getNumChildren(); i++) {
+            if (!PARAMS.check(mainMethodDeclNode.getJmmChild(i))) {
+                code.append(visit(mainMethodDeclNode.getJmmChild(i)));
             }
         }
+
+        code.append(RETURN);
+        code.append(".V");
+        code.append(SPACE);
+        code.append(END_STMT);
+        code.append(R_BRACKET);
+
+        return code.toString();
+    }
+
+    private String visitReturn(JmmNode returnNode, Void unused) {
+        String methodName = returnNode.getAncestor(METHOD_DECLARATION).get().get("name");
+        Type retType = table.getReturnType(methodName);
+
+        StringBuilder code = new StringBuilder(RETURN);
+        code.append(OptUtils.toOllirType(retType));
+
+        var expr = OllirExprResult.EMPTY;
+
+        if (returnNode.getNumChildren() > 0) {
+            code = new StringBuilder();
+            expr = exprVisitor.visit(returnNode.getJmmChild(0));
+        }
+
+        code.append(expr.getComputation());
+        code.append(RETURN);
+        code.append(OptUtils.toOllirType(retType));
+        code.append(SPACE);
+        code.append(expr.getCode());
+        code.append(END_STMT);
+        return code.toString();
+    }
+
+    private String visitParam(JmmNode paramNode, Void unused) {
+        var typeCode = OptUtils.toOllirType(paramNode.getJmmChild(0));
+        var id = paramNode.get("name");
+
+        String code = id + typeCode;
+
+        return code;
+    }
+
+    private String visitAssignStmt(JmmNode assignStmtNode, Void unused) {
+        var lhs = assignStmtNode.get("name");
+        var rhs = exprVisitor.visit(assignStmtNode.getJmmChild(0));
+
+        StringBuilder code = new StringBuilder(lhs);
+
+        Type thisType = TypeUtils.getExprType(assignStmtNode, table);
+        String typeString = OptUtils.toOllirType(thisType);
+
+        code.append(typeString);
+        code.append(SPACE);
+
+        code.append(ASSIGN);
+        code.append(typeString);
+        code.append(SPACE);
+
+        code.append(rhs.getCode());
+
+        code.append(END_STMT);
 
         return code.toString();
     }
@@ -276,5 +270,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         return code.toString();
+    }
+
+    private String buildConstructor() {
+
+        return ".construct " + table.getClassName() + "().V {\n" +
+                "invokespecial(this, \"<init>\").V;\n" +
+                "}\n";
     }
 }
