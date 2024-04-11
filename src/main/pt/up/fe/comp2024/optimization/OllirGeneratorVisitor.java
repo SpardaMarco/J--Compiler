@@ -27,7 +27,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String PUBLIC = "public";
     private final String METHOD = ".method";
     private final String STATIC = "static";
-    private final String RETURN = "ret";
+    private final String RETURN_STMT = "ret";
 
     private final SymbolTable table;
 
@@ -191,7 +191,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-        code.append(RETURN);
+        code.append(RETURN_STMT);
         code.append(".V");
         code.append(SPACE);
         code.append(END_STMT);
@@ -204,7 +204,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String methodName = returnNode.getAncestor(METHOD_DECLARATION).get().get("name");
         Type retType = table.getReturnType(methodName);
 
-        StringBuilder code = new StringBuilder(RETURN);
+        StringBuilder code = new StringBuilder(RETURN_STMT);
         code.append(OptUtils.toOllirType(retType));
 
         var expr = OllirExprResult.EMPTY;
@@ -215,7 +215,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         code.append(expr.getComputation());
-        code.append(RETURN);
+        code.append(RETURN_STMT);
         code.append(OptUtils.toOllirType(retType));
         code.append(SPACE);
         code.append(expr.getCode());
