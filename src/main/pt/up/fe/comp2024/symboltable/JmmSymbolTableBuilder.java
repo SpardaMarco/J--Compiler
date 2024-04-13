@@ -80,8 +80,8 @@ public class JmmSymbolTableBuilder {
             String name = mainMethod.get("name");
             Type returnType = new Type(TypeUtils.getVoidTypeName(), false);
 
-            List<Symbol> params = new ArrayList<>();
-            Symbol param = new Symbol(new Type("String", true), "args");
+            List<ParamSymbol> params = new ArrayList<>();
+            ParamSymbol param = new ParamSymbol(new Type("String", true), "args");
             params.add(param);
 
             List<Symbol> locals = buildFields(mainMethod);
@@ -103,7 +103,7 @@ public class JmmSymbolTableBuilder {
             String name = method.get("name");
             Type returnType = buildType(method.getChild(0));
 
-            List<Symbol> params = buildParams(method);
+            List<ParamSymbol> params = buildParams(method);
             List<Symbol> locals = buildFields(method);
 
             MethodSymbol methodSymbol = new MethodSymbol(
@@ -121,24 +121,29 @@ public class JmmSymbolTableBuilder {
         return methodSymbols;
     }
 
-    private static List<Symbol> buildParams(JmmNode methodDecl) {
-        List<Symbol> params = new ArrayList<>();
+    private static List<ParamSymbol> buildParams(JmmNode methodDecl) {
+        List<ParamSymbol> params = new ArrayList<>();
 
-        for (JmmNode param: methodDecl.getChildren()) {
-            if (!param.getKind().equals("Params")) continue;
-            Symbol symbol = new Symbol(buildType(param.getChild(0)), param.get("name"));
-            params.add(symbol);
-            while (!param.getChildren("Params").isEmpty()) {
-                param = param.getChildren("Params").get(0);
-                if (param.get("isVarArg").equals("true")) {
-                    symbol = new Symbol(new Type(TypeUtils.getIntTypeName(), true), param.get("name"));
-                    params.add(symbol);
-                    break;
-                }
-                symbol = new Symbol(buildType(param.getChild(0)), param.get("name"));
-                params.add(symbol);
+        List<JmmNode> paramChildren = methodDecl.getChildren("Params");
+
+        JmmNode param = paramChildren.isEmpty() ? null : paramChildren.get(0);
+
+        while (param != null) {
+
+            ParamSymbol symbol;
+
+            if (param.get("isVarArg").equals("true")) {
+                symbol = new ParamSymbol(new Type(TypeUtils.getIntTypeName(), true), param.get("name"), true);
+            } else {
+                symbol = new ParamSymbol(buildType(param.getChild(0)), param.get("name"));
             }
+
+            params.add(symbol);
+
+            paramChildren = param.getChildren("Params");
+            param = paramChildren.isEmpty() ? null : paramChildren.get(0);
         }
+
         return params;
     }
 }

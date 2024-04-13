@@ -44,11 +44,14 @@ public class ClassSymbol {
         return new ArrayList<>(this.methods.keySet());
     }
 
+    public MethodSymbol getMethodSymbol(String methodSignature) {
+        return methods.get(methodSignature);
+    }
     public Type getMethodType(String methodSignature) {
         return methods.get(methodSignature).getType();
     }
 
-    public List<Symbol> getParams(String methodSignature) {
+    public List<ParamSymbol> getParams(String methodSignature) {
         return methods.get(methodSignature).getParams();
     }
 

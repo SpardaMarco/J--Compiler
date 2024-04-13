@@ -1,0 +1,356 @@
+package pt.up.fe.comp2024.analysis;
+
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.ast.PostorderJmmVisitor;
+import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
+import pt.up.fe.comp2024.symboltable.MethodSymbol;
+
+import java.lang.reflect.Method;
+
+public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
+
+    String currentMethod;
+
+    public ASTAnnotator(){
+        setDefaultValue(() -> null);
+    }
+    @Override
+    protected void buildVisitor() {
+
+        addVisit("MethodDeclaration", this::visitMethodDecl);
+        addVisit("MainMethodDeclaration", this::visitMethodDecl);
+    }
+
+    private Void visitMethodDecl(JmmNode method, JmmSymbolTable table) {
+        currentMethod = method.get("name");
+
+        new MethodVisitor(currentMethod).visit(method, table);
+
+        return null;
+    }
+
+    class MethodVisitor extends PostorderJmmVisitor<JmmSymbolTable, Void> {
+
+        String currentMethod;
+        public MethodVisitor(String currentMethod) {
+            this.currentMethod = currentMethod;
+            setDefaultValue(() -> null);
+        }
+        @Override
+        protected void buildVisitor() {
+
+            addVisit("IntegerLiteral", this::visitIntegerLiteral);
+            addVisit("BooleanLiteral", this::visitBooleanLiteral);
+            addVisit("ArrayExpression", this::visitArrayExpression);
+            addVisit("Identifier", this::visitIdentifier);
+            addVisit("BinaryOp", this::visitBinaryOp);
+            addVisit("UnaryOp", this::visitUnaryOp);
+            addVisit("ExprStmt", this::visitExprStmt);
+            addVisit("ParenExpr", this::visitExprStmt);
+            addVisit("ArrayAccessOp", this::visitArrayAccessOp);
+            addVisit("MethodCall", this::visitMethodCall);
+            addVisit("FunctionCall", this::visitFunctionCall);
+            addVisit("This", this::visitThis);
+            addVisit("Attribute", this::visitAttribute);
+            addVisit("ObjectDeclaration", this::visitObjectDeclaration);
+            addVisit("ArrayDeclaration", this::visitArrayDeclaration);
+            addVisit("AssignStmt", this::visitAssignStmt);
+        }
+
+        private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
+
+            integerLiteral.put("type", "int");
+            integerLiteral.put("isArray", "false");
+            return null;
+        }
+
+        private Void visitBooleanLiteral(JmmNode booleanLiteral, SymbolTable table) {
+
+            booleanLiteral.put("type", "boolean");
+            booleanLiteral.put("isArray", "false");
+            return null;
+        }
+
+        private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
+
+            if (arrayExpression.getChildren().size() == 0){
+                arrayExpression.put("type", "?");
+                arrayExpression.put("isArray", "true");
+            }
+
+            String type = arrayExpression.getChild(0).get("type");
+
+            for (JmmNode element: arrayExpression.getChildren()){
+                if (!element.get("type").equals(type)){
+                    arrayExpression.put("type", "invalid");
+                    return null;
+                }
+            }
+
+            arrayExpression.put("type", type);
+            arrayExpression.put("isArray", "true");
+
+            return null;
+        }
+
+        private void updateUndefinedOperand(JmmNode operand, String type) {
+            if (operand.get("type") == "undefined") {
+                operand.put("type", type);
+                operand.put("isArray", "false");
+            }
+        }
+
+        private void updateUndefinedBinaryOperands(JmmNode binaryOp, String type) {
+            JmmNode leftOperand = binaryOp.getChild(0);
+            JmmNode rightOperand = binaryOp.getChild(1);
+            updateUndefinedOperand(leftOperand, type);
+            updateUndefinedOperand(rightOperand, type);
+        }
+
+        private Void visitBinaryOp(JmmNode binaryOp, SymbolTable table) {
+
+            switch (binaryOp.get("op")){
+                case "+", "-", "*", "/" -> {
+                    updateUndefinedBinaryOperands(binaryOp, "int");
+                    binaryOp.put("type", "int");
+                    break;
+                }
+                case "<" -> {
+                    updateUndefinedBinaryOperands(binaryOp, "int");
+                    binaryOp.put("type", "boolean");
+                    break;
+                }
+                case "&&" -> {
+                    updateUndefinedBinaryOperands(binaryOp, "boolean");
+                    binaryOp.put("type", "boolean");
+                    break;
+                }
+            }
+
+            binaryOp.put("isArray", "false");
+
+            return null;
+        }
+
+        private Void visitUnaryOp(JmmNode unaryOp, SymbolTable table) {
+
+            switch (unaryOp.get("op")) {
+                case "!":
+                    updateUndefinedOperand(unaryOp.getChild(0), "boolean");
+                    unaryOp.put("type", "boolean");
+
+            }
+            return null;
+        }
+        private Void visitIdentifier(JmmNode identifier, JmmSymbolTable table) {
+
+            String name = identifier.get("value");
+
+            Symbol declaration = table.getVarDeclaration(name, currentMethod);
+
+            if (declaration == null) {
+
+                if (Character.isUpperCase(name.charAt(0))){
+                    identifier.put("reference", "class");
+                    identifier.put("type", name);
+                    return null;
+                }
+
+                identifier.put("reference", "invalid");
+                identifier.put("type", "invalid");
+                return null;
+            }
+
+            String typeName = declaration.getType().getName();
+            String isArray = declaration.getType().isArray() ? "true" : "false";
+
+            identifier.put("reference", "variable");
+            identifier.put("type", typeName);
+            identifier.put("isArray", isArray);
+
+            return null;
+        }
+
+        private Void visitExprStmt(JmmNode exprStmt, SymbolTable table) {
+
+            String type = exprStmt.getChild(0).get("type");
+
+            if (type == "undefined") {
+                exprStmt.getChild(0).put("type", "void");
+                exprStmt.put("type", "void");
+                return null;
+            }
+            exprStmt.put("type", type);
+
+            if (type != "invalid") {
+                String isArray = exprStmt.getChild(0).get("isArray");
+                exprStmt.put("isArray", isArray);
+            }
+            return null;
+        }
+
+        private Void visitArrayAccessOp(JmmNode arrayAccess, SymbolTable table) {
+
+            JmmNode array = arrayAccess.getChild(0);
+
+            if (!array.isInstance("ArrayExpression") && !array.isInstance("Identifier")){
+                arrayAccess.put("type", "invalid");
+            }
+
+
+            if (array.isInstance("Identifier")) {
+                if (array.get("isArray") == "false") {
+                    arrayAccess.put("type", "invalid");
+                    return null;
+                }
+            }
+
+            String type = array.get("type");
+            arrayAccess.put("type", type);
+            arrayAccess.put("isArray", "false");
+
+            return null;
+        }
+
+        private Void visitMethodCall(JmmNode methodCall, JmmSymbolTable table){
+
+            JmmNode object = methodCall.getChild(0);
+
+            if (object.isInstance("This") || object.get("type").equals(table.getClassName())){
+
+                String methodName = methodCall.get("name");
+
+                MethodSymbol methodSymbol = table.getMethodSymbol(methodName);
+
+                if (methodSymbol != null){
+                    Type type = methodSymbol.getType();
+                    methodCall.put("type", type.getName());
+                    String isArray = type.isArray() ? "true" : "false";
+                    methodCall.put("isArray", isArray);
+                    return null;
+                }
+
+                if (table.getSuper() != null)
+                    methodCall.put("type", "undefined");
+                else
+                    methodCall.put("type", "invalid");
+                return null;
+            }
+
+            methodCall.put("type", "undefined");
+
+            return null;
+        }
+
+        private Void visitFunctionCall(JmmNode functionCall, JmmSymbolTable table){
+
+            String functionName = functionCall.get("name");
+
+            MethodSymbol methodSymbol = table.getMethodSymbol(functionName);
+
+            if (methodSymbol != null) {
+
+                Type type = methodSymbol.getType();
+
+                functionCall.put("type", type.getName());
+                functionCall.put("isArray", type.isArray() ? "true" : "false");
+
+                return null;
+            }
+
+            for (String importStmt: table.getImports()) {
+
+                String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
+                String importedFunction = words[words.length - 1];
+
+                if (importedFunction.equals(functionName)){
+                    functionCall.put("type", "undefined");
+                    return null;
+                }
+            }
+
+            functionCall.put("type", "invalid");
+
+            return null;
+        }
+
+        private Void visitThis(JmmNode thisNode, SymbolTable table) {
+
+            thisNode.put("type", table.getClassName());
+            thisNode.put("isArray", "false");
+
+            return null;
+        }
+
+        private Void visitAttribute(JmmNode attribute, SymbolTable table) {
+
+            JmmNode object = attribute.getChild(0);
+
+            String attributeName = attribute.get("name");
+
+            if (object.get("type").equals(table.getClassName()) || object.isInstance("This")) {
+
+                for (Symbol field: table.getFields()) {
+                    if (field.getName().equals(attributeName)) {
+
+                        attribute.put("type", field.getType().getName());
+                        attribute.put("isArray", field.getType().isArray() ? "true" : "false");
+                        return null;
+                    }
+                }
+            }
+
+            attribute.put("type", "undefined");
+
+            return null;
+        }
+
+        public Void visitObjectDeclaration (JmmNode objectDeclaration, SymbolTable table) {
+
+            objectDeclaration.put("type", objectDeclaration.get("name"));
+            objectDeclaration.put("isArray", "false");
+
+            return null;
+        }
+
+        public Void visitArrayDeclaration (JmmNode arrayDeclaration, SymbolTable table) {
+
+            arrayDeclaration.put("type", arrayDeclaration.getChild(0).get("type"));
+            arrayDeclaration.put("isArray", "true");
+
+            return null;
+        }
+
+        public Void visitAssignStmt (JmmNode assignStmt, JmmSymbolTable table) {
+
+            String variable = assignStmt.get("name");
+
+            Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
+
+            if (varDeclaration == null) {
+                assignStmt.put("type", "invalid");
+                return null;
+            }
+
+            String type = varDeclaration.getType().getName();
+            Boolean isArray = varDeclaration.getType().isArray();
+            assignStmt.put("type", type);
+            assignStmt.put("isArray", isArray ? "true" : "false");
+
+            JmmNode assignment = assignStmt.getChild(0);
+
+            if (assignment.get("type").equals("undefined")) {
+                assignment.put("type", type);
+                assignment.put("isArray", isArray ? "true" : "false");
+            }
+
+            return null;
+        }
+    }
+
+}
+
