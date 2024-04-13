@@ -21,17 +21,17 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     public JmmAnalysisImpl() {
 
         this.analysisPasses = List.of(
-                new ArithmeticArrayOp(),
                 new IncompatibleAssignment(),
                 //new IncompatibleMethodArguments(),
-                //new IncompatibleOperands(),
-                //new InvalidArrayAccess(),
-                //new InvalidArrayIndex(),
+                new IncompatibleOperands(),
+                new InvalidArrayAccess(),
+                new InvalidArrayIndex(),
                 //new InvalidThisObjectUse(),
                 //new InvalidVarargArgument(),
                 //new MethodFromNonImportedClass(),
                 //new NonArgumentVarargUse(),
-                //new NonBooleanCondition(),
+                new NonBooleanCondition(),
+                new NotImportedClass(),
                 //new StaticThisReference(),
                 new UndeclaredVariable()
                 //new UnknownMethodInNonChildClass()
@@ -45,6 +45,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         JmmNode rootNode = parserResult.getRootNode();
 
         SymbolTable table = JmmSymbolTableBuilder.build(rootNode);
+
+        new ASTAnnotator().visit(parserResult.getRootNode(), table);
 
         List<Report> reports = new ArrayList<>();
 

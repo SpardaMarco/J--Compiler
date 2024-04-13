@@ -16,49 +16,56 @@ public class SemanticAnalysisTest {
     @Test
     public void varNotDeclared() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarNotDeclared.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void classNotImported() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ClassNotImported.jmm"));
-        TestUtils.mustFail(result);
         System.out.println(result.getReports());
+        TestUtils.mustFail(result);
     }
 
     @Test
     public void intPlusObject() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IntPlusObject.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void boolTimesInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/BoolTimesInt.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void arrayPlusInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayPlusInt.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void arrayIndexNotInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayIndexNotInt.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
     @Test
     public void assignIntToBool() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssignIntToBool.jmm"));
+        System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 

@@ -10,11 +10,6 @@ import java.util.List;
 public class StaticThisReference extends AnalysisVisitor {
 
     @Override
-    public List<Report> analyze(JmmNode root, SymbolTable table) {
-        return null;
-    }
-
-    @Override
     protected void buildVisitor() {
 
     }

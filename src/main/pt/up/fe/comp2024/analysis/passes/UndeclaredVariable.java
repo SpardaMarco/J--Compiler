@@ -55,25 +55,9 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
 
+        if (!identifier.get("reference").equals("invalid")) return null;
+
         String variable = identifier.get("value");
-
-        // Var is a declared variable, return
-        if (table.getLocalVariables(currentMethod).stream()
-                .anyMatch(varDecl -> varDecl.getName().equals(variable))) {
-            return null;
-        }
-
-        // Var is a field, return
-        if (table.getFields().stream()
-                .anyMatch(param -> param.getName().equals(variable))) {
-            return null;
-        }
-
-        // Var is a parameter, return
-        if (table.getParameters(currentMethod).stream()
-                .anyMatch(param -> param.getName().equals(variable))) {
-            return null;
-        }
 
         // Create error report
         var message = String.format("Variable '%s' does not exist.", variable);
