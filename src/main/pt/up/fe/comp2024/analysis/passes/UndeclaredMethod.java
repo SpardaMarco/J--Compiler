@@ -11,17 +11,18 @@ public class UndeclaredMethod extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit("functionCall", this::visitFunctionCall);
+        addVisit("FunctionCall", this::visitMethodCall);
+        addVisit("MethodCall", this::visitMethodCall);
     }
 
-    private Void visitFunctionCall(JmmNode functionCall, SymbolTable table) {
+    private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
 
-        if (functionCall.get("type").equals("invalid")) {
+        if (methodCall.get("type").equals("invalid")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
-                    NodeUtils.getLine(functionCall),
-                    NodeUtils.getColumn(functionCall),
-                    String.format("Method %s is unknown.", functionCall.get("name")),
+                    NodeUtils.getLine(methodCall),
+                    NodeUtils.getColumn(methodCall),
+                    String.format("Method \"%s()\" is unknown.", methodCall.get("name")),
                     null)
             );
         }

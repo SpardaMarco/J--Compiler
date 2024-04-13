@@ -97,6 +97,7 @@ literal
 
 params locals[boolean isVarArg=false]
     : (type name=ID) COMMA params
+    | (INT (VARARGSUFFIX {$isVarArg=true;}) name=ID) COMMA params
     | type name=ID
     | INT (VARARGSUFFIX {$isVarArg=true;}) name=ID
     ;

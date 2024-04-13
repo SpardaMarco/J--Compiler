@@ -20,12 +20,19 @@ public class IncompatibleAssignment extends AnalysisVisitor {
 
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable table) {
 
+        if (invalidAssignment(assignStmt))
+            return null;
+
         if (isLiteralAssignment(assignStmt)) {
             checkLiteralAssignment(assignStmt);
         } else {
             checkObjectAssignment(assignStmt, table);
         }
         return null;
+    }
+
+    private static boolean invalidAssignment(JmmNode assignStmt) {
+        return assignStmt.getChild(0).get("type").equals("invalid");
     }
 
     private boolean isLiteralAssignment(JmmNode assignStmt) {
@@ -44,7 +51,7 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         String assigneeType = assignStmt.get("type");
         String assignmentType = assignStmt.getChild(0).get("type");
         Boolean isAssigneeArray = assignStmt.get("isArray").equals("true");
-        Boolean isAssignmentArray = assignStmt.get("isArray").equals("true");
+        Boolean isAssignmentArray = assignStmt.getChild(0).get("isArray").equals("true");
 
         if (!assigneeType.equals(assignmentType) || !isAssigneeArray.equals(isAssignmentArray)){
             addIncompabilityReport(
@@ -54,13 +61,12 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         }
     }
 
-
     private void checkObjectAssignment(JmmNode assignStmt, SymbolTable table) {
 
         String assigneeClass = assignStmt.get("type");
         String assignmentClass = assignStmt.getChild(0).get("type");
         Boolean isAssigneeArray = assignStmt.get("isArray").equals("true");
-        Boolean isAssignmentArray = assignStmt.get("isArray").equals("true");
+        Boolean isAssignmentArray = assignStmt.getChild(0).get("isArray").equals("true");
 
         if (!isAssigneeArray.equals(isAssignmentArray)) {
             addIncompabilityReport(
@@ -85,7 +91,7 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         String assigneeType = assignStmt.get("type");
         String assignmentType = assignStmt.getChild(0).get("type");
         Boolean isAssigneeArray = assignStmt.get("isArray").equals("true");
-        Boolean isAssignmentArray = assignStmt.get("isArray").equals("true");
+        Boolean isAssignmentArray = assignStmt.getChild(0).get("isArray").equals("true");
 
         String message = String.format(
                 format,

@@ -1,34 +1,12 @@
-import Math.Algebra;
-import Math2.sqrt;
-import Noob.hello;
+class Varargs {
 
-class QuantumMechanics extends Physics  {
-
-    int x;
-    boolean y;
-    Astro z;
-
-    public static void main (String[] args) {
-
-        Algebra algebra;
-        Vector v1;
-        Vector v2;
-
-        algebra = new Algebra();
-
-        sqrt(3);
-        x = sum(2,x);
-
-
-        v1 = new int[5] + new Vector();
-        v2 = algebra.vector;
-        v3 = this.z;
-        v4 = algebra.vector;
-
-        !hello() && algebra.multVector(v1, v2);
+    public int foo() {
+        int a;
+        a = varargs([true, true]);
+        return a;
     }
 
-    public int sum (int x, int z) {
-        return x + z;
+    public int varargs(boolean[] x, int[] x, int... a) {
+        return a[0];
     }
 }

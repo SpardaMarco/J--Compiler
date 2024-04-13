@@ -12,6 +12,7 @@ import pt.up.fe.comp2024.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2024.backend.JasminBackendImpl;
 import pt.up.fe.comp2024.optimization.JmmOptimizationImpl;
 import pt.up.fe.comp2024.parser.JmmParserImpl;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -41,7 +42,7 @@ public class Launcher {
 
         // Print AST
         System.out.println(parserResult.getRootNode().toTree());
-        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+        JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         table.print();
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
         System.out.println(parserResult.getRootNode().toTree());

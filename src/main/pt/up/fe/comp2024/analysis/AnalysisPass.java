@@ -3,6 +3,7 @@ package pt.up.fe.comp2024.analysis;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 import java.util.List;
 
@@ -18,6 +19,6 @@ public interface AnalysisPass {
      * @param table the symbol table
      * @return a list of reports with the results of the analysis
      */
-    List<Report> analyze(JmmNode root, SymbolTable table);
+    List<Report> analyze(JmmNode root, JmmSymbolTable table);
 
 }

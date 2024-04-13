@@ -14,11 +14,11 @@ public class MethodSymbol {
 
     private final Boolean isPublic;
 
-    private final List<Symbol> params;
+    private final List<ParamSymbol> params;
 
     private final List<Symbol> locals;
 
-    public MethodSymbol(String name, Type type, Boolean isStatic, Boolean isPublic, List<Symbol> params, List<Symbol> locals) {
+    public MethodSymbol(String name, Type type, Boolean isStatic, Boolean isPublic, List<ParamSymbol> params, List<Symbol> locals) {
         this.name = name;
         this.type = type;
         this.isStatic = isStatic;
@@ -39,7 +39,7 @@ public class MethodSymbol {
 
     public Boolean isPublic() { return isPublic; }
 
-    public List<Symbol> getParams() {
+    public List<ParamSymbol> getParams() {
         return params;
     }
 

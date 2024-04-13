@@ -61,7 +61,7 @@ public class IncompatibleOperands extends AnalysisVisitor {
         if (operandType.equals(type) && !isArray) return;
 
         var message = String.format(
-                "Operand of wrong type, \"%s\".\n Operation \"%s\" only takes \"%s\" as argument",
+                "Operand of wrong type, \"%s\". Operation \"%s\" only takes \"%s\" as argument",
                 operandType + (isArray ? "[]" : ""), operation, type);
         addReport(Report.newError(
                 Stage.SEMANTIC,

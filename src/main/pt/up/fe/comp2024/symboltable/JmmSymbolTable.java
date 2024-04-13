@@ -59,5 +59,27 @@ public class JmmSymbolTable implements SymbolTable {
         return Collections.unmodifiableList(declaredClass.getLocals(methodSignature));
     }
 
+    public MethodSymbol getMethodSymbol(String method){
+        return declaredClass.getMethodSymbol(method);
+    }
 
+    public Symbol getVarDeclaration(String varName, String method) {
+
+        for (Symbol varDecl : getLocalVariables(method)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : getParameters(method)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : getFields()) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        return null;
+    }
 }

@@ -1,10 +1,9 @@
 package pt.up.fe.comp2024.analysis;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  *
  */
-public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Void> implements AnalysisPass {
+public abstract class AnalysisVisitor extends PreorderJmmVisitor<JmmSymbolTable, Void> implements AnalysisPass {
 
     private List<Report> reports;
 
@@ -30,7 +29,7 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
     }
 
     @Override
-    public List<Report> analyze(JmmNode root, SymbolTable table) {
+    public List<Report> analyze(JmmNode root, JmmSymbolTable table) {
         // Visit the node
         visit(root, table);
 
@@ -38,23 +37,4 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         return getReports();
     }
 
-    protected Symbol getVarDeclaration(String varName, String currentMethod, SymbolTable table) {
-
-        for (Symbol varDecl : table.getLocalVariables(currentMethod)) {
-            if (varDecl.getName().equals(varName)) {
-                return varDecl;
-            }
-        }
-        for (Symbol varDecl : table.getParameters(currentMethod)) {
-            if (varDecl.getName().equals(varName)) {
-                return varDecl;
-            }
-        }
-        for (Symbol varDecl : table.getFields()) {
-            if (varDecl.getName().equals(varName)) {
-                return varDecl;
-            }
-        }
-        return null;
-    }
 }
