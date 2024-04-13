@@ -32,6 +32,7 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    int stackSize = 99;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -85,13 +86,13 @@ public class JasminGenerator {
 
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class ").append(className).append(NL).append(NL);
+        code.append(".class ").append(className).append(NL);
 
         if (ollirResult.getOllirClass().getSuperClass() != null) {
-            code.append(".super ").append(ollirResult.getOllirClass().getSuperClass()).append(NL);
+            code.append(".super ").append(ollirResult.getOllirClass().getSuperClass()).append(NL).append(NL);
         }
         else {
-            code.append(".super java/lang/Object").append(NL);
+            code.append(".super java/lang/Object").append(NL).append(NL);
         }
 
         // generate fields
@@ -163,10 +164,13 @@ public class JasminGenerator {
         // apply operation
         var op = getOperation(unaryOp.getOperation());
 
-        // TODO: NOT ARITHMETIC
-
-        code.append(op).append(NL);
-
+        // if it's a boolean operation, we expect the caller to add the label
+        if (unaryOp.getOperation().getOpType() == OperationType.NOTB) {
+            code.append(op).append(" ");
+        }
+        else {
+            code.append(op).append(NL);
+        }
         return code.toString();
     }
 
@@ -224,8 +228,7 @@ public class JasminGenerator {
     }
 
     private String generateGoto(GotoInstruction gotoInst) {
-        //TODO: NOT ARITHMETIC
-        throw new NotImplementedException(gotoInst);
+        return "goto " + gotoInst.getLabel() + NL;
     }
     private String generateGetField(GetFieldInstruction getField) {
         var code = new StringBuilder();
@@ -268,11 +271,33 @@ public class JasminGenerator {
     private String generateOpCond(OpCondInstruction opCond) {
         // TODO: NOT ARITHMETIC
         throw new NotImplementedException(opCond);
+
+//        var code = new StringBuilder();
+//
+//        Instruction inst = opCond.getCondition();
+//
+//        // assumes that code ended with conditional operation + " "
+//        code.append(generators.apply(inst));
+//        // add label
+//        code.append(opCond.getLabel()).append(NL);
+//
+//        return code.toString();
     }
 
     private String generateSingleOpCond(SingleOpCondInstruction singleOpCond) {
         // TODO: NOT ARITHMETIC
         throw new NotImplementedException(singleOpCond);
+
+//        var code = new StringBuilder();
+//
+//        Instruction inst = singleOpCond.getCondition();
+//
+//        // assumes that code ended with conditional operation + " "
+//        code.append(generators.apply(inst));
+//        // add label
+//        code.append(singleOpCond.getLabel()).append(NL);
+//
+//        return code.toString();
     }
 
     private String generateLiteral(LiteralElement literal) {
@@ -323,27 +348,32 @@ public class JasminGenerator {
 
         code.append("\n.method ").append(modifier).append(isStatic).append(methodName).append("(").append(params).append(")").append(descriptor).append(NL);
 
-        // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
-
+        var instCode = new StringBuilder();
         for (var inst : method.getInstructions()) {
-            var instCode = StringLines.getLines(generators.apply(inst)).stream()
-                    .collect(Collectors.joining(NL + TAB, NL+TAB, NL));
+            instCode.append(StringLines.getLines(generators.apply(inst)).stream()
+                    .collect(Collectors.joining(NL + TAB, NL+TAB, NL)));
 
             if (inst instanceof CallInstruction call) {
                 if (call.getReturnType().getTypeOfElement() != ElementType.VOID) {
-                    code.append(TAB).append("pop").append(NL);
+                    instCode.append(TAB).append("pop").append(NL);
                 }
             }
-
-            code.append(instCode);
         }
-
-        code.append(".end method\n");
 
         // unset method
         currentMethod = null;
+        // Add limits
+        code.append(TAB).append(".limit stack ").append(stackSize).append(NL);
+        // Add locals limit
+//        var locals = method.getVarTable().size();
+//        if (!method.isStaticMethod() && method.getVarTable().get("this") == null) {
+//            locals++;
+//        }
+        var locals = 99;
+        code.append(TAB).append(".limit locals ").append(locals).append(NL);
+        // Add code
+        code.append(instCode);
+        code.append(".end method\n");
 
         return code.toString();
     }
@@ -382,7 +412,6 @@ public class JasminGenerator {
 
             default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
         }
-
         return code.toString();
     }
 
@@ -437,7 +466,7 @@ public class JasminGenerator {
 
         var caller = (Operand) call.getCaller();
         var className = "";
-        if (call.getInvocationType() == CallType.invokespecial) {
+        if (call.getInvocationType() == CallType.invokespecial || call.getInvocationType() == CallType.invokevirtual) {
             var callerType = caller.getType();
             className = callerType.getTypeOfElement() == ElementType.THIS ? ollirResult.getOllirClass().getClassName() : ((ClassType) callerType).getName();
         }

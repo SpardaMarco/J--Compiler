@@ -106,6 +106,7 @@ public class Launcher {
 
         // Code generation stage
         JasminBackendImpl jasminGen = new JasminBackendImpl();
+//        OllirResult ollirResult = new OllirResult(code, config);
         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
         System.out.println(jasminResult.getJasminCode());
         TestUtils.noErrors(jasminResult.getReports());
