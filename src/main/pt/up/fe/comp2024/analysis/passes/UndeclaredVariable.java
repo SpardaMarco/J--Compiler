@@ -19,7 +19,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-
         addVisit("MethodDeclaration", this::visitMethodDecl);
         addVisit("MainMethodDeclaration", this::visitMethodDecl);
         addVisit("AssignStmt", this::visitAssignment);
@@ -32,7 +31,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitAssignment(JmmNode assignment, JmmSymbolTable table) {
-
         String variable = assignment.get("name");
 
         if (table.getVarDeclaration(variable, currentMethod) != null)
@@ -69,6 +67,4 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         return null;
     }
-
-
 }

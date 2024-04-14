@@ -78,9 +78,13 @@ varDecl
 
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
-    (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
+    (varDecl)* (stmt)* returnStmt RCURLY #MethodDeclaration
     | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=ID LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
+    ;
+
+returnStmt
+    : RETURN expr SEMI #Return
     ;
 
 type

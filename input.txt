@@ -1,12 +1,16 @@
-class Varargs {
+class CompileArithmetic {
+
+    public static void main(String[] args) {
+
+    }
 
     public int foo() {
         int a;
-        a = varargs([true, true], [1,2], 12,5,3);
-        return a;
-    }
+        int b;
 
-    public int varargs(boolean[] x, int[] x, int... a) {
-        return a[0];
+        a = 1;
+        b = 2;
+
+        return a + b;
     }
 }

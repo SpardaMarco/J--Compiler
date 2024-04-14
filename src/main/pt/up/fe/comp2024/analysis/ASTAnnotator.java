@@ -59,6 +59,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("ObjectDeclaration", this::visitObjectDeclaration);
             addVisit("ArrayDeclaration", this::visitArrayDeclaration);
             addVisit("AssignStmt", this::visitAssignStmt);
+            addVisit("Return", this::visitReturn);
         }
 
         private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
@@ -349,6 +350,18 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             }
 
             return null;
+        }
+
+        public Void visitReturn(JmmNode returnNode, JmmSymbolTable table) {
+                JmmNode expression = returnNode.getChild(0);
+
+                if (expression.get("type").equals("invalid")) {
+                    return null;
+                }
+
+                returnNode.put("type", expression.get("type"));
+                returnNode.put("isArray", expression.get("isArray"));
+                return null;
         }
     }
 

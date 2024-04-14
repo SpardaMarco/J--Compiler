@@ -9,32 +9,28 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import java.util.List;
 import java.util.Optional;
 
-import static pt.up.fe.comp2024.ast.Kind.TYPE;
+import static pt.up.fe.comp2024.ast.Kind.PRIMITIVE_TYPE;
 
 public class OptUtils {
     private static int tempNumber = -1;
 
     public static String getTemp() {
-
         return getTemp("tmp");
     }
 
     public static String getTemp(String prefix) {
-
         return prefix + getNextTempNum();
     }
 
     public static int getNextTempNum() {
-
         tempNumber += 1;
         return tempNumber;
     }
 
     public static String toOllirType(JmmNode typeNode) {
+        PRIMITIVE_TYPE.checkOrThrow(typeNode);
 
-        TYPE.checkOrThrow(typeNode);
-
-        String typeName = typeNode.get("name");
+        String typeName = typeNode.getChildren().get(0).get("name");
 
         return toOllirType(typeName);
     }
@@ -47,11 +43,11 @@ public class OptUtils {
 
         String type = "." + switch (typeName) {
             case "int" -> "i32";
-            default -> throw new NotImplementedException(typeName);
+            case "boolean" -> "bool";
+            case "void" -> "V";
+            default -> typeName;
         };
 
         return type;
     }
-
-
 }

@@ -49,15 +49,15 @@ public class Launcher {
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
         System.out.println(parserResult.getRootNode().toTree());
 
-//        SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-//        printSymbolTable(table);
+
+    // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+    // printSymbolTable(table);
 
         // Semantic Analysis stage
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
         TestUtils.noErrors(semanticsResult.getReports());
-
 
         // Optimization stage
         JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
