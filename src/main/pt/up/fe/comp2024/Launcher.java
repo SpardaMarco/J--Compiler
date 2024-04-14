@@ -43,15 +43,14 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        System.out.println(parserResult.getRootNode().toTree());
+        //System.out.println(parserResult.getRootNode().toTree());
         JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         table.print();
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
         System.out.println(parserResult.getRootNode().toTree());
 
-
-    // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-    // printSymbolTable(table);
+        // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
+        // printSymbolTable(table);
 
         // Semantic Analysis stage
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
@@ -69,9 +68,9 @@ public class Launcher {
 
         // Code generation stage
         JasminBackendImpl jasminGen = new JasminBackendImpl();
-//        OllirResult ollirResult = new OllirResult(code, config);
+        // OllirResult ollirResult = new OllirResult(code, config);
         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        System.out.println(jasminResult.getJasminCode());
+        //System.out.println(jasminResult.getJasminCode());
         TestUtils.noErrors(jasminResult.getReports());
 
         // Print Jasmin code

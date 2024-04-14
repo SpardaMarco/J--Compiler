@@ -18,6 +18,7 @@ public enum Kind {
     PARAMS,
     EXPR_STMT,
     ASSIGN_STMT,
+    OBJECT_DECLARATION,
     METHOD_CALL,
     BINARY_OP,
     IDENTIFIER,
