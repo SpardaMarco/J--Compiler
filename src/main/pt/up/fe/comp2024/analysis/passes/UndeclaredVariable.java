@@ -14,7 +14,6 @@ import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
  * @author JBispo
  */
 public class UndeclaredVariable extends AnalysisVisitor {
-
     private String currentMethod;
 
     @Override
@@ -52,6 +51,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
     private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
 
         if (!identifier.get("reference").equals("invalid")) return null;
+        if (!identifier.get("reference").equals("class")) return null;
 
         String variable = identifier.get("value");
 
