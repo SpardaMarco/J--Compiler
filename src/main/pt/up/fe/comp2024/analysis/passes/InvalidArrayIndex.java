@@ -21,9 +21,23 @@ public class InvalidArrayIndex extends AnalysisVisitor {
 
         JmmNode index = arrayAccess.getChild(1);
 
-        if (index.get("type").equals("int"))
+        if (index.get("type").equals("invalid"))
+            report(index);
+
+        if (index.get("type").equals("undefined")){
+            index.put("type", "int");
+            index.put("isArray", "false");
+        }
+
+        if (index.get("type").equals("int") && index.get("isArray").equals("false"))
             return null;
 
+        report(index);
+
+        return null;
+    }
+
+    private void report(JmmNode index) {
         String message = String.format(
                 "Invalid array access operation with index of type %s",
                 index.get("type")
@@ -36,7 +50,5 @@ public class InvalidArrayIndex extends AnalysisVisitor {
                 message,
                 null)
         );
-
-        return null;
     }
 }
