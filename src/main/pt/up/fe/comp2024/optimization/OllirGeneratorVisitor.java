@@ -173,10 +173,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(SPACE);
         code.append("main");
 
-        List<Symbol> parameters = table.getParameters("main");
-        var paramCode = parameters.stream()
-                .map(symbol -> symbol.getName() + OptUtils.toOllirType(symbol.getType()))
-                .collect(Collectors.joining(", "));
+        var paramCode = "args.array.String";
 
         code.append("(" + paramCode + ")");
 
@@ -185,7 +182,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(L_BRACKET);
 
-        for (var i = 1; i < mainMethodDeclNode.getNumChildren(); i++) {
+        for (var i = 0; i < mainMethodDeclNode.getNumChildren(); i++) {
+            if (EXPR_STMT.check(mainMethodDeclNode.getJmmChild(i))) {
+                OllirExprResult expr = exprVisitor.visit(mainMethodDeclNode.getJmmChild(i));
+
+                code.append(expr.getCode());
+            }
+
             if (!PARAMS.check(mainMethodDeclNode.getJmmChild(i))) {
                 code.append(visit(mainMethodDeclNode.getJmmChild(i)));
             }
