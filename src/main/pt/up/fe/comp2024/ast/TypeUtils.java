@@ -4,15 +4,17 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-public class TypeUtils {
+import static pt.up.fe.comp2024.ast.Kind.*;
 
+public class TypeUtils {
     private static final String INT_TYPE_NAME = "int";
+    private static final String BOOLEAN_TYPE_NAME = "boolean";
     private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
     }
-
+    public static String getBooleanTypeName() { return BOOLEAN_TYPE_NAME; }
     public static String getVoidTypeName() { return VOID_TYPE_NAME; }
 
     /**
@@ -23,39 +25,76 @@ public class TypeUtils {
      * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-
         var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
-            case METHOD_DECL -> getMethodDeclType(expr);
-            case BINARY_EXPR -> getBinExprType(expr);
-            case VAR_REF_EXPR -> getVarExprType(expr, table);
+            case METHOD_CALL -> getMethodCallType(expr);
+            case BINARY_OP -> getBinExprType(expr);
+            case IDENTIFIER, ASSIGN_STMT -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
         return type;
     }
 
-    private static Type getBinExprType(JmmNode binaryExpr) {
-        // TODO: Simple implementation that needs to be expanded
+    private static Type getMethodCallType(JmmNode methodCall) {
+        if (methodCall.get("type").equals("void")) {
+            return new Type(VOID_TYPE_NAME, false);
+        }
 
+        Type methodCallType = new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
+        return methodCallType;
+    }
+
+    private static Type getBinExprType(JmmNode binaryExpr) {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*" -> new Type(INT_TYPE_NAME, false);
+            case "*", "/", "+", "-" -> new Type(INT_TYPE_NAME, false);
+            case  "<", "&&" -> new Type(BOOLEAN_TYPE_NAME, false);
+
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
     }
 
-
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(INT_TYPE_NAME, false);
-    }
+        String methodName;
 
+        if (varRefExpr.getAncestor(METHOD_DECLARATION).isPresent()) methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
+
+        else methodName = varRefExpr.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
+
+        String id;
+
+        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) id = varRefExpr.get("name");
+        else id = varRefExpr.get("value");
+
+        var locals = table.getLocalVariables(methodName);
+        for (var local : locals) {
+            if (id.equals(local.getName())) {
+                return local.getType();
+            }
+        }
+
+        var params = table.getParameters(methodName);
+        for (var param : params) {
+            if (id.equals(param.getName())) {
+                return param.getType();
+            }
+        }
+
+        var fields = table.getFields();
+        for (var field : fields) {
+            if (varRefExpr.get("value").equals(field.getName())) {
+                return field.getType();
+            }
+        }
+
+        return new Type(VOID_TYPE_NAME, false);
+    }
 
     /**
      * @param sourceType
@@ -65,9 +104,5 @@ public class TypeUtils {
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
         // TODO: Simple implementation that needs to be expanded
         return sourceType.getName().equals(destinationType.getName());
-    }
-
-    private static Type getMethodDeclType(JmmNode methodDecl) {
-        return new Type(VOID_TYPE_NAME, false);
     }
 }

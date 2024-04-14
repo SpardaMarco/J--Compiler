@@ -78,9 +78,13 @@ varDecl
 
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
-    (varDecl)* (stmt)* RETURN expr SEMI RCURLY #MethodDeclaration
+    (varDecl)* (stmt)* returnStmt RCURLY #MethodDeclaration
     | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=ID LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
+    ;
+
+returnStmt
+    : RETURN expr SEMI #Return
     ;
 
 type
@@ -97,6 +101,7 @@ literal
 
 params locals[boolean isVarArg=false]
     : (type name=ID) COMMA params
+    | (INT (VARARGSUFFIX {$isVarArg=true;}) name=ID) COMMA params
     | type name=ID
     | INT (VARARGSUFFIX {$isVarArg=true;}) name=ID
     ;
@@ -115,10 +120,11 @@ expr
     | expr LBRACKET expr RBRACKET #ArrayAccessOp
     | NEW INT LBRACKET expr RBRACKET #ArrayDeclaration
     | NEW name=ID LPAREN RPAREN #ObjectDeclaration
-    | expr DOT ID #Length
+    | expr DOT name=ID #Attribute
     | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
+    | name=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
-    | NOT expr #UnaryOp
+    | op=NOT expr #UnaryOp
     | expr op=(MUL | DIV) expr #BinaryOp
     | expr op=(ADD | SUB) expr #BinaryOp
     | expr op=LT expr #BinaryOp

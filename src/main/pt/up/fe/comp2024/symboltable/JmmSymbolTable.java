@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
@@ -56,5 +57,29 @@ public class JmmSymbolTable implements SymbolTable {
     @Override
     public List<Symbol> getLocalVariables(String methodSignature) {
         return Collections.unmodifiableList(declaredClass.getLocals(methodSignature));
+    }
+
+    public MethodSymbol getMethodSymbol(String method){
+        return declaredClass.getMethodSymbol(method);
+    }
+
+    public Symbol getVarDeclaration(String varName, String method) {
+
+        for (Symbol varDecl : getLocalVariables(method)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : getParameters(method)) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        for (Symbol varDecl : getFields()) {
+            if (varDecl.getName().equals(varName)) {
+                return varDecl;
+            }
+        }
+        return null;
     }
 }

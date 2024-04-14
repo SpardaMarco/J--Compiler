@@ -7,7 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
+import pt.up.fe.comp2024.analysis.passes.*;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -20,7 +21,21 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
     public JmmAnalysisImpl() {
 
-        this.analysisPasses = List.of(new UndeclaredVariable());
+        this.analysisPasses = List.of(
+                new IncompatibleAssignment(),
+                new IncompatibleArguments(),
+                new IncompatibleOperands(),
+                new IncompatibleReturn(),
+                new InvalidArrayAccess(),
+                new InvalidArrayIndex(),
+                new InvalidArrayInit(),
+                new InvalidThisInStaticMethod(),
+                new InvalidVarargArgument(),
+                new NonBooleanCondition(),
+                new NotImportedClass(),
+                new UndeclaredVariable(),
+                new UndeclaredMethod()
+        );
 
     }
 
@@ -29,7 +44,9 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         JmmNode rootNode = parserResult.getRootNode();
 
-        SymbolTable table = JmmSymbolTableBuilder.build(rootNode);
+        JmmSymbolTable table = JmmSymbolTableBuilder.build(rootNode);
+
+        new ASTAnnotator().visit(parserResult.getRootNode(), table);
 
         List<Report> reports = new ArrayList<>();
 
@@ -46,7 +63,6 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                         e)
                 );
             }
-
         }
 
         return new JmmSemanticsResult(parserResult, table, reports);
