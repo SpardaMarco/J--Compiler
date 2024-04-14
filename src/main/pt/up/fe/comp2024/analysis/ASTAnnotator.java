@@ -78,9 +78,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
         private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
 
-            if (arrayExpression.getChildren().size() == 0){
-                arrayExpression.put("type", "?");
+            if (arrayExpression.getNumChildren() == 0){
+                arrayExpression.put("type", "empty_array");
                 arrayExpression.put("isArray", "true");
+                return null;
             }
 
             String type = arrayExpression.getChild(0).get("type");

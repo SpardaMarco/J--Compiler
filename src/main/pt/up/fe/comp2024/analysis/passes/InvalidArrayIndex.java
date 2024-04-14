@@ -40,7 +40,7 @@ public class InvalidArrayIndex extends AnalysisVisitor {
     private void report(JmmNode index) {
         String message = String.format(
                 "Invalid array access operation with index of type %s",
-                index.get("type")
+                index.get("type") + (index.get("isArray").equals("true") ? "[]" : "")
         );
 
         addReport(Report.newError(
