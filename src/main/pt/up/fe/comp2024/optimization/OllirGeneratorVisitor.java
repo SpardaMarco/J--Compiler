@@ -92,7 +92,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         code.append(L_BRACKET);
-        code.append(NL);
         var needNl = true;
 
         for (var field : table.getFields()) {
@@ -105,6 +104,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(END_STMT);
         }
 
+        code.append(buildConstructor());
+
         for (var child : classNode.getChildren()) {
             var result = visit(child);
 
@@ -116,7 +117,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(result);
         }
 
-        code.append(buildConstructor());
         code.append(R_BRACKET);
 
         return code.toString();
@@ -146,10 +146,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(OptUtils.toOllirType(retType));
         code.append(L_BRACKET);
 
-        for (var i = 1; i < methodDeclNode.getNumChildren(); i++) {
+        for (var i = 0; i < methodDeclNode.getNumChildren(); i++) {
             if (EXPR_STMT.check(methodDeclNode.getJmmChild(i))) {
                 OllirExprResult expr = exprVisitor.visit(methodDeclNode.getJmmChild(i));
-
                 code.append(expr.getCode());
             }
 
@@ -158,8 +157,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-        code.append(NL);
         code.append(R_BRACKET);
+        code.append(NL);
 
         return code.toString();
     }
@@ -185,7 +184,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         for (var i = 0; i < mainMethodDeclNode.getNumChildren(); i++) {
             if (EXPR_STMT.check(mainMethodDeclNode.getJmmChild(i))) {
                 OllirExprResult expr = exprVisitor.visit(mainMethodDeclNode.getJmmChild(i));
-
                 code.append(expr.getCode());
             }
 
@@ -199,6 +197,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(SPACE);
         code.append(END_STMT);
         code.append(R_BRACKET);
+        code.append(NL);
 
         return code.toString();
     }
@@ -237,12 +236,58 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode assignStmtNode, Void unused) {
         var lhs = assignStmtNode.get("name");
-        var rhs = exprVisitor.visit(assignStmtNode.getJmmChild(0));
+        var child = assignStmtNode.getJmmChild(0);
+        var rhs = exprVisitor.visit(child);
 
-        StringBuilder code = new StringBuilder(lhs);
-
+        StringBuilder code = new StringBuilder();
         Type thisType = TypeUtils.getExprType(assignStmtNode, table);
         String typeString = OptUtils.toOllirType(thisType);
+
+        if (child.getKind().equals(OBJECT_DECLARATION.toString())) {
+            code.append(rhs.getComputation());
+            code.append(lhs);
+            code.append(typeString);
+            code.append(SPACE);
+
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+
+            code.append(rhs.getCode());
+
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+
+            return code.toString();
+        }
+
+        if (child.getKind().equals(METHOD_CALL.toString())) {
+            var newCode = new StringBuilder();
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(thisType);
+
+            newCode.append(temp);
+            newCode.append(tempType);
+            newCode.append(SPACE);
+            newCode.append(ASSIGN);
+            newCode.append(tempType);
+            newCode.append(SPACE);
+            newCode.append(rhs.getCode());
+            newCode.append(lhs);
+            newCode.append(typeString);
+            newCode.append(SPACE);
+            newCode.append(ASSIGN);
+            newCode.append(typeString);
+            newCode.append(SPACE);
+            newCode.append(temp);
+            newCode.append(tempType);
+            newCode.append(END_STMT);
+            return newCode.toString();
+        }
+
+        var rhsCode = rhs.getComputation();
+        code.append(rhsCode);
+        code.append(lhs);
 
         code.append(typeString);
         code.append(SPACE);
@@ -253,7 +298,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(rhs.getCode());
 
-        code.append(END_STMT);
+        if (!code.toString().endsWith(END_STMT))
+            code.append(END_STMT);
 
         return code.toString();
     }

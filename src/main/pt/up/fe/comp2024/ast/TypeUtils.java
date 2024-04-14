@@ -40,8 +40,11 @@ public class TypeUtils {
     }
 
     private static Type getMethodCallType(JmmNode methodCall) {
-        //Type methodCallType = new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
-        Type methodCallType =  new Type(VOID_TYPE_NAME, false);
+        if (methodCall.get("type").equals("void")) {
+            return new Type(VOID_TYPE_NAME, false);
+        }
+
+        Type methodCallType = new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
         return methodCallType;
     }
 
@@ -56,7 +59,6 @@ public class TypeUtils {
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
     }
-
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         String methodName;
@@ -79,7 +81,7 @@ public class TypeUtils {
 
         var params = table.getParameters(methodName);
         for (var param : params) {
-            if (varRefExpr.get("value").equals(param.getName())) {
+            if (id.equals(param.getName())) {
                 return param.getType();
             }
         }
