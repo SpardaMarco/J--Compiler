@@ -177,6 +177,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
     }
 
     private boolean hasVararg(List<ParamSymbol> parameters) {
+        if (parameters.size() == 0) return false;
         return parameters.get(parameters.size() - 1).isVararg();
     }
 
