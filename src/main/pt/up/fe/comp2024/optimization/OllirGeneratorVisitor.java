@@ -240,12 +240,54 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var rhs = exprVisitor.visit(child);
 
         StringBuilder code = new StringBuilder();
-        var rhsCode = (!child.getKind().equals(OBJECT_DECLARATION.toString())) ? rhs.getComputation() : rhs.getCode();
-        code.append(rhsCode);
-        code.append(lhs);
-
         Type thisType = TypeUtils.getExprType(assignStmtNode, table);
         String typeString = OptUtils.toOllirType(thisType);
+
+        if (child.getKind().equals(OBJECT_DECLARATION.toString())) {
+            code.append(rhs.getComputation());
+            code.append(lhs);
+            code.append(typeString);
+            code.append(SPACE);
+
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+
+            code.append(rhs.getCode());
+
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+
+            return code.toString();
+        }
+
+        if (child.getKind().equals(METHOD_CALL.toString())) {
+            var newCode = new StringBuilder();
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(thisType);
+
+            newCode.append(temp);
+            newCode.append(tempType);
+            newCode.append(SPACE);
+            newCode.append(ASSIGN);
+            newCode.append(tempType);
+            newCode.append(SPACE);
+            newCode.append(rhs.getCode());
+            newCode.append(lhs);
+            newCode.append(typeString);
+            newCode.append(SPACE);
+            newCode.append(ASSIGN);
+            newCode.append(typeString);
+            newCode.append(SPACE);
+            newCode.append(temp);
+            newCode.append(tempType);
+            newCode.append(END_STMT);
+            return newCode.toString();
+        }
+
+        var rhsCode = rhs.getComputation();
+        code.append(rhsCode);
+        code.append(lhs);
 
         code.append(typeString);
         code.append(SPACE);

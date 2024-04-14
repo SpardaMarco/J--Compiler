@@ -81,7 +81,7 @@ public class TypeUtils {
 
         var params = table.getParameters(methodName);
         for (var param : params) {
-            if (varRefExpr.get("value").equals(param.getName())) {
+            if (id.equals(param.getName())) {
                 return param.getType();
             }
         }

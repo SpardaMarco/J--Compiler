@@ -60,7 +60,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         var methods = table.getMethods();
 
-        if (exprName.equals("this")) {
+        if (exprName.equals("this") || exprType.equals(table.getClassName())) {
             code.append("invokevirtual(");
         }
 
