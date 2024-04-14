@@ -1,3 +1,4 @@
+import fruta.amarela.banana;
 import io;
 class Simple {
 
