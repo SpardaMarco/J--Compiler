@@ -19,6 +19,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
     }
 
     public Void visitMethodDecl(JmmNode methodDecl, SymbolTable table) {
+
         JmmNode returnNode = methodDecl.getChild(methodDecl.getNumChildren() - 1);
 
         String methodName = methodDecl.get("name");

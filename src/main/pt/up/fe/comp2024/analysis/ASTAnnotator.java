@@ -355,12 +355,11 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         public Void visitReturn(JmmNode returnNode, JmmSymbolTable table) {
                 JmmNode expression = returnNode.getChild(0);
 
-                if (expression.get("type").equals("invalid")) {
-                    return null;
-                }
-
                 returnNode.put("type", expression.get("type"));
-                returnNode.put("isArray", expression.get("isArray"));
+
+                if (!expression.get("type").equals("invalid") && !expression.get("type").equals("undefined"))
+                    returnNode.put("isArray", expression.get("isArray"));
+
                 return null;
         }
     }
