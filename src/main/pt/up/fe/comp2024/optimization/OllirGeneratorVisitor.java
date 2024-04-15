@@ -128,6 +128,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitMethodDecl(JmmNode methodDeclNode, Void unused) {
         StringBuilder code = new StringBuilder(METHOD);
+        code.append(SPACE);
 
         boolean isPublic = NodeUtils.getBooleanAttribute(methodDeclNode, "isPublic", "false");
 
@@ -246,6 +247,46 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
         Type thisType = TypeUtils.getExprType(assignStmtNode, table);
         String typeString = OptUtils.toOllirType(thisType);
+
+        var fields = table.getFields();
+
+        if (fields.stream().anyMatch(f -> f.getName().equals(lhs))) {
+            code.append("putfield(this,");
+            code.append(SPACE);
+            code.append(lhs);
+            code.append(typeString);
+            code.append(",");
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            code.append(").V");
+            code.append(END_STMT);
+            return code.toString();
+        }
+
+        if (child.getKind().equals(IDENTIFIER.toString())) {
+            if (fields.stream().anyMatch(f -> f.getName().equals(child.get("value")))) {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(thisType);
+                code.append(temp);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(rhs.getCode());
+                code.append(END_STMT);
+                code.append(lhs);
+                code.append(typeString);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(typeString);
+                code.append(SPACE);
+                code.append(temp);
+                code.append(tempType);
+                code.append(END_STMT);
+                return code.toString();
+            }
+        }
 
         if (child.getKind().equals(OBJECT_DECLARATION.toString())) {
             code.append(rhs.getComputation());

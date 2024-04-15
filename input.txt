@@ -1,22 +1,16 @@
+import io;
+import Extension;
 class Main {
 
-    Main z;
-    int x;
-
-    boolean[] y;
+    int exampleField;
 
     public static void main(String[] args) {
 
-        int y;
-
-    }
-
-    public int add(int x, int y) {
         int x;
-        return 1;
     }
 
-    public boolean add(){
-        return true;
+    public int bar(){
+
+        return 0;
     }
 }

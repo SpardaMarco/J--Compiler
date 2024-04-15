@@ -88,7 +88,7 @@ public class TypeUtils {
 
         var fields = table.getFields();
         for (var field : fields) {
-            if (varRefExpr.get("value").equals(field.getName())) {
+            if (id.equals(field.getName())) {
                 return field.getType();
             }
         }

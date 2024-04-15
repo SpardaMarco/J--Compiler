@@ -203,6 +203,10 @@ public class JasminGenerator {
             case invokevirtual, invokespecial, invokestatic -> code.append(getNormalCall(call));
             case NEW -> code.append(getNewCall(call));
             case arraylength -> code.append(getArrayLengthCall(call));
+            case ldc -> {
+                var literal = call.getCaller();
+                code.append(generators.apply(literal));
+            }
             default -> throw new NotImplementedException(call.getInvocationType());
         }
 
@@ -463,9 +467,23 @@ public class JasminGenerator {
 
         var caller = (Operand) call.getCaller();
         var className = "";
-        if (call.getInvocationType() == CallType.invokespecial || call.getInvocationType() == CallType.invokevirtual) {
+        if (call.getInvocationType() == CallType.invokespecial) {
             var callerType = caller.getType();
-            className = callerType.getTypeOfElement() == ElementType.THIS ? ollirResult.getOllirClass().getClassName() : ((ClassType) callerType).getName();
+            if (callerType.getTypeOfElement() == ElementType.THIS) {
+                if (ollirResult.getOllirClass().getSuperClass() == null) {
+                    className = "java/lang/Object";
+                }
+                else {
+                    className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
+                }
+            }
+            else {
+                className = getFullClassName(((ClassType) callerType).getName());
+            }
+        }
+        else if (call.getInvocationType() == CallType.invokevirtual) {
+            var callerType = caller.getType();
+            className = getFullClassName(((ClassType) callerType).getName());
         }
         else {
             className = getFullClassName(caller.getName());

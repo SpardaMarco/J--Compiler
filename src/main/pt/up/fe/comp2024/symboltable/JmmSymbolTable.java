@@ -74,12 +74,12 @@ public class JmmSymbolTable implements SymbolTable {
 
     public Symbol getVarDeclaration(String varName, String method) {
 
-        for (Symbol varDecl : getLocalVariables(method)) {
+        for (Symbol varDecl : getParameters(method)) {
             if (varDecl.getName().equals(varName)) {
                 return varDecl;
             }
         }
-        for (Symbol varDecl : getParameters(method)) {
+        for (Symbol varDecl : getLocalVariables(method)) {
             if (varDecl.getName().equals(varName)) {
                 return varDecl;
             }
