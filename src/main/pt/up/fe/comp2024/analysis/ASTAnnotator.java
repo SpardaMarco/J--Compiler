@@ -325,7 +325,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
         public Void visitArrayDeclaration (JmmNode arrayDeclaration, SymbolTable table) {
 
-            arrayDeclaration.put("type", arrayDeclaration.getChild(0).get("type"));
+            arrayDeclaration.put("type", "int");
             arrayDeclaration.put("isArray", "true");
 
             return null;

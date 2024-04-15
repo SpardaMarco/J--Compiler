@@ -13,6 +13,7 @@ public class InvalidArrayInit extends AnalysisVisitor {
     protected void buildVisitor() {
 
         addVisit("ArrayExpression", this::visitArrayExpression);
+        addVisit("ArrayDeclaration", this::visitArrayDeclaration);
     }
 
     private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
@@ -28,6 +29,34 @@ public class InvalidArrayInit extends AnalysisVisitor {
                 Stage.SEMANTIC,
                 NodeUtils.getLine(arrayExpression),
                 NodeUtils.getColumn(arrayExpression),
+                message,
+                null)
+        );
+
+        return null;
+    }
+
+    public Void visitArrayDeclaration(JmmNode arrayDeclaration, SymbolTable table){
+
+        JmmNode length = arrayDeclaration.getChild(0);
+
+        if (!length.get("type").equals("invalid")) {
+            if (length.get("type").equals("int") && length.get("isArray").equals("false"))
+                return null;
+            if (length.get("type").equals("undefined")){
+                length.put("type", "int");
+                return  null;
+            }
+        }
+
+        String message = String.format(
+                "Invalid array declaration. Length value provided is not of type int."
+        );
+
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(arrayDeclaration),
+                NodeUtils.getColumn(arrayDeclaration),
                 message,
                 null)
         );
