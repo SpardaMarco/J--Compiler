@@ -92,7 +92,8 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             String type = arrayExpression.getChild(0).get("type");
 
             for (JmmNode element: arrayExpression.getChildren()){
-                if (!element.get("type").equals(type)){
+                String elementType = element.get("type");
+                if (!elementType.equals(type) && !elementType.equals("invalid")){
                     arrayExpression.put("type", "invalid");
                     return null;
                 }
@@ -149,7 +150,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 case "!":
                     updateUndefinedOperand(unaryOp.getChild(0), "boolean");
                     unaryOp.put("type", "boolean");
-
+                    unaryOp.put("isArray", "false");
             }
             return null;
         }

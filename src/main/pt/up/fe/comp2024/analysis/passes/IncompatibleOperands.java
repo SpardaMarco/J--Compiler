@@ -62,7 +62,8 @@ public class IncompatibleOperands extends AnalysisVisitor {
             return;
 
         Boolean isArray = operand.get("isArray").equals("true");
-            if (operandType.equals(type) && !isArray) return;
+
+        if (operandType.equals(type) && !isArray) return;
 
 
         var message = String.format(
