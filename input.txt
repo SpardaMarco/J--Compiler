@@ -1,11 +1,27 @@
+
 import b.asmth;
 import a.smth;
 
 class Main {
 
-    public static void main(String[] args) {
-    smth a;
-    a = new smth();
 
+    int x;
+
+    public static void main(String[] args) {
+
+        Main main;
+
+        int y;
+        int x;
+        if (!false && 1 < 2) {
+            y = main.bar(x);
+        } else {
+
+        }
+    }
+
+    public int bar(int x){
+
+        return 0;
     }
 }
