@@ -9,7 +9,6 @@ public class CompilerConfig {
     private static final String INPUT_FILE = "inputFile";
     private static final String OPTIMIZE = "optimize";
     private static final String REGISTER = "registerAllocation";
-
     static Map<String, String> shortToLong = new HashMap<>();
 
     static {

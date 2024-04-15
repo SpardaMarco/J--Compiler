@@ -1,9 +1,21 @@
-class Main {
+import smth;
+
+class Square {
 
     public static void main(String[] args) {
 
-       int[] x;
+       Square square;
+       smth();
 
-       x = new int[[2]];
+       square.hello1();
+    }
+
+    public int smth2(){
+        return 1;
+    }
+
+    public int hello1(){
+        hello2();
+        return 1;
     }
 }
