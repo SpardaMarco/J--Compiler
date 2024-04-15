@@ -425,20 +425,20 @@ public class JasminGenerator {
     }
 
     private String getTypeDescriptor(Type type) {
-        switch (type.getTypeOfElement()) {
-            case ARRAYREF:
-                return "[" + getTypeDescriptor(((ArrayType) type).getElementType());
-            case OBJECTREF:
+        return switch (type.getTypeOfElement()) {
+            case ARRAYREF -> "[" + getTypeDescriptor(((ArrayType) type).getElementType());
+            case OBJECTREF -> {
                 String className = getFullClassName(((ClassType) type).getName());
-                return "L" + className + ";";
-        }
-        return switch (type.toString()) {
+                yield "L" + className + ";";
+            }
+            default -> switch (type.toString()) {
 
-            case "INT32" -> "I";
-            case "BOOLEAN" -> "Z";
-            case "STRING" -> "Ljava/lang/String;";
-            case "VOID" -> "V";
-            default -> throw new NotImplementedException(type);
+                case "INT32" -> "I";
+                case "BOOLEAN" -> "Z";
+                case "STRING" -> "Ljava/lang/String;";
+                case "VOID" -> "V";
+                default -> throw new NotImplementedException(type);
+            };
         };
     }
 
