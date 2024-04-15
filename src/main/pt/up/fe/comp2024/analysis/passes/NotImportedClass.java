@@ -30,9 +30,8 @@ public class NotImportedClass extends AnalysisVisitor {
 
     private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
 
-        if (!identifier.get("reference").equals("class")) return null;
-
-        checkClass(identifier, table, "value");
+        if (identifier.get("type").equals("undefined"))
+            checkClass(identifier, table, "value");
 
         return null;
     }

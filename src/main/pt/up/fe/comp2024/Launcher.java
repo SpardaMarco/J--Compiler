@@ -58,20 +58,20 @@ public class Launcher {
 
         TestUtils.noErrors(semanticsResult.getReports());
 
-        // Optimization stage
-        JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
-        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
-        TestUtils.noErrors(ollirResult.getReports());
-
-        // Print OLLIR code
-        System.out.println(ollirResult.getOllirCode());
-
-        // Code generation stage
-        JasminBackendImpl jasminGen = new JasminBackendImpl();
-        // OllirResult ollirResult = new OllirResult(code, config);
-        JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        //System.out.println(jasminResult.getJasminCode());
-        TestUtils.noErrors(jasminResult.getReports());
+//        // Optimization stage
+//        JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+//        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
+//        TestUtils.noErrors(ollirResult.getReports());
+//
+//        // Print OLLIR code
+//        System.out.println(ollirResult.getOllirCode());
+//
+//        // Code generation stage
+//        JasminBackendImpl jasminGen = new JasminBackendImpl();
+//        // OllirResult ollirResult = new OllirResult(code, config);
+//        JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+//        //System.out.println(jasminResult.getJasminCode());
+//        TestUtils.noErrors(jasminResult.getReports());
 
         // Print Jasmin code
         //System.out.println(jasminResult.getJasminCode());

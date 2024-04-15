@@ -50,8 +50,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitIdentifier(JmmNode identifier, SymbolTable table) {
 
-        if (!identifier.get("reference").equals("invalid")) return null;
-        if (!identifier.get("reference").equals("class")) return null;
+        if (!identifier.get("type").equals("invalid")) return null;
 
         String variable = identifier.get("value");
 

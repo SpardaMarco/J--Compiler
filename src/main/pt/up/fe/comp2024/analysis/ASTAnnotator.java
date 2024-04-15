@@ -79,7 +79,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
 
             if (arrayExpression.getNumChildren() == 0){
-                arrayExpression.put("type", "empty_array");
+                arrayExpression.put("type", "undefined_array");
                 arrayExpression.put("isArray", "true");
                 return null;
             }
@@ -156,13 +156,17 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             if (declaration == null) {
 
-                if (Character.isUpperCase(name.charAt(0))){
-                    identifier.put("reference", "class");
-                    identifier.put("type", name);
-                    return null;
+                for (String importStmt: table.getImports()) {
+
+                    String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
+                    String importedFunction = words[words.length - 1];
+
+                    if (importedFunction.equals(name)){
+                        identifier.put("type", "undefined");
+                        return null;
+                    }
                 }
 
-                identifier.put("reference", "invalid");
                 identifier.put("type", "invalid");
                 return null;
             }
@@ -348,6 +352,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (assignment.get("type").equals("undefined")) {
                 assignment.put("type", type);
                 assignment.put("isArray", isArray ? "true" : "false");
+            }
+
+            if (assignment.get("type").equals("undefined_array") && isArray){
+                assignment.put("type", type);
             }
 
             return null;
