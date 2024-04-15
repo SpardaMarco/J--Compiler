@@ -74,7 +74,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
 
         else {
-            code.append("invokespecial(");
+            code.append("invokevirtual(");
         }
 
         code.append(exprName);
