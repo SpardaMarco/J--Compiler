@@ -10,10 +10,7 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.stream.Collectors;
-
-import static java.lang.constant.DirectMethodHandleDesc.Kind.VIRTUAL;
 
 /**
  * Generates Jasmin code from an OllirResult.
@@ -85,18 +82,18 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // generate class name
-        var className = ollirResult.getOllirClass().getClassName();
+        var className = classUnit.getClassName();
         code.append(".class ").append(className).append(NL);
 
-        if (ollirResult.getOllirClass().getSuperClass() != null) {
-            code.append(".super ").append(ollirResult.getOllirClass().getSuperClass()).append(NL).append(NL);
+        if (classUnit.getSuperClass() != null) {
+            code.append(".super ").append(getFullClassName(classUnit.getSuperClass())).append(NL).append(NL);
         }
         else {
             code.append(".super java/lang/Object").append(NL).append(NL);
         }
 
         // generate fields
-        for (var field : ollirResult.getOllirClass().getFields()) {
+        for (var field : classUnit.getFields()) {
             code.append(generators.apply(field));
         }
 
@@ -106,7 +103,7 @@ public class JasminGenerator {
         code.append(defaultConstructor);
 
         // generate code for all other methods
-        for (var method : ollirResult.getOllirClass().getMethods()) {
+        for (var method : classUnit.getMethods()) {
 
             // Ignore constructor, since there is always one constructor
             // that receives no arguments, and has been already added
@@ -239,7 +236,7 @@ public class JasminGenerator {
 
         // get field
         var field = getField.getField();
-        var className = object.getName().equals("this") ? ollirResult.getOllirClass().getClassName() : object.getName();
+        var className = getFullClassName(object.getName());
 
         code.append("getfield ").append(className).append("/").append(field.getName()).append(" ").append(getTypeDescriptor(field.getType())).append(NL);
 
@@ -255,7 +252,7 @@ public class JasminGenerator {
 
         // get field
         var field = putField.getField();
-        var className = object.getName().equals("this") ? ollirResult.getOllirClass().getClassName() : object.getName();
+        var className = getFullClassName(object.getName());
 
         code.append(generators.apply(putField.getValue()));
 
@@ -426,7 +423,7 @@ public class JasminGenerator {
             case ARRAYREF:
                 return "[" + getTypeDescriptor(((ArrayType) type).getElementType());
             case OBJECTREF:
-                String className = ((ClassType) type).getName().equals("this") ? ollirResult.getOllirClass().getClassName() : ((ClassType) type).getName();
+                String className = getFullClassName(((ClassType) type).getName());
                 return "L" + className + ";";
         }
         return switch (type.toString()) {
@@ -440,7 +437,7 @@ public class JasminGenerator {
     }
 
     private String buildDefaultConstructor() {
-        String superClassName = ollirResult.getOllirClass().getSuperClass() == null ? "java/lang/Object" : ollirResult.getOllirClass().getSuperClass();
+        String superClassName = ollirResult.getOllirClass().getSuperClass() == null ? "java/lang/Object" : getFullClassName(ollirResult.getOllirClass().getSuperClass());
         return ".method public <init>()V" + NL +
                 TAB + "aload_0" + NL +
                 TAB + "invokespecial " + superClassName + "/<init>()V" + NL +
@@ -471,7 +468,7 @@ public class JasminGenerator {
             className = callerType.getTypeOfElement() == ElementType.THIS ? ollirResult.getOllirClass().getClassName() : ((ClassType) callerType).getName();
         }
         else {
-            className = caller.getName().equals("this") ? ollirResult.getOllirClass().getClassName() : caller.getName();
+            className = getFullClassName(caller.getName());
         }
         var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
 
@@ -525,5 +522,19 @@ public class JasminGenerator {
         code.append("arraylength").append(NL);
 
         return code.toString();
+    }
+
+    private String getFullClassName(String className) {
+        if (className.equals("this")) {
+            return ollirResult.getOllirClass().getClassName();
+        }
+        else {
+            for (var importClass : ollirResult.getOllirClass().getImports()) {
+                if (importClass.endsWith(className)) {
+                    return importClass.replaceAll("\\.", "/");
+                }
+            }
+        }
+        return className;
     }
 }

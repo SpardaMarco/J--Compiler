@@ -1,6 +1,7 @@
+import bar.foo.b;
 import io;
 
-class CompileMethodInvocation {
+class CompileMethodInvocation extends b {
 
     public static void main(String[] args) {
 
