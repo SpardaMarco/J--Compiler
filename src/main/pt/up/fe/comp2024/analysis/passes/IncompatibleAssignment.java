@@ -32,7 +32,8 @@ public class IncompatibleAssignment extends AnalysisVisitor {
     }
 
     private static boolean invalidAssignment(JmmNode assignStmt) {
-        return assignStmt.getChild(0).get("type").equals("invalid");
+        return assignStmt.getChild(0).get("type").equals("invalid") ||
+                assignStmt.get("type").equals("invalid");
     }
 
     private boolean isLiteralAssignment(JmmNode assignStmt) {
