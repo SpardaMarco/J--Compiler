@@ -1,18 +1,9 @@
-import io;
-
-class CompileMethodInvocation {
+class Main {
 
     public static void main(String[] args) {
 
-    }
+       int[] x;
 
-    public int foo() {
-        int a;
-
-        a = 1;
-
-        io.println(a);
-
-        return 0;
+       x = new int[[2]];
     }
 }
