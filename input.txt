@@ -42,8 +42,8 @@ class Misc extends Extension{
 
         miscVar = new Misc();
         ioVar = new io();
- 
-        intVar = miscVar.foo(true); 
+
+        intVar = miscVar.foo(true);
 
         return 0;
     }
