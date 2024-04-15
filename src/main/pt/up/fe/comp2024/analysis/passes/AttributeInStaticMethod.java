@@ -49,11 +49,13 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
     }
 
     private void checkFieldReference(JmmNode identifier, JmmSymbolTable symbolTable, String varName) {
-        if (symbolTable.getParameters(currentMethod).contains(varName))
-            return;
+        if (symbolTable.getParameters(currentMethod).stream().anyMatch(
+                symbol -> symbol.getName().equals(varName)
+        )) return;
 
-        if (symbolTable.getLocalVariables(currentMethod).contains(varName))
-            return;
+        if (symbolTable.getLocalVariables(currentMethod).stream().anyMatch(
+                symbol -> symbol.getName().equals(varName))
+        ) return;
 
         if (symbolTable.getFields().stream().anyMatch(
                 symbol -> symbol.getName().equals(varName)
