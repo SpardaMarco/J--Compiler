@@ -74,7 +74,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         code.append(exprName);
 
-        if (!exprType.equals("invalid") && !exprName.equals("this"))
+        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !exprName.equals("this"))
             code.append("." + exprType);
 
         code.append(", ");

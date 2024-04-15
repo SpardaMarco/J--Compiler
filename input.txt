@@ -1,12 +1,18 @@
-import fruta.amarela.banana;
 import io;
 
-class Simple {
+class CompileMethodInvocation {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
-        int[] a;
+    }
 
-        a[banana];
+    public int foo() {
+        int a;
+
+        a = 1;
+
+        io.println(a);
+
+        return 0;
     }
 }
