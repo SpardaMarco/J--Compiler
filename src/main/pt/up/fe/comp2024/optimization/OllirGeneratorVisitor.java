@@ -265,7 +265,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             return code.toString();
         }
 
-        if (child.getKind().equals(METHOD_CALL.toString())) {
+        if (child.getKind().equals(METHOD_CALL.toString()) || child.getKind().equals(FUNCTION_CALL.toString())) {
             var newCode = new StringBuilder();
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);

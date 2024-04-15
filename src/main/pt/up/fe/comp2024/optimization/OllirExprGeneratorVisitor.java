@@ -27,6 +27,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     protected void buildVisitor() {
         addVisit(OBJECT_DECLARATION, this::visitObjectDecl);
         addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(BINARY_OP, this::visitBinExpr);
         addVisit(IDENTIFIER, this::visitVarRef);
         addVisit(INTEGER_LITERAL, this::visitInteger);
@@ -74,7 +75,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
 
         else {
-            code.append("invokespecial(");
+            code.append("invokevirtual(");
         }
 
         code.append(exprName);
@@ -99,6 +100,40 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         var type = TypeUtils.getExprType(methodCallNode, table);
         var ollirType = OptUtils.toOllirType(type);
         code.append(ollirType);
+        code.append(END_STMT);
+
+        return new OllirExprResult(code.toString());
+    }
+
+    private OllirExprResult visitFunctionCall(JmmNode functionCallNode, Void unused) {
+        var code = new StringBuilder();
+
+        var name = functionCallNode.get("name");
+        var type = functionCallNode.get("type");
+
+        var methodSymbol = table.getMethodSymbol(name);
+
+        if (methodSymbol.isStatic()) {
+            code.append("invokestatic(");
+        }
+        else code.append("invokevirtual(");
+
+        code.append(name);
+
+        if (!type.equals("invalid") && !type.equals("undefined")) {
+            code.append("." + type);
+        }
+
+        if (functionCallNode.getNumChildren() > 1) {
+            for (int i = 1; i < functionCallNode.getNumChildren(); i++) {
+                code.append(",");
+                code.append(SPACE);
+                code.append(visit(functionCallNode.getJmmChild(i)).getCode());
+            }
+        }
+
+        code.append(")");
+        code.append("." + type);
         code.append(END_STMT);
 
         return new OllirExprResult(code.toString());
