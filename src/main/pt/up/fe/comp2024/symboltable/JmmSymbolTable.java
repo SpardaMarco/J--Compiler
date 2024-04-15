@@ -5,10 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
@@ -24,6 +21,18 @@ public class JmmSymbolTable implements SymbolTable {
     @Override
     public List<String> getImports() {
         return imports;
+    }
+
+    public List<String> getImportsList() {
+        List<String> importsList = new ArrayList<>();
+
+        for (String importStmt: this.getImports()) {
+            String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
+            String imported = words[words.length - 1];
+            importsList.add(imported);
+        }
+
+        return importsList;
     }
 
     @Override

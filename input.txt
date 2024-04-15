@@ -1,21 +1,9 @@
-import smth;
+import smth.a.b.c;
+import smth2.x;
 
-class Square {
+class Main {
 
     public static void main(String[] args) {
 
-       Square square;
-       smth();
-
-       square.hello1();
-    }
-
-    public int smth2(){
-        return 1;
-    }
-
-    public int hello1(){
-        hello2();
-        return 1;
     }
 }

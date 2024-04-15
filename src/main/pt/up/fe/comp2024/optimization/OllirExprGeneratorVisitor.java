@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -16,10 +17,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
 
-    private final SymbolTable table;
+    private final JmmSymbolTable table;
 
     public OllirExprGeneratorVisitor(SymbolTable table) {
-        this.table = table;
+        this.table = (JmmSymbolTable) table;
     }
 
     @Override
@@ -58,18 +59,22 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         var exprType = methodCallNode.getJmmChild(0).get("type");
         var name = methodCallNode.get("name");
 
-        var methods = table.getMethods();
+        var importsList = table.getImportsList();
+        var methodSymbol = table.getMethodSymbol(name);
 
         if (exprName.equals("this") || exprType.equals(table.getClassName())) {
-            code.append("invokevirtual(");
+            if (methodSymbol.isStatic()) {
+                code.append("invokestatic(");
+            }
+            else code.append("invokevirtual(");
         }
 
-        else if (methods.contains(exprName)) {
-            code.append("invokespecial(");
+        else if (exprName.equals(table.getClassName()) || importsList.contains(exprName)) {
+            code.append("invokestatic(");
         }
 
         else {
-            code.append("invokestatic(");
+            code.append("invokespecial(");
         }
 
         code.append(exprName);
