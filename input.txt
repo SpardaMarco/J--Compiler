@@ -5,10 +5,12 @@ import a.smth;
 class Main {
 
 
+    int x;
+
     public static void main(String[] args) {
 
         if (!false && 1 < 2) {
-
+            x = 1;
         } else {
 
         }

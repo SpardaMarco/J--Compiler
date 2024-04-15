@@ -16,6 +16,7 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit("MainMethodDeclaration", this::visitMainMethodDeclaration);
         addVisit("Identifier", this::visitIdentifier);
+        addVisit("AssignStmt", this::visitAssignStmt);
     }
 
     private Void visitMainMethodDeclaration(JmmNode methodDeclaration, JmmSymbolTable symbolTable){
@@ -31,11 +32,28 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
 
         String varName = identifier.get("value");
 
+        checkFieldReference(identifier, symbolTable, varName);
+
+        return null;
+    }
+
+    private Void visitAssignStmt(JmmNode assignStmt, JmmSymbolTable symbolTable) {
+
+        if (currentMethod == null) return null;
+
+        String varName = assignStmt.get("name");
+
+        checkFieldReference(assignStmt, symbolTable, varName);
+
+        return null;
+    }
+
+    private void checkFieldReference(JmmNode identifier, JmmSymbolTable symbolTable, String varName) {
         if (symbolTable.getParameters(currentMethod).contains(varName))
-            return null;
+            return;
 
         if (symbolTable.getLocalVariables(currentMethod).contains(varName))
-            return null;
+            return;
 
         if (symbolTable.getFields().stream().anyMatch(
                 symbol -> symbol.getName().equals(varName)
@@ -52,6 +70,7 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
                     null)
             );
         }
-        return null;
     }
+
+
 }
