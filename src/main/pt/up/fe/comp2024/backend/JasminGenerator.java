@@ -463,10 +463,24 @@ public class JasminGenerator {
 
         var caller = (Operand) call.getCaller();
         var className = "";
-        if (call.getInvocationType() == CallType.invokespecial || call.getInvocationType() == CallType.invokevirtual) {
+        if (call.getInvocationType() == CallType.invokespecial) {
             var callerType = caller.getType();
             if (callerType.getTypeOfElement() == ElementType.THIS) {
-                className = getFullClassName(ollirResult.getOllirClass().getClassName());
+                if (ollirResult.getOllirClass().getSuperClass() == null) {
+                    className = "java/lang/Object";
+                }
+                else {
+                    className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
+                }
+            }
+            else {
+                className = getFullClassName(((ClassType) callerType).getName());
+            }
+        }
+        else if (call.getInvocationType() == CallType.invokevirtual) {
+            var callerType = caller.getType();
+            if (callerType.getTypeOfElement() == ElementType.THIS) {
+                className = ollirResult.getOllirClass().getClassName();
             }
             else {
                 className = getFullClassName(((ClassType) callerType).getName());
