@@ -43,10 +43,6 @@ public class InvalidArrayInit extends AnalysisVisitor {
         if (!length.get("type").equals("invalid")) {
             if (length.get("type").equals("int") && length.get("isArray").equals("false"))
                 return null;
-            if (length.get("type").equals("undefined")){
-                length.put("type", "int");
-                return  null;
-            }
         }
 
         String message = String.format(
