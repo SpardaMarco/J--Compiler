@@ -1,5 +1,5 @@
-import banana.io;
-import a.io;
+import smth;
+import smth2;
 class Simple {
 
     public static void main(String[] args){
