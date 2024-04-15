@@ -1,0 +1,9 @@
+import banana.io;
+import a.io;
+class Simple {
+
+    public static void main(String[] args){
+
+    }
+
+}
