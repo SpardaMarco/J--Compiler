@@ -465,7 +465,12 @@ public class JasminGenerator {
         var className = "";
         if (call.getInvocationType() == CallType.invokespecial || call.getInvocationType() == CallType.invokevirtual) {
             var callerType = caller.getType();
-            className = callerType.getTypeOfElement() == ElementType.THIS ? ollirResult.getOllirClass().getClassName() : ((ClassType) callerType).getName();
+            if (callerType.getTypeOfElement() == ElementType.THIS) {
+                className = getFullClassName(ollirResult.getOllirClass().getClassName());
+            }
+            else {
+                className = getFullClassName(((ClassType) callerType).getName());
+            }
         }
         else {
             className = getFullClassName(caller.getName());
