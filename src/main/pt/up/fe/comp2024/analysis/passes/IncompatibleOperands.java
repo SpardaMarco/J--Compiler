@@ -57,8 +57,13 @@ public class IncompatibleOperands extends AnalysisVisitor {
     private void checkOperand(JmmNode operand, String operation, String type) {
 
         String operandType = operand.get("type");
+
+        if (operandType.equals("invalid"))
+            return;
+
         Boolean isArray = operand.get("isArray").equals("true");
-        if (operandType.equals(type) && !isArray) return;
+            if (operandType.equals(type) && !isArray) return;
+
 
         var message = String.format(
                 "Operand of wrong type, \"%s\". Operation \"%s\" only takes \"%s\" as argument",
