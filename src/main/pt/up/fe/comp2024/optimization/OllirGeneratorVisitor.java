@@ -63,26 +63,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitImport(JmmNode importNode, Void unused) {
-        StringBuilder code = new StringBuilder("import");
-        List<String> imports = table.getImports();
+        StringBuilder code = new StringBuilder("import ");
+        String importDecl = importNode.get("name");
 
-        for (var importDecl : imports) {
-            if (importDecl.contains(importNode.get("ID"))) {
-                code.append(SPACE);
+        String importName =  importDecl.replace("[", "").replace("]", "");
+        List<String> importParts = List.of(importName.split(", "));
 
-                String importName =  importDecl.replace("[", "").replace("]", "");
-                List<String> importParts = List.of(importName.split(", "));
-
-                for (int i = 0; i < importParts.size(); i++) {
-                    code.append(importParts.get(i));
-                    if (i < importParts.size() - 1) {
-                        code.append(".");
-                    }
-                }
-
-                code.append(END_STMT);
+        for (int i = 0; i < importParts.size(); i++) {
+            code.append(importParts.get(i));
+            if (i < importParts.size() - 1) {
+                code.append(".");
             }
         }
+
+        code.append(END_STMT);
 
         return code.toString();
     }

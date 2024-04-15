@@ -328,6 +328,13 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             arrayDeclaration.put("type", "int");
             arrayDeclaration.put("isArray", "true");
 
+            JmmNode length = arrayDeclaration.getChild(0);
+
+            if (length.get("type").equals("undefined")){
+                length.put("type", "int");
+                length.put("isArray", "false");
+            }
+
             return null;
         }
 

@@ -28,6 +28,8 @@ public class IncompatibleReturn extends AnalysisVisitor {
         String methodReturnType = returnType.getName();
         String returnNodeType = returnNode.get("type");
 
+        if (returnNodeType.equals("invalid")) return null;
+
         Boolean isMethodReturnArray = returnType.isArray();
 
         if (returnNodeType.equals("undefined")) {

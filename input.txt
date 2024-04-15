@@ -34,5 +34,4 @@ class Simple {
         return c;
     }
 
-
 }
