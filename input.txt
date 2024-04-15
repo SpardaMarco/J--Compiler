@@ -1,10 +1,36 @@
-import io;
+import banana.io;
+class Simple {
 
-class Test {
+    public io add(io a, io b){
+        return a;
+    }
 
-	public static void main(String[] args) {
-    	Test test;
-		test = new Test();
-	}
+    public static void main(String[] args){
+        int a;
+        int b;
+        int c;
+        io d;
+        Simple s;
+        a = 20;
+        b = 10;
+        s = new Simple();
+        d = s.add(d,d);
+        io.println(s);
+    }
+
+    public int constInstr(){
+        int c;
+        c = 0;
+        c = 4;
+        c = 8;
+        c = 14;
+        c = 250;
+        c = 400;
+        c = 1000;
+        c = 100474650;
+		c = 10;
+        return c;
+    }
+
 
 }
