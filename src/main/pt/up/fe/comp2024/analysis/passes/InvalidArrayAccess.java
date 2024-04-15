@@ -26,7 +26,7 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
             String message = String.format(
                 "Invalid array access operation on '%s'.",
-                    accessed.get("name")
+                    accessed.get("value")
             );
 
             addReport(Report.newError(
