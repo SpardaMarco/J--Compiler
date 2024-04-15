@@ -1,8 +1,16 @@
+import smth;
+
 class ArrayAccessOnInt {
 
-    public static void main(String[] args) {
-        1[10];
+    boolean x;
 
+    public static void main(String[] args) {
+
+    }
+
+    public boolean foo(){
+       new int [x];
+        return true;
     }
 
 }

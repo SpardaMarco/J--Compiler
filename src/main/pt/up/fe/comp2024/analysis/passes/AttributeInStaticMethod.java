@@ -14,12 +14,13 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
     String currentMethod;
     @Override
     protected void buildVisitor() {
-        addVisit("MainMethodDeclaration", this::visitMainMethodDeclaration);
+        addVisit("MainMethodDeclaration", this::visitMethodDeclaration);
+        addVisit("MethodDeclaration", this::visitMethodDeclaration);
         addVisit("Identifier", this::visitIdentifier);
         addVisit("AssignStmt", this::visitAssignStmt);
     }
 
-    private Void visitMainMethodDeclaration(JmmNode methodDeclaration, JmmSymbolTable symbolTable){
+    private Void visitMethodDeclaration(JmmNode methodDeclaration, JmmSymbolTable symbolTable){
 
         currentMethod = methodDeclaration.get("name");
 
@@ -29,6 +30,9 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
     private Void visitIdentifier(JmmNode identifier, JmmSymbolTable symbolTable) {
 
         if (currentMethod == null) return null;
+
+        if (!symbolTable.getMethodSymbol(currentMethod).isStatic())
+            return null;
 
         String varName = identifier.get("value");
 
@@ -40,6 +44,9 @@ public class AttributeInStaticMethod extends AnalysisVisitor {
     private Void visitAssignStmt(JmmNode assignStmt, JmmSymbolTable symbolTable) {
 
         if (currentMethod == null) return null;
+
+        if (!symbolTable.getMethodSymbol(currentMethod).isStatic())
+            return null;
 
         String varName = assignStmt.get("name");
 
