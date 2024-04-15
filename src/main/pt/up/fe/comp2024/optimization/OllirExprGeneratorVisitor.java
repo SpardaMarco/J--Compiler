@@ -155,7 +155,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE);
 
-
         if (BinExprNode.getJmmChild(0).getKind().equals(METHOD_CALL.toString()) || BinExprNode.getJmmChild(1).getKind().equals(METHOD_CALL.toString())) {
             computation.append(rhs.getCode());
 
@@ -194,6 +193,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         Type type = TypeUtils.getExprType(varRefNode, table);
         String ollirType = OptUtils.toOllirType(type);
 
+        var fields = table.getFields();
+
+        if (fields.stream().anyMatch(f -> f.getName().equals(id))) {
+            String code = "getfield(this, " + id + ollirType + ")" + ollirType;
+            return new OllirExprResult(code);
+        }
+
         String code = id + ollirType;
 
         return new OllirExprResult(code);
@@ -209,7 +215,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitBoolean(JmmNode booleanNode, Void unused) {
         var booleanType = new Type(TypeUtils.getBooleanTypeName(), false);
         String ollirBooleanType = OptUtils.toOllirType(booleanType);
-        String code = booleanNode.get("value") + ollirBooleanType;
+        String value = booleanNode.get("value").equals("true") ? "1" : "0";
+        String code = value + ollirBooleanType;
         return  new OllirExprResult(code);
     }
 
