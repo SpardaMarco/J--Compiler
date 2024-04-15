@@ -530,7 +530,8 @@ public class JasminGenerator {
         }
         else {
             for (var importClass : ollirResult.getOllirClass().getImports()) {
-                if (importClass.endsWith(className)) {
+                var tokens = importClass.split("\\.");
+                if (tokens[tokens.length - 1].equals(className)) {
                     return importClass.replaceAll("\\.", "/");
                 }
             }
