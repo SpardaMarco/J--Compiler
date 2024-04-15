@@ -59,6 +59,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("ObjectDeclaration", this::visitObjectDeclaration);
             addVisit("ArrayDeclaration", this::visitArrayDeclaration);
             addVisit("AssignStmt", this::visitAssignStmt);
+            addVisit("ArrayAssignStmt", this::visitArrayAssignStmt);
             addVisit("Return", this::visitReturn);
             addVisit("PrimitiveType", this::visitPrimitiveType);
             addVisit("ArrayType", this::visitArrayType);
@@ -84,7 +85,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
 
             if (arrayExpression.getNumChildren() == 0){
-                arrayExpression.put("type", "undefined_array");
+                arrayExpression.put("type", "empty_array");
                 arrayExpression.put("isArray", "true");
                 return null;
             }
@@ -367,8 +368,34 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 assignment.put("isArray", isArray ? "true" : "false");
             }
 
-            if (assignment.get("type").equals("undefined_array") && isArray){
+            if (assignment.get("type").equals("empty_array") && isArray){
                 assignment.put("type", type);
+                assignment.put("isArray", "true");
+            }
+
+            return null;
+        }
+
+        public Void visitArrayAssignStmt (JmmNode arrayAssignStmt, JmmSymbolTable table) {
+
+            String variable = arrayAssignStmt.get("name");
+
+            Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
+
+            if (varDeclaration == null) {
+                arrayAssignStmt.put("type", "invalid");
+                return null;
+            }
+
+            String type = varDeclaration.getType().getName();
+            arrayAssignStmt.put("type", type);
+            arrayAssignStmt.put("isArray", "false");
+
+            JmmNode assignment = arrayAssignStmt.getChild(1);
+
+            if (assignment.get("type").equals("undefined")) {
+                assignment.put("type", type);
+                assignment.put("isArray","false");
             }
 
             return null;

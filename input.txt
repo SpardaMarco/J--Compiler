@@ -1,27 +1,10 @@
-
-import b.asmth;
-import a.smth;
-
 class Main {
-
-
-    int x;
 
     public static void main(String[] args) {
 
-        Main main;
+        Car[] x;
 
-        int y;
-        int x;
-        if (!false && 1 < 2) {
-            y = main.bar(x);
-        } else {
 
-        }
-    }
-
-    public int bar(int x){
-
-        return 0;
+        x = [];
     }
 }

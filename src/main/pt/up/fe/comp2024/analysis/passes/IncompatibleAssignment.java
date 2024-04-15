@@ -15,9 +15,10 @@ public class IncompatibleAssignment extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit("AssignStmt", this::visitAssignStmt);
-    }
 
+        addVisit("AssignStmt", this::visitAssignStmt);
+        addVisit("ArrayAssignStmt", this::visitArrayAssignStmt);
+    }
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable table) {
 
         if (invalidAssignment(assignStmt))
@@ -29,6 +30,38 @@ public class IncompatibleAssignment extends AnalysisVisitor {
             checkObjectAssignment(assignStmt, table);
         }
         return null;
+    }
+
+    private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
+
+        String arrayType = arrayAssignStmt.get("type");
+
+        JmmNode assigment = arrayAssignStmt.getChild(1);
+        String assignmentType = assigment.get("type");
+        Boolean isAssignmentArray = assigment.get("isArray").equals("true");
+
+        if (arrayType.equals("invalid") || assignmentType.equals("invalid"))
+            return null;
+
+        if (isAssignmentArray || !assignmentType.equals(arrayType)) {
+
+            String format = "Incompatible assignment. Attempted to assign expression of type %s to array of type %s.";
+
+            String message = String.format(
+                    format,
+                    assignmentType + (isAssignmentArray ? "[]" : ""),
+                    arrayType
+            );
+
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(arrayAssignStmt),
+                    NodeUtils.getColumn(arrayAssignStmt),
+                    message,
+                    null)
+            );
+        }
+       return null;
     }
 
     private static boolean invalidAssignment(JmmNode assignStmt) {
