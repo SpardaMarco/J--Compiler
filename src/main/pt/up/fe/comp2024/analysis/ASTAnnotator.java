@@ -60,7 +60,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("ArrayDeclaration", this::visitArrayDeclaration);
             addVisit("AssignStmt", this::visitAssignStmt);
             addVisit("Return", this::visitReturn);
+            addVisit("PrimitiveType", this::visitPrimitiveType);
+            addVisit("ArrayType", this::visitArrayType);
+            addVisit("VarDeclaration", this::visitVarDeclaration);
         }
+
+
 
         private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
 
@@ -378,7 +383,31 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
                 return null;
         }
-    }
 
+        private Void visitPrimitiveType(JmmNode primitiveType, JmmSymbolTable symbolTable) {
+
+            String type =  primitiveType.getChild(0).get("name");
+            primitiveType.put("type", type);
+            primitiveType.put("isArray", "false");
+
+            return null;
+        }
+        private Void visitArrayType(JmmNode arrayType, JmmSymbolTable symbolTable) {
+
+            String type =  arrayType.getChild(0).get("name");
+            arrayType.put("type", type);
+            arrayType.put("isArray", "true");
+
+            return null;
+        }
+        private Void visitVarDeclaration(JmmNode varDeclaration, JmmSymbolTable symbolTable) {
+
+            String type =  varDeclaration.getChild(0).get("type");
+            String isArray = varDeclaration.getChild(0).get("isArray");
+            varDeclaration.put("type", type);
+            varDeclaration.put("isArray", isArray);
+            return null;
+        }
+    }
 }
 
