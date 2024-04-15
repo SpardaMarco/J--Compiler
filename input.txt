@@ -1,12 +1,14 @@
-import io;
-import Extension;
-class Main {
 
-    int exampleField;
+import b.asmth;
+import a.smth;
+
+class Main {
 
     public static void main(String[] args) {
 
         int x;
+        smth a;
+        a = new smth();
     }
 
     public int bar(){

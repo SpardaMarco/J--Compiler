@@ -200,7 +200,9 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         switch (call.getInvocationType()) {
-            case invokevirtual, invokespecial, invokestatic -> code.append(getNormalCall(call));
+            case invokespecial -> code.append(getSpecialCall(call));
+            case invokestatic -> code.append(getStaticCall(call));
+            case invokevirtual -> code.append(getVirtualCall(call));
             case NEW -> code.append(getNewCall(call));
             case arraylength -> code.append(getArrayLengthCall(call));
             case ldc -> {
@@ -462,44 +464,82 @@ public class JasminGenerator {
         };
     }
 
-    private String getNormalCall(CallInstruction call) {
+    private String getSpecialCall(CallInstruction call) {
         var code = new StringBuilder();
 
         var caller = (Operand) call.getCaller();
         var className = "";
-        if (call.getInvocationType() == CallType.invokespecial) {
-            var callerType = caller.getType();
-            if (callerType.getTypeOfElement() == ElementType.THIS) {
-                if (ollirResult.getOllirClass().getSuperClass() == null) {
-                    className = "java/lang/Object";
-                }
-                else {
-                    className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
-                }
+        if (caller.getType().getTypeOfElement() == ElementType.THIS) {
+            if (ollirResult.getOllirClass().getSuperClass() == null) {
+                className = "java/lang/Object";
             }
             else {
-                className = getFullClassName(((ClassType) callerType).getName());
+                className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
             }
         }
-        else if (call.getInvocationType() == CallType.invokevirtual) {
-            var callerType = caller.getType();
-            className = getFullClassName(((ClassType) callerType).getName());
-        }
         else {
-            className = getFullClassName(caller.getName());
+            className = getFullClassName(((ClassType) caller.getType()).getName());
         }
         var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
 
         // load caller
-        if (call.getInvocationType() != CallType.invokestatic) {
-            code.append(generators.apply(call.getCaller()));
-        }
+        code.append(generators.apply(call.getCaller()));
+
         // arguments
         for (var arg : call.getArguments()) {
             code.append(generators.apply(arg));
         }
 
-        code.append(call.getInvocationType().toString().toLowerCase()).append(" ").append(className).append("/").append(methodName).append("(");
+        code.append("invokespecial ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getStaticCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(caller.getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokestatic ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getVirtualCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(((ClassType) caller.getType()).getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // load caller
+        code.append(generators.apply(call.getCaller()));
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokevirtual ").append(className).append("/").append(methodName).append("(");
 
         for (var arg : call.getArguments()) {
             code.append(getTypeDescriptor(arg.getType()));
