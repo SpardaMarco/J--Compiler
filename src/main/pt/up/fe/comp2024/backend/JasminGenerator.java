@@ -357,12 +357,12 @@ public class JasminGenerator {
         var instCode = new StringBuilder();
         for (var inst : method.getInstructions()) {
 
-            var label = method.getLabels(inst);
-            if (label != null) {
-                for (var l : label) {
-                    instCode.append(TAB).append(l).append(":").append(NL);
-                }
-            }
+//            var label = method.getLabels(inst);
+//            if (label != null) {
+//                for (var l : label) {
+//                    instCode.append(TAB).append(l).append(":").append(NL);
+//                }
+//            }
             instCode.append(StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, NL+TAB, NL)));
 
@@ -406,9 +406,9 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         var code = new StringBuilder();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-//        if (operand.getName().equals("this")) {
-//            reg = 0;
-//        }
+        if (operand.getName().equals("this")) {
+            reg = 0;
+        }
         switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 if (operand instanceof ArrayOperand) {
