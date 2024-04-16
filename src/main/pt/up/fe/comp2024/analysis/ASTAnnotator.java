@@ -162,6 +162,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             if (declaration == null) {
 
+                if (table.getClassName().equals(name)){
+                    identifier.put("type", name);
+                    return null;
+                }
                 if (table.getImportsList().contains(name)){
                     identifier.put("type", "undefined");
                     return null;
@@ -231,11 +235,26 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             JmmNode object = methodCall.getChild(0);
 
+            String methodName = methodCall.get("name");
+
+            MethodSymbol methodSymbol = table.getMethodSymbol(methodName);
+
+            if (object.isInstance("Identifier") && object.get("value").equals(table.getClassName())) {
+
+                if (methodSymbol == null)
+                    if (table.classExtends())
+                        methodCall.put("type", "undefined");
+                    else
+                        methodCall.put("type", "invalid");
+                else {
+                    Type type = methodSymbol.getType();
+                    methodCall.put("type", type.getName());
+                    String isArray = type.isArray() ? "true" : "false";
+                    methodCall.put("isArray", isArray);
+                }
+            }
+
             if (object.isInstance("This") || object.get("type").equals(table.getClassName())){
-
-                String methodName = methodCall.get("name");
-
-                MethodSymbol methodSymbol = table.getMethodSymbol(methodName);
 
                 if (methodSymbol != null){
                     Type type = methodSymbol.getType();
@@ -245,7 +264,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                     return null;
                 }
 
-                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
+                if (table.classExtends())
                     methodCall.put("type", "undefined");
                 else
                     methodCall.put("type", "invalid");

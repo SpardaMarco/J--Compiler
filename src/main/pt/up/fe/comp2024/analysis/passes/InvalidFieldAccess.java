@@ -19,10 +19,29 @@ public class InvalidFieldAccess extends AnalysisVisitor {
 
         JmmNode object = attribute.getChild(0);
 
+        String attributeName = attribute.get("name");
+
+        if (object.isInstance("Identifier") && object.get("value").equals(table.getClassName()))
+        {
+            String message = String.format(
+                    "Attribute '%s' is not statically accessible in class '%s'.",
+                    attributeName,
+                    table.getClassName()
+            );
+
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(attribute),
+                    NodeUtils.getColumn(attribute),
+                    message,
+                    null)
+            );
+
+            return null;
+        }
+
         if (!object.get("type").equals(table.getClassName()) || table.classExtends())
             return null;
-
-        String attributeName = attribute.get("name");
 
         if (!table.getFields().stream().anyMatch(
                 field -> field.getName().equals(attributeName)

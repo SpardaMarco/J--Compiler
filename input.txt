@@ -1,8 +1,8 @@
-class Main {
+class Main extends Super {
 
+    int x;
     public static void main(String[] args) {
-        Main Main;
-        Main.y;
+        Main.x;
     }
 
     public int some(int x){
