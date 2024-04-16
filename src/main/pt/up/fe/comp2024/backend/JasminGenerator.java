@@ -21,13 +21,9 @@ public class JasminGenerator {
 
     private static final String NL = "\n";
     private static final String TAB = "   ";
-
     private final OllirResult ollirResult;
-
     List<Report> reports;
-
     String code;
-
     Method currentMethod;
     int stackSize = 99;
 
@@ -59,8 +55,6 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(Method.class, this::generateMethod);
         generators.put(Field.class, this::generateField);
-
-
     }
 
     public List<Report> getReports() {
@@ -82,9 +76,12 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // generate class name
+        // .class <access-spec> <class-name>
         var className = classUnit.getClassName();
         code.append(".class ").append(className).append(NL);
 
+        // generate super class
+        // .super <super-class-name>
         if (classUnit.getSuperClass() != null) {
             code.append(".super ").append(getFullClassName(classUnit.getSuperClass())).append(NL).append(NL);
         }
@@ -93,6 +90,7 @@ public class JasminGenerator {
         }
 
         // generate fields
+        // .field <access-spec> <field-name> <descriptor>
         for (var field : classUnit.getFields()) {
             code.append(generators.apply(field));
         }
@@ -103,6 +101,11 @@ public class JasminGenerator {
         code.append(defaultConstructor);
 
         // generate code for all other methods
+        // .method <access-spec> <method-spec>
+        // .limit stack <max-stack>
+        // .limit locals <max-locals>
+        // <statements>
+        // .end method
         for (var method : classUnit.getMethods()) {
 
             // Ignore constructor, since there is always one constructor
@@ -125,21 +128,17 @@ public class JasminGenerator {
         code.append(generators.apply(assign.getRhs()));
 
         // store value in the stack in destination
-        var lhs = assign.getDest();
-
-        if (!(lhs instanceof Operand operand)) {
-            throw new NotImplementedException(lhs.getClass());
-        }
+        var lhs = (Operand) assign.getDest();
 
         // get register
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        if (operand.getName().equals("this")) {
+        var reg = currentMethod.getVarTable().get(lhs.getName()).getVirtualReg();
+        if (lhs.getName().equals("this")) {
             reg = 0;
         }
-        switch (operand.getType().getTypeOfElement()) {
+        switch (lhs.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 // TODO: check if this is correct
-                if (operand instanceof ArrayOperand) {
+                if (lhs instanceof ArrayOperand) {
                     code.append("iastore").append(NL);
                 }
                 else {
@@ -150,7 +149,7 @@ public class JasminGenerator {
             case ARRAYREF, OBJECTREF, THIS, STRING-> {
                 code.append("astore").append(reg < 4 ? "_" : " ").append(reg).append(NL);
             }
-            default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
+            default -> throw new NotImplementedException(lhs.getType().getTypeOfElement());
         }
         return code.toString();
     }
@@ -357,6 +356,13 @@ public class JasminGenerator {
 
         var instCode = new StringBuilder();
         for (var inst : method.getInstructions()) {
+
+            var label = method.getLabels(inst);
+            if (label != null) {
+                for (var l : label) {
+                    instCode.append(TAB).append(l).append(":").append(NL);
+                }
+            }
             instCode.append(StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, NL+TAB, NL)));
 
@@ -400,6 +406,9 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         var code = new StringBuilder();
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        if (operand.getName().equals("this")) {
+            reg = 0;
+        }
         switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 if (operand instanceof ArrayOperand) {
