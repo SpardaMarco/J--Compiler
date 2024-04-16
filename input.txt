@@ -1,15 +1,20 @@
+import Super;
 class Main extends Super {
 
     int x;
     public static void main(String[] args) {
 
-        Main.x;
+        Main m;
+        m = new Main();
+        m.some(1);
 
     }
 
-    public int some(int x){
-
-
+    int some(int y){
+        Super s;
+        int i;
+        s = new Super();
+        i = s.emiru(1);
         return 1;
     }
 }
