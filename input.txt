@@ -1,0 +1,11 @@
+import b.asmth;
+import a.smth;
+
+class Main {
+
+    public static void main(String[] args) {
+    smth a;
+    a = new smth();
+
+    }
+}
