@@ -48,7 +48,7 @@ public class IncompatibleAssignment extends AnalysisVisitor {
 
         if (isAssignmentArray || !assignmentType.equals(arrayType)) {
 
-            String format = "Incompatible assignment. Attempted to assign expression of type %s to array of type %s.";
+            String format = "Incompatible assignment. Attempted to assign expression of type %s to entry in array of type %s.";
 
             String message = String.format(
                     format,

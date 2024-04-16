@@ -3,17 +3,17 @@ import Main;
 class Object {
 
 
-    int x;
+    int[] x;
     boolean y;
     public static void main(String[] args) {
 
     }
 
-    public int foo(){
+    public int foo(int[] x){
 
-        int x;
-        x[1] = 2;
-        y[1] = 2;
+        x = new int [0];
+
+        x[2] = [1,2];
 
         return 1;
     }
