@@ -58,21 +58,38 @@ public class InvalidArrayAccess extends AnalysisVisitor {
             index.put("type", "int");
             index.put("isArray", "false");
             return null;
-        } else if (array.get("isArray").equals("true"))
-            return null;
+        }
 
-        String message = String.format(
-                "Invalid array access operation on '%s'.",
-                arrayAssignStmt.get("name")
-        );
+        if (!(indexType.equals("int") && index.get("isArray").equals("false")))
+        {
+            String message = String.format(
+                    "Invalid index on access operation on array '%s'.",
+                    arrayAssignStmt.get("name")
+            );
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(arrayAssignStmt),
+                    NodeUtils.getColumn(arrayAssignStmt),
+                    message,
+                    null)
+            );
+        }
 
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(arrayAssignStmt),
-                NodeUtils.getColumn(arrayAssignStmt),
-                message,
-                null)
-        );
+        if (array.get("isArray").equals("false")) {
+
+            String message = String.format(
+                    "Invalid array access operation on non-array '%s'.",
+                    arrayAssignStmt.get("name")
+            );
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(arrayAssignStmt),
+                    NodeUtils.getColumn(arrayAssignStmt),
+                    message,
+                    null)
+            );
+        }
+
 
         return null;
     }
