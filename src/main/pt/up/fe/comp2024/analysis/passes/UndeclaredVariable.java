@@ -21,6 +21,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         addVisit("MethodDeclaration", this::visitMethodDecl);
         addVisit("MainMethodDeclaration", this::visitMethodDecl);
         addVisit("AssignStmt", this::visitAssignment);
+        addVisit("ArrayAssignStmt", this::visitAssignment);
         addVisit("Identifier", this::visitIdentifier);
     }
 
