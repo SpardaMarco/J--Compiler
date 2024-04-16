@@ -181,19 +181,7 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getRightOperand()));
 
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
-            case ADD -> "iadd";
-            case MUL -> "imul";
-            case SUB -> "isub";
-            case DIV -> "idiv";
-            case LTH -> "if_icmplt";
-            case NOTB -> "ifeq";
-            case ANDB -> "iand";
-
-            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-        };
-
-        code.append(op).append(NL);
+        code.append(getOperation(binaryOp.getOperation())).append(NL);
 
         return code.toString();
     }
@@ -419,7 +407,7 @@ public class JasminGenerator {
                 }
                 break;
             }
-            case ARRAYREF, OBJECTREF -> {
+            case STRING, ARRAYREF, OBJECTREF -> {
                 code.append("aload").append(reg < 4 ? "_" : " ").append(reg).append(NL);
             }
             case THIS -> {
