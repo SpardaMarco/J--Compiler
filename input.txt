@@ -7,7 +7,7 @@ class Object {
 
     }
 
-    public int foo(int[] x){
+    public int foo(){
 
         x[1] = 1;
 
