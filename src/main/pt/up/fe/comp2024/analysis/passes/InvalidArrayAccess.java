@@ -86,10 +86,11 @@ public class InvalidArrayAccess extends AnalysisVisitor {
     private void checkArray(JmmNode arrayAssignStmt) {
 
         String arrayType = arrayAssignStmt.get("type");
-        Boolean isArray = arrayAssignStmt.get("isArray").equals("true");
 
         if (arrayType.equals("invalid"))
             return;
+
+        Boolean isArray = arrayAssignStmt.get("isArray").equals("true");
 
         if (!isArray){
             String message = String.format(
