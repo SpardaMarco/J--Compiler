@@ -9,7 +9,9 @@ class Object {
 
     public int foo(){
 
-        [][1];
+        int x;
+
+        x[2] = 2;
 
         return 1;
     }
