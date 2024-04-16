@@ -25,8 +25,8 @@ public class InvalidArrayAccess extends AnalysisVisitor {
             JmmNode accessed = arrayAccess.getChild(0);
 
             String message = String.format(
-                "Invalid array access operation on '%s'.",
-                    accessed.get("value")
+                "Invalid array access operation on expression of type '%s'.",
+                    accessed.get("type")
             );
 
             addReport(Report.newError(

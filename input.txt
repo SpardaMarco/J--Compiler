@@ -1,20 +1,17 @@
 import smth;
 
-class Master extends Main {
-
-    int x;
+class Master extends Inter {
 
     public static void main(String[] args) {
-
     }
 
     public boolean foo(){
 
-       Master master;
-       int[] a;
+       int[] x;
 
-       a = new int [master.y];
-       return true;
+       x[2][1];
+
+       return false;
     }
 
 }
