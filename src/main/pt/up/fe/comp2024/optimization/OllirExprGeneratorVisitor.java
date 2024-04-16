@@ -2,6 +2,7 @@ package pt.up.fe.comp2024.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
@@ -12,7 +13,7 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
  */
-public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExprResult> {
+public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult> {
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
@@ -92,10 +93,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             for (int i = 1; i < methodCallNode.getNumChildren(); i++) {
                 code.append(",");
                 code.append(SPACE);
+                OllirExprResult result = visit(methodCallNode.getJmmChild(i));
                 if (methodCallNode.getJmmChild(i).getKind().equals(OBJECT_DECLARATION.toString())) {
-                    computation.append(visit(methodCallNode.getJmmChild(i)).getComputation());
+                    computation.append(result.getComputation());
                 }
-                code.append(visit(methodCallNode.getJmmChild(i)).getCode());
+                code.append(result.getCode());
             }
         }
 
@@ -106,7 +108,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         code.append(ollirType);
         code.append(END_STMT);
 
-        return new OllirExprResult(code.toString());
+        return new OllirExprResult(code.toString(), computation.toString());
     }
 
     private OllirExprResult visitFunctionCall(JmmNode functionCallNode, Void unused) {
@@ -253,8 +255,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         var computation = new StringBuilder();
 
         for (var child : node.getChildren()) {
-            code.append(visit(child).getCode());
-            computation.append(visit(child).getComputation());
+            OllirExprResult result = visit(child);
+            code.append(result.getCode());
+            computation.append(result.getComputation());
         }
 
         return new OllirExprResult(code.toString(), computation.toString());
