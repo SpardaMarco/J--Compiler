@@ -373,8 +373,9 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             }
 
             String type = varDeclaration.getType().getName();
+            Boolean isArray = varDeclaration.getType().isArray();
             arrayAssignStmt.put("type", type);
-            arrayAssignStmt.put("isArray", "true");
+            arrayAssignStmt.put("isArray", isArray ? "true" : "false");
 
             JmmNode assignment = arrayAssignStmt.getChild(1);
 
