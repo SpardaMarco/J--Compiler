@@ -11,10 +11,15 @@ class Misc extends Extension{
     public int foo(boolean exampleParam) {
         int exampleLocal;
 
+        int x;
+
+
         int tempInt;
         boolean tempBool;
         Misc exampleMisc;
         Extension exampleEx;
+
+        x[2] = 2;
 
         exampleLocal = 1;
         tempInt = exampleLocal;
