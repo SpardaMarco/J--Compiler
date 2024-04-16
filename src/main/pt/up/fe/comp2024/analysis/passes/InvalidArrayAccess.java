@@ -49,8 +49,8 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
 
-        JmmNode array = arrayAssignStmt.getChild(0);
-        JmmNode index = arrayAssignStmt.getChild(1);
+        JmmNode index = arrayAssignStmt.getChild(0);
+
         String indexType = index.get("type");
         if (indexType.equals("invalid"))
             return null;
@@ -58,38 +58,8 @@ public class InvalidArrayAccess extends AnalysisVisitor {
             index.put("type", "int");
             index.put("isArray", "false");
             return null;
-        }
-
-        if (!(indexType.equals("int") && index.get("isArray").equals("false")))
-        {
-            String message = String.format(
-                    "Invalid index on access operation on array '%s'.",
-                    arrayAssignStmt.get("name")
-            );
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(arrayAssignStmt),
-                    NodeUtils.getColumn(arrayAssignStmt),
-                    message,
-                    null)
-            );
-        }
-
-        if (array.get("isArray").equals("false")) {
-
-            String message = String.format(
-                    "Invalid array access operation on non-array '%s'.",
-                    arrayAssignStmt.get("name")
-            );
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(arrayAssignStmt),
-                    NodeUtils.getColumn(arrayAssignStmt),
-                    message,
-                    null)
-            );
-        }
-
+        } else if (indexType.equals("int") && index.get("isArray").equals("false"))
+            return null;
 
         return null;
     }
