@@ -10,7 +10,8 @@ class Object {
     public int foo(){
 
         int x;
-        x[2] = 2;
+
+        [1,2,3][x];
 
         return 1;
     }
