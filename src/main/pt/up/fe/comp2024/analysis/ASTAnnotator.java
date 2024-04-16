@@ -171,10 +171,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                     return null;
                 }
 
-                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
-                    identifier.put("type", "undefined");
-                else
-                    identifier.put("type", "invalid");
+                identifier.put("type", "invalid");
 
                 return null;
             }
