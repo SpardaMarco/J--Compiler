@@ -50,7 +50,7 @@ public class InvalidArrayAccess extends AnalysisVisitor {
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
 
         checkIndex(arrayAssignStmt);
-        checkArray(arrayAssignStmt);
+        //checkArray(arrayAssignStmt);
 
         return null;
     }
