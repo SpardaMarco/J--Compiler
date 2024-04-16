@@ -49,7 +49,8 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
 
-        JmmNode index = arrayAssignStmt.getChild(0);
+        JmmNode array = arrayAssignStmt.getChild(0);
+        JmmNode index = arrayAssignStmt.getChild(1);
         String indexType = index.get("type");
         if (indexType.equals("invalid"))
             return null;
@@ -57,7 +58,7 @@ public class InvalidArrayAccess extends AnalysisVisitor {
             index.put("type", "int");
             index.put("isArray", "false");
             return null;
-        } else if (indexType.equals("int") && index.get("isArray").equals("false"))
+        } else if (array.get("isArray").equals("true"))
             return null;
 
         String message = String.format(

@@ -26,9 +26,9 @@ public class SemanticAnalysisTest {
     @Test
     public void ImportedClassAttributeAccess() {
         var result = TestUtils.analyse(SpecsIo.getResource(
-                "pt/up/fe/comp/ramos_tests/ImportedClassAttributeAccess.jmm"
+                "pt/up/fe/comp/ramos_tests/ArrayAccessOnIntVar.jmm"
         ));
         System.out.println(result.getReports());
-        TestUtils.noErrors(result);
+        TestUtils.mustFail(result);
     }
 }
