@@ -173,7 +173,11 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                     }
                 }
 
-                identifier.put("type", "invalid");
+                if (table.classExtends())
+                    identifier.put("type", "undefined");
+                else
+                    identifier.put("type", "invalid");
+
                 return null;
             }
 
@@ -320,7 +324,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
 
             if (varDeclaration == null) {
-                assignStmt.put("type", "invalid");
+                if (!table.classExtends())
+                    assignStmt.put("type", "invalid");
+                else
+                    assignStmt.put("type", "undefined");
                 return null;
             }
 

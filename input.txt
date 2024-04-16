@@ -1,17 +1,13 @@
 import smth;
 
-class Master extends Inter {
+class Main extends SmthWx {
 
     public static void main(String[] args) {
+
+        int y;
+        x = 1;
+
+        y = x;
+
     }
-
-    public boolean foo(){
-
-       int[] x;
-
-       x[2][1];
-
-       return false;
-    }
-
 }

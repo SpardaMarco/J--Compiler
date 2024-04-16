@@ -24,6 +24,9 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         if (invalidAssignment(assignStmt))
             return null;
 
+        if (assignStmt.get("type").equals("undefined"))
+            return null;
+
         if (isLiteralAssignment(assignStmt)) {
             checkLiteralAssignment(assignStmt);
         } else {
