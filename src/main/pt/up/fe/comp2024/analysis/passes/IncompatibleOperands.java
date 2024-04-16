@@ -45,7 +45,7 @@ public class IncompatibleOperands extends AnalysisVisitor {
                 checkOperand(leftOperand, operation, "int");
                 checkOperand(rightOperand, operation, "int");
             }
-            case "%" -> {
+            case "&&" -> {
                 checkOperand(leftOperand, operation, "boolean");
                 checkOperand(rightOperand, operation, "boolean");
             }

@@ -1,13 +1,7 @@
-import smth;
-
-class Main extends SmthWx {
+class Main extends Super {
 
     public static void main(String[] args) {
 
-        int y;
-        x = 1;
-
-        y = x;
-
+        [true] && [true];
     }
 }
