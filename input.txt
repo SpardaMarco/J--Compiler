@@ -2,12 +2,10 @@ class Main {
 
     public static void main(String[] args) {
         Main Main;
-        Main.y;
     }
 
     public int some(int x){
 
-        this.some([1,2][y]);
 
         return 1;
     }
