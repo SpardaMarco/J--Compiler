@@ -423,9 +423,13 @@ public class JasminGenerator {
     }
 
     private String getAccessModifier(AccessModifier accessModifier) {
-        return accessModifier != AccessModifier.DEFAULT ?
-                accessModifier.name().toLowerCase():
-                "";
+        return switch (accessModifier) {
+            case PUBLIC -> "public";
+            case PRIVATE -> "private";
+            case PROTECTED -> "protected";
+            case DEFAULT -> "";
+            default -> throw new NotImplementedException(accessModifier);
+        };
     }
 
     private String getTypeDescriptor(Type type) {
