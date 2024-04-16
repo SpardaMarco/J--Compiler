@@ -203,6 +203,7 @@ public class JasminGenerator {
             case invokespecial -> code.append(getSpecialCall(call));
             case invokestatic -> code.append(getStaticCall(call));
             case invokevirtual -> code.append(getVirtualCall(call));
+            case invokeinterface -> code.append(getInterfaceCall(call));
             case NEW -> code.append(getNewCall(call));
             case arraylength -> code.append(getArrayLengthCall(call));
             case ldc -> {
@@ -546,6 +547,32 @@ public class JasminGenerator {
         }
 
         code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getInterfaceCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(((ClassType) caller.getType()).getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // load caller
+        code.append(generators.apply(call.getCaller()));
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokeinterface ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(" ").append(call.getArguments().size()).append(NL);
 
         return code.toString();
     }
