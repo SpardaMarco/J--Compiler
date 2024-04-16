@@ -407,7 +407,7 @@ public class JasminGenerator {
                 }
                 break;
             }
-            case STRING, ARRAYREF, OBJECTREF -> {
+            case ARRAYREF, OBJECTREF -> {
                 code.append("aload").append(reg < 4 ? "_" : " ").append(reg).append(NL);
             }
             case THIS -> {
