@@ -2,6 +2,7 @@ class Main extends Super {
 
     public static void main(String[] args) {
 
-        [true] && [true];
+        Main main;
+        [true, 1][main.somefunc()];
     }
 }

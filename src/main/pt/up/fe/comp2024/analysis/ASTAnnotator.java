@@ -212,13 +212,14 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayAccessOp(JmmNode arrayAccess, SymbolTable table) {
 
             JmmNode array = arrayAccess.getChild(0);
+            JmmNode access = arrayAccess.getChild(1);
             String type = array.get("type");
 
-            if (array.get("type").equals("invalid")){
+            if (type.equals("invalid")){
                 arrayAccess.put("type", "invalid");
                 return null;
             }
-            else if (array.get("type").equals("undefined")){
+            else if (type.equals("undefined") || type.equals("empty_array")){
                 arrayAccess.put("type", "undefined");
                 return null;
             }
