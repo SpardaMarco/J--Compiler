@@ -25,7 +25,7 @@ class Misc extends Extension{
         exampleField =  3;
         tempInt = exampleField;
 
-        tempInt = exampleField + exampleLocal;
+        tempInt = exampleLocal + exampleField;
 
         exampleMisc = io.printMisc(new Misc());
 

@@ -180,9 +180,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             computation.append("getfield(this, ").append(BinExprNode.getJmmChild(1).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(END_STMT);
             computation.append(temp + resOllirType);
             computation.append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
-            computation.append(code).append(SPACE);
+            computation.append(lhs.getCode()).append(SPACE);
+
+            Type type = TypeUtils.getExprType(BinExprNode, table);
+            computation.append(BinExprNode.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+                    .append(code);
 
             code = temp + resOllirType;
+
+            if (!computation.toString().endsWith(END_STMT))
+                computation.append(END_STMT);
+
+            return new OllirExprResult(code, computation);
         }
 
         if (BinExprNode.getJmmChild(0).getKind().equals(METHOD_CALL.toString()) || BinExprNode.getJmmChild(1).getKind().equals(METHOD_CALL.toString())) {
