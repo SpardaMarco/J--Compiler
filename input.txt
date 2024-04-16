@@ -2,12 +2,13 @@ class Main extends Super {
 
     int x;
     public static void main(String[] args) {
+
         Main.x;
+
     }
 
     public int some(int x){
 
-        this.some([1,2][y]);
 
         return 1;
     }
