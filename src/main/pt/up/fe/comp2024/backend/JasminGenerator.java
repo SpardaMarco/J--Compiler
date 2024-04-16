@@ -133,6 +133,9 @@ public class JasminGenerator {
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        if (operand.getName().equals("this")) {
+            reg = 0;
+        }
         switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 // TODO: check if this is correct
@@ -144,7 +147,7 @@ public class JasminGenerator {
                 }
                 break;
             }
-            case ARRAYREF, OBJECTREF -> {
+            case ARRAYREF, OBJECTREF, THIS, STRING-> {
                 code.append("astore").append(reg < 4 ? "_" : " ").append(reg).append(NL);
             }
             default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
