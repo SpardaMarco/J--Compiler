@@ -35,9 +35,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
         if (table.getVarDeclaration(variable, currentMethod) != null)
             return null;
 
-        if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
-            return null;
-
         // Create error report
         var message = String.format("Variable '%s' does not exist.", variable);
         addReport(Report.newError(
@@ -57,7 +54,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         String variable = identifier.get("value");
 
-        // Create error report
         var message = String.format("Variable \"%s\" does not exist.", variable);
         addReport(Report.newError(
                 Stage.SEMANTIC,

@@ -20,6 +20,14 @@ public class NotImportedClass extends AnalysisVisitor {
 
         addVisit("Identifier", this::visitIdentifier);
         addVisit("NamedType", this::visitNamedType);
+        addVisit("ClassDeclaration", this::visitClassDecl);
+    }
+
+    private Void visitClassDecl(JmmNode classDecl, JmmSymbolTable table) {
+
+        if (classDecl.hasAttribute("parent"))
+            checkClass(classDecl, table, "parent");
+        return null;
     }
 
     private Void visitNamedType(JmmNode namedType, JmmSymbolTable table) {
@@ -37,9 +45,9 @@ public class NotImportedClass extends AnalysisVisitor {
         return null;
     }
 
-    private void checkClass(JmmNode identifier, JmmSymbolTable table, String nameAttribute) {
+    private void checkClass(JmmNode node, JmmSymbolTable table, String nameAttribute) {
 
-        String className = identifier.get(nameAttribute);
+        String className = node.get(nameAttribute);
 
         if (className.equals(table.getClassName())) return;
 
@@ -49,8 +57,8 @@ public class NotImportedClass extends AnalysisVisitor {
         var message = String.format("Class '%s' not imported.", className);
         addReport(Report.newError(
                 Stage.SEMANTIC,
-                NodeUtils.getLine(identifier),
-                NodeUtils.getColumn(identifier),
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
                 message,
                 null)
         );
