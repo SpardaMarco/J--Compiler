@@ -310,6 +310,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             var newCode = new StringBuilder();
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);
+            newCode.append(rhs.getComputation());
 
             newCode.append(temp);
             newCode.append(tempType);
