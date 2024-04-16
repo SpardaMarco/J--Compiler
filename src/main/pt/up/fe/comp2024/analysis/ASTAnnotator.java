@@ -144,7 +144,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             return null;
         }
 
-        private Void visitUnaryOp(JmmNode unaryOp, SymbolTable table) {
+        private Void visitUnaryOp(JmmNode unaryOp, JmmSymbolTable table) {
 
             switch (unaryOp.get("op")) {
                 case "!":
@@ -162,18 +162,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             if (declaration == null) {
 
-                for (String importStmt: table.getImports()) {
-
-                    String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
-                    String importedFunction = words[words.length - 1];
-
-                    if (importedFunction.equals(name)){
-                        identifier.put("type", "undefined");
-                        return null;
-                    }
+                if (table.getImportsList().contains(name)){
+                    identifier.put("type", "undefined");
+                    return null;
                 }
 
-                if (table.classExtends())
+                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
                     identifier.put("type", "undefined");
                 else
                     identifier.put("type", "invalid");
@@ -212,7 +206,6 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayAccessOp(JmmNode arrayAccess, SymbolTable table) {
 
             JmmNode array = arrayAccess.getChild(0);
-            JmmNode access = arrayAccess.getChild(1);
             String type = array.get("type");
 
             if (type.equals("invalid")){
@@ -252,7 +245,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                     return null;
                 }
 
-                if (table.classExtends())
+                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
                     methodCall.put("type", "undefined");
                 else
                     methodCall.put("type", "invalid");
@@ -325,10 +318,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
 
             if (varDeclaration == null) {
-                if (!table.classExtends())
-                    assignStmt.put("type", "invalid");
-                else
+                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
                     assignStmt.put("type", "undefined");
+                else
+                    assignStmt.put("type", "invalid");
                 return null;
             }
 

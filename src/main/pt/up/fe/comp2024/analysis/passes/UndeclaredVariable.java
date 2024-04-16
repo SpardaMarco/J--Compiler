@@ -35,7 +35,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         if (table.getVarDeclaration(variable, currentMethod) != null)
             return null;
 
-        if (table.classExtends())
+        if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
             return null;
 
         // Create error report

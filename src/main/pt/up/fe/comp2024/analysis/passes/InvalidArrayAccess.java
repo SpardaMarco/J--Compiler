@@ -23,6 +23,9 @@ public class InvalidArrayAccess extends AnalysisVisitor {
         if (arrayAccess.getChild(0).get("type").equals("invalid"))
             return null;
 
+        if (arrayAccess.getChild(1).get("type").equals("invalid"))
+            return null;
+
         if (arrayAccess.get("type").equals("invalid")) {
 
             JmmNode accessed = arrayAccess.getChild(0);

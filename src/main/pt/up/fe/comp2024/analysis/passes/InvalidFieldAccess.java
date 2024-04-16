@@ -29,7 +29,7 @@ public class InvalidFieldAccess extends AnalysisVisitor {
         )) {
 
             String message = String.format(
-                    "Invalid access to unexistent '%s' of class '%s'.",
+                    "Attribute '%s' does not exist in class '%s'.",
                     attributeName,
                     table.getClassName()
             );

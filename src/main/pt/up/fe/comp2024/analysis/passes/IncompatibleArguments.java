@@ -85,6 +85,9 @@ public class IncompatibleArguments extends AnalysisVisitor {
                     JmmNode array = arguments.get(arguments.size() - 1);
                     String arrayType = array.get("type");
 
+                    if (arrayType.equals("empty_array"))
+                        return;
+
                     if (!arrayType.equals(varargType)) {
                         addReport(Report.newError(
                                 Stage.SEMANTIC,
@@ -152,6 +155,9 @@ public class IncompatibleArguments extends AnalysisVisitor {
                     parameter.getType().getName() + (parameter.getType().isArray() ? "[]" : "");
             String argumentType =
                     argument.get("type") + (argument.get("isArray").equals("true") ? "[]" : "");
+
+            if (argument.get("type").equals("empty_array") && parameter.getType().isArray())
+                return;
 
             if (!parameterType.equals(argumentType)){
                 addReport(Report.newError(

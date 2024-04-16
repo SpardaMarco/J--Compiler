@@ -47,7 +47,7 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
 
         String message = String.format(
-                "Return type \"%s\" does not coincide with \"%s\" method declaration's \"%s\".",
+                "Return type '%s' does not coincide with '%s()' method declaration's '%s'.",
                 returnNodeType + (isReturnNodeArray ? "[]" : ""),
                 methodName,
                 methodReturnType + (isMethodReturnArray ? "[]" : "")

@@ -1,8 +1,14 @@
-class Main extends Super {
+class Main {
 
     public static void main(String[] args) {
+        Main Main;
+        Main.y;
+    }
 
-        Main main;
-        [true, 1][main.somefunc()];
+    public int some(int x){
+
+        this.some([1,2][y]);
+
+        return 1;
     }
 }
