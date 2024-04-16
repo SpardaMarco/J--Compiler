@@ -53,14 +53,19 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("ParenExpr", this::visitExprStmt);
             addVisit("ArrayAccessOp", this::visitArrayAccessOp);
             addVisit("MethodCall", this::visitMethodCall);
-            addVisit("FunctionCall", this::visitFunctionCall);
             addVisit("This", this::visitThis);
             addVisit("Attribute", this::visitAttribute);
             addVisit("ObjectDeclaration", this::visitObjectDeclaration);
             addVisit("ArrayDeclaration", this::visitArrayDeclaration);
             addVisit("AssignStmt", this::visitAssignStmt);
+            addVisit("ArrayAssignStmt", this::visitArrayAssignStmt);
             addVisit("Return", this::visitReturn);
+            addVisit("PrimitiveType", this::visitPrimitiveType);
+            addVisit("ArrayType", this::visitArrayType);
+            addVisit("VarDeclaration", this::visitVarDeclaration);
         }
+
+
 
         private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
 
@@ -79,7 +84,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayExpression(JmmNode arrayExpression, SymbolTable table) {
 
             if (arrayExpression.getNumChildren() == 0){
-                arrayExpression.put("type", "undefined_array");
+                arrayExpression.put("type", "empty_array");
                 arrayExpression.put("isArray", "true");
                 return null;
             }
@@ -87,7 +92,8 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             String type = arrayExpression.getChild(0).get("type");
 
             for (JmmNode element: arrayExpression.getChildren()){
-                if (!element.get("type").equals(type)){
+                String elementType = element.get("type");
+                if (!elementType.equals(type) && !elementType.equals("invalid")){
                     arrayExpression.put("type", "invalid");
                     return null;
                 }
@@ -138,13 +144,13 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             return null;
         }
 
-        private Void visitUnaryOp(JmmNode unaryOp, SymbolTable table) {
+        private Void visitUnaryOp(JmmNode unaryOp, JmmSymbolTable table) {
 
             switch (unaryOp.get("op")) {
                 case "!":
                     updateUndefinedOperand(unaryOp.getChild(0), "boolean");
                     unaryOp.put("type", "boolean");
-
+                    unaryOp.put("isArray", "false");
             }
             return null;
         }
@@ -156,18 +162,17 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             if (declaration == null) {
 
-                for (String importStmt: table.getImports()) {
-
-                    String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
-                    String importedFunction = words[words.length - 1];
-
-                    if (importedFunction.equals(name)){
-                        identifier.put("type", "undefined");
-                        return null;
-                    }
+                if (table.getClassName().equals(name)){
+                    identifier.put("type", name);
+                    return null;
+                }
+                if (table.getImportsList().contains(name)){
+                    identifier.put("type", "undefined");
+                    return null;
                 }
 
                 identifier.put("type", "invalid");
+
                 return null;
             }
 
@@ -202,20 +207,21 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         private Void visitArrayAccessOp(JmmNode arrayAccess, SymbolTable table) {
 
             JmmNode array = arrayAccess.getChild(0);
-
-            if (!array.isInstance("ArrayExpression") && !array.isInstance("Identifier")){
-                arrayAccess.put("type", "invalid");
-            }
-
-
-            if (array.isInstance("Identifier")) {
-                if (array.get("isArray") == "false") {
-                    arrayAccess.put("type", "invalid");
-                    return null;
-                }
-            }
-
             String type = array.get("type");
+
+            if (type.equals("invalid")){
+                arrayAccess.put("type", "invalid");
+                return null;
+            }
+            else if (type.equals("undefined") || type.equals("empty_array")){
+                arrayAccess.put("type", "undefined");
+                return null;
+            }
+            else if (array.get("isArray") == "false") {
+                arrayAccess.put("type", "invalid");
+                return null;
+            }
+
             arrayAccess.put("type", type);
             arrayAccess.put("isArray", "false");
 
@@ -226,11 +232,26 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
             JmmNode object = methodCall.getChild(0);
 
+            String methodName = methodCall.get("name");
+
+            MethodSymbol methodSymbol = table.getMethodSymbol(methodName);
+
+            if (object.isInstance("Identifier") && object.get("value").equals(table.getClassName())) {
+
+                if (methodSymbol == null)
+                    if (table.classExtends())
+                        methodCall.put("type", "undefined");
+                    else
+                        methodCall.put("type", "invalid");
+                else {
+                    Type type = methodSymbol.getType();
+                    methodCall.put("type", type.getName());
+                    String isArray = type.isArray() ? "true" : "false";
+                    methodCall.put("isArray", isArray);
+                }
+            }
+
             if (object.isInstance("This") || object.get("type").equals(table.getClassName())){
-
-                String methodName = methodCall.get("name");
-
-                MethodSymbol methodSymbol = table.getMethodSymbol(methodName);
 
                 if (methodSymbol != null){
                     Type type = methodSymbol.getType();
@@ -240,7 +261,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                     return null;
                 }
 
-                if (table.getSuper() != null)
+                if (table.classExtends())
                     methodCall.put("type", "undefined");
                 else
                     methodCall.put("type", "invalid");
@@ -248,38 +269,6 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             }
 
             methodCall.put("type", "undefined");
-
-            return null;
-        }
-
-        private Void visitFunctionCall(JmmNode functionCall, JmmSymbolTable table){
-
-            String functionName = functionCall.get("name");
-
-            MethodSymbol methodSymbol = table.getMethodSymbol(functionName);
-
-            if (methodSymbol != null) {
-
-                Type type = methodSymbol.getType();
-
-                functionCall.put("type", type.getName());
-                functionCall.put("isArray", type.isArray() ? "true" : "false");
-
-                return null;
-            }
-
-            for (String importStmt: table.getImports()) {
-
-                String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
-                String importedFunction = words[words.length - 1];
-
-                if (importedFunction.equals(functionName)){
-                    functionCall.put("type", "undefined");
-                    return null;
-                }
-            }
-
-            functionCall.put("type", "invalid");
 
             return null;
         }
@@ -345,7 +334,10 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
 
             if (varDeclaration == null) {
-                assignStmt.put("type", "invalid");
+                if (table.classExtends() && !table.getMethodSymbol(currentMethod).isStatic())
+                    assignStmt.put("type", "undefined");
+                else
+                    assignStmt.put("type", "invalid");
                 return null;
             }
 
@@ -361,8 +353,34 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 assignment.put("isArray", isArray ? "true" : "false");
             }
 
-            if (assignment.get("type").equals("undefined_array") && isArray){
+            if (assignment.get("type").equals("empty_array") && isArray){
                 assignment.put("type", type);
+                assignment.put("isArray", "true");
+            }
+
+            return null;
+        }
+
+        public Void visitArrayAssignStmt (JmmNode arrayAssignStmt, JmmSymbolTable table) {
+
+            String variable = arrayAssignStmt.get("name");
+
+            Symbol varDeclaration = table.getVarDeclaration(variable, currentMethod);
+
+            if (varDeclaration == null) {
+                arrayAssignStmt.put("type", "invalid");
+                return null;
+            }
+
+            String type = varDeclaration.getType().getName();
+            arrayAssignStmt.put("type", type);
+            arrayAssignStmt.put("isArray", "false");
+
+            JmmNode assignment = arrayAssignStmt.getChild(1);
+
+            if (assignment.get("type").equals("undefined")) {
+                assignment.put("type", type);
+                assignment.put("isArray","false");
             }
 
             return null;
@@ -378,7 +396,31 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
                 return null;
         }
-    }
 
+        private Void visitPrimitiveType(JmmNode primitiveType, JmmSymbolTable symbolTable) {
+
+            String type =  primitiveType.getChild(0).get("name");
+            primitiveType.put("type", type);
+            primitiveType.put("isArray", "false");
+
+            return null;
+        }
+        private Void visitArrayType(JmmNode arrayType, JmmSymbolTable symbolTable) {
+
+            String type =  arrayType.getChild(0).get("name");
+            arrayType.put("type", type);
+            arrayType.put("isArray", "true");
+
+            return null;
+        }
+        private Void visitVarDeclaration(JmmNode varDeclaration, JmmSymbolTable symbolTable) {
+
+            String type =  varDeclaration.getChild(0).get("type");
+            String isArray = varDeclaration.getChild(0).get("isArray");
+            varDeclaration.put("type", type);
+            varDeclaration.put("isArray", isArray);
+            return null;
+        }
+    }
 }
 

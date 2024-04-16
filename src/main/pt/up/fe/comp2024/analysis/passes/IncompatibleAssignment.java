@@ -15,12 +15,16 @@ public class IncompatibleAssignment extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit("AssignStmt", this::visitAssignStmt);
-    }
 
+        addVisit("AssignStmt", this::visitAssignStmt);
+        addVisit("ArrayAssignStmt", this::visitArrayAssignStmt);
+    }
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable table) {
 
         if (invalidAssignment(assignStmt))
+            return null;
+
+        if (assignStmt.get("type").equals("undefined"))
             return null;
 
         if (isLiteralAssignment(assignStmt)) {
@@ -31,8 +35,41 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         return null;
     }
 
+    private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
+
+        String arrayType = arrayAssignStmt.get("type");
+
+        JmmNode assigment = arrayAssignStmt.getChild(1);
+        String assignmentType = assigment.get("type");
+        Boolean isAssignmentArray = assigment.get("isArray").equals("true");
+
+        if (arrayType.equals("invalid") || assignmentType.equals("invalid"))
+            return null;
+
+        if (isAssignmentArray || !assignmentType.equals(arrayType)) {
+
+            String format = "Incompatible assignment. Attempted to assign expression of type %s to array of type %s.";
+
+            String message = String.format(
+                    format,
+                    assignmentType + (isAssignmentArray ? "[]" : ""),
+                    arrayType
+            );
+
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(arrayAssignStmt),
+                    NodeUtils.getColumn(arrayAssignStmt),
+                    message,
+                    null)
+            );
+        }
+       return null;
+    }
+
     private static boolean invalidAssignment(JmmNode assignStmt) {
-        return assignStmt.getChild(0).get("type").equals("invalid");
+        return assignStmt.getChild(0).get("type").equals("invalid") ||
+                assignStmt.get("type").equals("invalid");
     }
 
     private boolean isLiteralAssignment(JmmNode assignStmt) {

@@ -133,6 +133,9 @@ public class JasminGenerator {
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        if (operand.getName().equals("this")) {
+            reg = 0;
+        }
         switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 // TODO: check if this is correct
@@ -144,7 +147,7 @@ public class JasminGenerator {
                 }
                 break;
             }
-            case ARRAYREF, OBJECTREF -> {
+            case ARRAYREF, OBJECTREF, THIS, STRING-> {
                 code.append("astore").append(reg < 4 ? "_" : " ").append(reg).append(NL);
             }
             default -> throw new NotImplementedException(operand.getType().getTypeOfElement());
@@ -200,7 +203,10 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         switch (call.getInvocationType()) {
-            case invokevirtual, invokespecial, invokestatic -> code.append(getNormalCall(call));
+            case invokespecial -> code.append(getSpecialCall(call));
+            case invokestatic -> code.append(getStaticCall(call));
+            case invokevirtual -> code.append(getVirtualCall(call));
+            case invokeinterface -> code.append(getInterfaceCall(call));
             case NEW -> code.append(getNewCall(call));
             case arraylength -> code.append(getArrayLengthCall(call));
             case ldc -> {
@@ -417,26 +423,30 @@ public class JasminGenerator {
     }
 
     private String getAccessModifier(AccessModifier accessModifier) {
-        return accessModifier != AccessModifier.DEFAULT ?
-                accessModifier.name().toLowerCase():
-                "";
+        return switch (accessModifier) {
+            case PUBLIC -> "public";
+            case PRIVATE -> "private";
+            case PROTECTED -> "protected";
+            case DEFAULT -> "";
+            default -> throw new NotImplementedException(accessModifier);
+        };
     }
 
     private String getTypeDescriptor(Type type) {
-        switch (type.getTypeOfElement()) {
-            case ARRAYREF:
-                return "[" + getTypeDescriptor(((ArrayType) type).getElementType());
-            case OBJECTREF:
+        return switch (type.getTypeOfElement()) {
+            case ARRAYREF -> "[" + getTypeDescriptor(((ArrayType) type).getElementType());
+            case OBJECTREF -> {
                 String className = getFullClassName(((ClassType) type).getName());
-                return "L" + className + ";";
-        }
-        return switch (type.toString()) {
+                yield "L" + className + ";";
+            }
+            default -> switch (type.toString()) {
 
-            case "INT32" -> "I";
-            case "BOOLEAN" -> "Z";
-            case "STRING" -> "Ljava/lang/String;";
-            case "VOID" -> "V";
-            default -> throw new NotImplementedException(type);
+                case "INT32" -> "I";
+                case "BOOLEAN" -> "Z";
+                case "STRING" -> "Ljava/lang/String;";
+                case "VOID" -> "V";
+                default -> throw new NotImplementedException(type);
+            };
         };
     }
 
@@ -462,50 +472,114 @@ public class JasminGenerator {
         };
     }
 
-    private String getNormalCall(CallInstruction call) {
+    private String getSpecialCall(CallInstruction call) {
         var code = new StringBuilder();
 
         var caller = (Operand) call.getCaller();
         var className = "";
-        if (call.getInvocationType() == CallType.invokespecial) {
-            var callerType = caller.getType();
-            if (callerType.getTypeOfElement() == ElementType.THIS) {
-                if (ollirResult.getOllirClass().getSuperClass() == null) {
-                    className = "java/lang/Object";
-                }
-                else {
-                    className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
-                }
+        if (caller.getType().getTypeOfElement() == ElementType.THIS) {
+            if (ollirResult.getOllirClass().getSuperClass() == null) {
+                className = "java/lang/Object";
             }
             else {
-                className = getFullClassName(((ClassType) callerType).getName());
+                className = getFullClassName(ollirResult.getOllirClass().getSuperClass());
             }
         }
-        else if (call.getInvocationType() == CallType.invokevirtual) {
-            var callerType = caller.getType();
-            className = getFullClassName(((ClassType) callerType).getName());
-        }
         else {
-            className = getFullClassName(caller.getName());
+            className = getFullClassName(((ClassType) caller.getType()).getName());
         }
         var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
 
         // load caller
-        if (call.getInvocationType() != CallType.invokestatic) {
-            code.append(generators.apply(call.getCaller()));
-        }
+        code.append(generators.apply(call.getCaller()));
+
         // arguments
         for (var arg : call.getArguments()) {
             code.append(generators.apply(arg));
         }
 
-        code.append(call.getInvocationType().toString().toLowerCase()).append(" ").append(className).append("/").append(methodName).append("(");
+        code.append("invokespecial ").append(className).append("/").append(methodName).append("(");
 
         for (var arg : call.getArguments()) {
             code.append(getTypeDescriptor(arg.getType()));
         }
 
         code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getStaticCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(caller.getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokestatic ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getVirtualCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(((ClassType) caller.getType()).getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // load caller
+        code.append(generators.apply(call.getCaller()));
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokevirtual ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String getInterfaceCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        var caller = (Operand) call.getCaller();
+        var className = getFullClassName(((ClassType) caller.getType()).getName());
+        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
+
+        // load caller
+        code.append(generators.apply(call.getCaller()));
+
+        // arguments
+        for (var arg : call.getArguments()) {
+            code.append(generators.apply(arg));
+        }
+
+        code.append("invokeinterface ").append(className).append("/").append(methodName).append("(");
+
+        for (var arg : call.getArguments()) {
+            code.append(getTypeDescriptor(arg.getType()));
+        }
+
+        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(" ").append(call.getArguments().size()).append(NL);
 
         return code.toString();
     }

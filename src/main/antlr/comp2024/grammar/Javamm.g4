@@ -122,7 +122,6 @@ expr
     | NEW name=ID LPAREN RPAREN #ObjectDeclaration
     | expr DOT name=ID #Attribute
     | expr DOT name=ID LPAREN (expr (COMMA expr)*)? RPAREN #MethodCall
-    | name=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | LBRACKET (expr (COMMA expr)*)? RBRACKET #ArrayExpression
     | op=NOT expr #UnaryOp
     | expr op=(MUL | DIV) expr #BinaryOp

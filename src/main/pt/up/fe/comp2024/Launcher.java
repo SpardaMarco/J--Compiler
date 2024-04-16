@@ -47,7 +47,6 @@ public class Launcher {
         JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         table.print();
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
-        System.out.println(parserResult.getRootNode().toTree());
 
         // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         // printSymbolTable(table);
@@ -56,6 +55,8 @@ public class Launcher {
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
+        System.out.println(semanticsResult.getRootNode().toTree());
+        System.out.println(semanticsResult.getReports());
         TestUtils.noErrors(semanticsResult.getReports());
 
         // Optimization stage

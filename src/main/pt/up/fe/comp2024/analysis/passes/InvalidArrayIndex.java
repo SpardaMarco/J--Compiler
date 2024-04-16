@@ -41,6 +41,9 @@ public class InvalidArrayIndex extends AnalysisVisitor {
 
         String type = index.get("type");
 
+        if (type.equals("invalid"))
+            return;
+
         String message = String.format(
                 "Invalid array access operation with  %s.",
                 type.equals("invalid") ?

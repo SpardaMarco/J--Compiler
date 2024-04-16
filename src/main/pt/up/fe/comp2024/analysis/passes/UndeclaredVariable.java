@@ -21,6 +21,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         addVisit("MethodDeclaration", this::visitMethodDecl);
         addVisit("MainMethodDeclaration", this::visitMethodDecl);
         addVisit("AssignStmt", this::visitAssignment);
+        addVisit("ArrayAssignStmt", this::visitAssignment);
         addVisit("Identifier", this::visitIdentifier);
     }
 
@@ -54,7 +55,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         String variable = identifier.get("value");
 
-        // Create error report
         var message = String.format("Variable \"%s\" does not exist.", variable);
         addReport(Report.newError(
                 Stage.SEMANTIC,

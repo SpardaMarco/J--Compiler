@@ -40,10 +40,11 @@ public class InvalidArrayInit extends AnalysisVisitor {
 
         JmmNode length = arrayDeclaration.getChild(0);
 
-        if (!length.get("type").equals("invalid")) {
-            if (length.get("type").equals("int") && length.get("isArray").equals("false"))
-                return null;
-        }
+
+        if (length.get("type").equals("invalid"))
+            return null;
+        else if (length.get("type").equals("int") && length.get("isArray").equals("false"))
+            return null;
 
         String message = String.format(
                 "Invalid array declaration. Length value provided is not of type int."

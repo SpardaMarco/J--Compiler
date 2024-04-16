@@ -16,7 +16,6 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit("FunctionCall", this::visitFunctionCall);
         addVisit("MethodCall", this::visitMethodCall);
     }
 
@@ -25,13 +24,6 @@ public class IncompatibleArguments extends AnalysisVisitor {
         List<JmmNode> arguments = methodCall.getChildren().subList(1, methodCall.getNumChildren());
 
         checkArguments(methodCall, table, arguments);
-
-        return null;
-    }
-
-    public Void visitFunctionCall(JmmNode functionCall, JmmSymbolTable table) {
-
-        checkArguments(functionCall, table, functionCall.getChildren());
 
         return null;
     }
@@ -92,6 +84,9 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
                     JmmNode array = arguments.get(arguments.size() - 1);
                     String arrayType = array.get("type");
+
+                    if (arrayType.equals("empty_array"))
+                        return;
 
                     if (!arrayType.equals(varargType)) {
                         addReport(Report.newError(
@@ -160,6 +155,9 @@ public class IncompatibleArguments extends AnalysisVisitor {
                     parameter.getType().getName() + (parameter.getType().isArray() ? "[]" : "");
             String argumentType =
                     argument.get("type") + (argument.get("isArray").equals("true") ? "[]" : "");
+
+            if (argument.get("type").equals("empty_array") && parameter.getType().isArray())
+                return;
 
             if (!parameterType.equals(argumentType)){
                 addReport(Report.newError(

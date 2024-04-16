@@ -3,7 +3,6 @@ package pt.up.fe.comp2024.symboltable;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.*;
 
@@ -74,12 +73,12 @@ public class JmmSymbolTable implements SymbolTable {
 
     public Symbol getVarDeclaration(String varName, String method) {
 
-        for (Symbol varDecl : getLocalVariables(method)) {
+        for (Symbol varDecl : getParameters(method)) {
             if (varDecl.getName().equals(varName)) {
                 return varDecl;
             }
         }
-        for (Symbol varDecl : getParameters(method)) {
+        for (Symbol varDecl : getLocalVariables(method)) {
             if (varDecl.getName().equals(varName)) {
                 return varDecl;
             }
@@ -90,5 +89,9 @@ public class JmmSymbolTable implements SymbolTable {
             }
         }
         return null;
+    }
+
+    public boolean classExtends() {
+        return getSuper() != null;
     }
 }

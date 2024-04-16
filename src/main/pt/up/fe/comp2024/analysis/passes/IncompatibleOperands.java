@@ -45,7 +45,7 @@ public class IncompatibleOperands extends AnalysisVisitor {
                 checkOperand(leftOperand, operation, "int");
                 checkOperand(rightOperand, operation, "int");
             }
-            case "%" -> {
+            case "&&" -> {
                 checkOperand(leftOperand, operation, "boolean");
                 checkOperand(rightOperand, operation, "boolean");
             }
@@ -62,7 +62,8 @@ public class IncompatibleOperands extends AnalysisVisitor {
             return;
 
         Boolean isArray = operand.get("isArray").equals("true");
-            if (operandType.equals(type) && !isArray) return;
+
+        if (operandType.equals(type) && !isArray) return;
 
 
         var message = String.format(

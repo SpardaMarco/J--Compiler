@@ -22,6 +22,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     public JmmAnalysisImpl() {
 
         this.analysisPasses = List.of(
+                new AttributeInStaticMethod(),
                 new Duplicates(),
                 new IncompatibleAssignment(),
                 new IncompatibleArguments(),
@@ -30,6 +31,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new InvalidArrayAccess(),
                 new InvalidArrayIndex(),
                 new InvalidArrayInit(),
+                new InvalidFieldAccess(),
                 new InvalidThisInStaticMethod(),
                 new InvalidVarargArgument(),
                 new NonBooleanCondition(),
@@ -51,7 +53,6 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         List<Report> reports = new ArrayList<>();
 
-        // Visit all nodes in the AST
         for (var analysisPass : analysisPasses) {
             try {
                 var passReports = analysisPass.analyze(rootNode, table);

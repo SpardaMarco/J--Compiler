@@ -1,0 +1,8 @@
+import Other;
+
+class Main {
+
+    public static void main(String[] args) {
+        Other.x;
+    }
+}
