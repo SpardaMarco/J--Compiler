@@ -340,7 +340,7 @@ public class JasminGenerator {
 
         // calculate modifier
         String modifier = getAccessModifier(method.getMethodAccessModifier());
-        String isStatic = method.isStaticMethod() ? "static " : " ";
+        String isStatic = method.isStaticMethod() ? " static " : " ";
 
         String methodName = method.getMethodName();
 
@@ -357,12 +357,12 @@ public class JasminGenerator {
         var instCode = new StringBuilder();
         for (var inst : method.getInstructions()) {
 
-//            var label = method.getLabels(inst);
-//            if (label != null) {
-//                for (var l : label) {
-//                    instCode.append(TAB).append(l).append(":").append(NL);
-//                }
-//            }
+            var label = method.getLabels(inst);
+            if (label != null) {
+                for (var l : label) {
+                    instCode.append(TAB).append(l).append(":").append(NL);
+                }
+            }
             instCode.append(StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, NL+TAB, NL)));
 
@@ -398,7 +398,7 @@ public class JasminGenerator {
         String name = field.getFieldName();
         String descriptor = getTypeDescriptor(field.getFieldType());
 
-        code.append(".field ").append(access).append(name).append(" ").append(descriptor).append(NL);
+        code.append(".field ").append(access).append(" ").append(name).append(" ").append(descriptor).append(NL);
 
         return code.toString();
     }
@@ -433,10 +433,10 @@ public class JasminGenerator {
 
     private String getAccessModifier(AccessModifier accessModifier) {
         return switch (accessModifier) {
-            case PUBLIC -> "public ";
-            case PRIVATE -> "private ";
-            case PROTECTED -> "protected ";
-            case DEFAULT -> " ";
+            case PUBLIC -> "public";
+            case PRIVATE -> "private";
+            case PROTECTED -> "protected";
+            case DEFAULT -> "";
             default -> throw new NotImplementedException(accessModifier);
         };
     }
