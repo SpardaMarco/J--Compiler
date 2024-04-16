@@ -1,16 +1,20 @@
 import smth;
 
-class ArrayAccessOnInt {
+class Master {
 
-    boolean x;
+    int x;
 
     public static void main(String[] args) {
 
     }
 
     public boolean foo(){
-       new int [x];
-        return true;
+
+       Master master;
+       int[] a;
+
+       a = new int [smth.y];
+       return true;
     }
 
 }
