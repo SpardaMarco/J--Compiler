@@ -49,23 +49,28 @@ public class InvalidArrayAccess extends AnalysisVisitor {
 
     private Void visitArrayAssignStmt(JmmNode arrayAssignStmt, SymbolTable table) {
 
-        checkArray(arrayAssignStmt);
         checkIndex(arrayAssignStmt);
+        checkArray(arrayAssignStmt);
+
+        return null;
+    }
+
+    private void checkIndex(JmmNode arrayAssignStmt) {
 
         JmmNode index = arrayAssignStmt.getChild(0);
 
         String indexType = index.get("type");
         if (indexType.equals("invalid"))
-            return null;
+            return;
         else if (indexType.equals("undefined")){
             index.put("type", "int");
             index.put("isArray", "false");
-            return null;
+            return;
         } else if (indexType.equals("int") && index.get("isArray").equals("false"))
-            return null;
+            return;
 
         String message = String.format(
-                "Invalid array access operation on '%s'.",
+                "Invalid array access operation on '%s' with bad index.",
                 arrayAssignStmt.get("name")
         );
 
@@ -76,14 +81,29 @@ public class InvalidArrayAccess extends AnalysisVisitor {
                 message,
                 null)
         );
-
-        return null;
-    }
-
-    private void checkIndex(JmmNode arrayAssignStmt) {
     }
 
     private void checkArray(JmmNode arrayAssignStmt) {
-        
+
+        String arrayType = arrayAssignStmt.get("type");
+        Boolean isArray = arrayAssignStmt.get("isArray").equals("true");
+
+        if (arrayType.equals("invalid"))
+            return;
+
+        if (!isArray){
+            String message = String.format(
+                    "Invalid array access operation on non-array '%s'.",
+                    arrayAssignStmt.get("name")
+            );
+
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(arrayAssignStmt),
+                    NodeUtils.getColumn(arrayAssignStmt),
+                    message,
+                    null)
+            );
+        }
     }
 }
