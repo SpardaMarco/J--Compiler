@@ -1,0 +1,52 @@
+import io;
+import Extension;
+class Misc extends Extension{
+
+    int exampleField;
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo(boolean exampleParam) {
+        int exampleLocal;
+
+        int tempInt;
+        boolean tempBool;
+        Misc exampleMisc;
+        Extension exampleEx;
+
+        exampleLocal = 1;
+        tempInt = exampleLocal;
+
+        exampleParam = true;
+        tempBool = exampleParam;
+
+        exampleField =  3;
+        tempInt = exampleField;
+
+        tempInt = exampleField + exampleLocal;
+
+        exampleMisc = io.printMisc(new Misc());
+
+        exampleEx = exampleMisc;
+
+        return 0;
+    }
+
+    public int bar(){
+        Misc miscVar;
+        int intVar;
+        boolean boolVar;
+        io ioVar;
+
+        miscVar = new Misc();
+        ioVar = new io();
+
+        intVar = miscVar.foo(true);
+
+        return 0;
+    }
+
+
+}
