@@ -16,7 +16,6 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit("FunctionCall", this::visitFunctionCall);
         addVisit("MethodCall", this::visitMethodCall);
     }
 
@@ -25,13 +24,6 @@ public class IncompatibleArguments extends AnalysisVisitor {
         List<JmmNode> arguments = methodCall.getChildren().subList(1, methodCall.getNumChildren());
 
         checkArguments(methodCall, table, arguments);
-
-        return null;
-    }
-
-    public Void visitFunctionCall(JmmNode functionCall, JmmSymbolTable table) {
-
-        checkArguments(functionCall, table, functionCall.getChildren());
 
         return null;
     }

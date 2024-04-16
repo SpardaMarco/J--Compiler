@@ -35,6 +35,9 @@ public class UndeclaredVariable extends AnalysisVisitor {
         if (table.getVarDeclaration(variable, currentMethod) != null)
             return null;
 
+        if (table.classExtends())
+            return null;
+
         // Create error report
         var message = String.format("Variable '%s' does not exist.", variable);
         addReport(Report.newError(

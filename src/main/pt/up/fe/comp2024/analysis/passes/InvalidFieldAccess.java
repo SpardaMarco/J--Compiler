@@ -1,11 +1,11 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 public class InvalidFieldAccess extends AnalysisVisitor {
 
@@ -15,11 +15,11 @@ public class InvalidFieldAccess extends AnalysisVisitor {
         addVisit("Attribute", this::visitAttribute);
     }
 
-    private Void visitAttribute(JmmNode attribute, SymbolTable table) {
+    private Void visitAttribute(JmmNode attribute, JmmSymbolTable table) {
 
         JmmNode object = attribute.getChild(0);
 
-        if (!object.get("type").equals(table.getClassName()))
+        if (!object.get("type").equals(table.getClassName()) || table.classExtends())
             return null;
 
         String attributeName = attribute.get("name");

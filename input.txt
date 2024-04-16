@@ -1,6 +1,6 @@
 import smth;
 
-class Master {
+class Master extends Main {
 
     int x;
 
@@ -13,7 +13,7 @@ class Master {
        Master master;
        int[] a;
 
-       a = new int [smth.y];
+       a = new int [master.y];
        return true;
     }
 

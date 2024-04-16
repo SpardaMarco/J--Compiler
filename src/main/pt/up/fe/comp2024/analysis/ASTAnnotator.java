@@ -53,7 +53,6 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("ParenExpr", this::visitExprStmt);
             addVisit("ArrayAccessOp", this::visitArrayAccessOp);
             addVisit("MethodCall", this::visitMethodCall);
-            addVisit("FunctionCall", this::visitFunctionCall);
             addVisit("This", this::visitThis);
             addVisit("Attribute", this::visitAttribute);
             addVisit("ObjectDeclaration", this::visitObjectDeclaration);
@@ -252,38 +251,6 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             }
 
             methodCall.put("type", "undefined");
-
-            return null;
-        }
-
-        private Void visitFunctionCall(JmmNode functionCall, JmmSymbolTable table){
-
-            String functionName = functionCall.get("name");
-
-            MethodSymbol methodSymbol = table.getMethodSymbol(functionName);
-
-            if (methodSymbol != null) {
-
-                Type type = methodSymbol.getType();
-
-                functionCall.put("type", type.getName());
-                functionCall.put("isArray", type.isArray() ? "true" : "false");
-
-                return null;
-            }
-
-            for (String importStmt: table.getImports()) {
-
-                String[] words = importStmt.replaceAll("[\\[\\]]", "").split(", ");
-                String importedFunction = words[words.length - 1];
-
-                if (importedFunction.equals(functionName)){
-                    functionCall.put("type", "undefined");
-                    return null;
-                }
-            }
-
-            functionCall.put("type", "invalid");
 
             return null;
         }
