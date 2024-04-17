@@ -289,6 +289,29 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         if (fields.stream().anyMatch(f -> f.getName().equals(lhs)) && isNotLocal && isNotParam) {
             code.append(rhs.getComputation());
+            var isMethodCall = isNodeType(METHOD_CALL.toString(), child);
+            if (isMethodCall) {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(thisType);
+                code.append(temp);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(rhs.getCode());
+                code.append("putfield(this,");
+                code.append(SPACE);
+                code.append(lhs);
+                code.append(typeString);
+                code.append(",");
+                code.append(SPACE);
+                code.append(temp);
+                code.append(tempType);
+                code.append(").V");
+                code.append(END_STMT);
+                return code.toString();
+            }
             code.append("putfield(this,");
             code.append(SPACE);
             code.append(lhs);

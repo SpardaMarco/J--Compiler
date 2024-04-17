@@ -30,7 +30,8 @@ class Misc {
         m = new Misc();
 
         //i = m.one((field));
-        field = field + field * field / field;
+        field = (new Misc()).one(1);
+        //field3 = new Misc();
         return 1;
     }
 }
