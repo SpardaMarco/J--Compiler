@@ -1,6 +1,6 @@
 import Main;
 import java.util.Scanner;
-
+import io;
 class Object {
     Main x;
     String y;
@@ -8,11 +8,16 @@ class Object {
     public static void main(String[] args) {
         Object obj;
         obj = new Object();
-        obj.call();
     }
 
-    public int call() {
+    public int foo() {
+        return 1;
+    }
+
+    public int call(Object obj, Main xx, String y) {
         x = new Main();
+        io.println(new Main());
+
         return 1;
     }
 
