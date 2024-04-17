@@ -8,6 +8,9 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -161,19 +164,52 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         code.append("\"" + name + "\"");
 
         if (methodCallNode.getNumChildren() > 1) {
-            var codeToAppend = new StringBuilder();
-            var computationToAppend = new StringBuilder();
+            var ancestor = methodCallNode.getAncestor(METHOD_DECLARATION).isPresent() ?
+                    methodCallNode.getAncestor(METHOD_DECLARATION).get() :
+                    methodCallNode.getAncestor(MAIN_METHOD_DECLARATION).get();
+            var locals = table.getLocalVariables(ancestor.get("name"));
+            var params = table.getParameters(ancestor.get("name"));
             for (int i = 1; i < methodCallNode.getNumChildren(); i++) {
                 code.append(",");
                 code.append(SPACE);
                 OllirExprResult result = visit(methodCallNode.getJmmChild(i));
-//                if (methodCallNode.getJmmChild(i).getKind().equals(OBJECT_DECLARATION.toString())) {
+                var isLiteral = isNodeType(INTEGER_LITERAL.toString(), methodCallNode.getJmmChild(i)) || isNodeType(BOOLEAN_LITERAL.toString(), methodCallNode.getJmmChild(i));
+                String childValue;
+                var child = methodCallNode.getJmmChild(i);
+                while (true) {
+                    if (child.getKind().equals(IDENTIFIER.toString())) {
+                        childValue = child.get("value");
+                        break;
+                    }
+                    else if (child.getKind().equals(PAREN_EXPR.toString())) {
+                        child = child.getJmmChild(0);
+                    }
+                    else {
+                        childValue = "";
+                        break;
+                    }
+                }
+
+                var isNotLocal = locals == null || locals.stream().noneMatch(l -> l.getName().equals(childValue));
+                var isNotParam = params == null || params.stream().noneMatch(p -> p.getName().equals(childValue));
+                var isObjectDecl = isNodeType(OBJECT_DECLARATION.toString(), methodCallNode.getJmmChild(i));
+                if (!(isLiteral || !isNotLocal || !isNotParam || isObjectDecl)) {
+                    var temp = OptUtils.getTemp();
+                    var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(i), table));
                     computation.append(result.getComputation());
-//                }
-                code.append(result.getCode());
+                    computation.append(temp).append(tempType).append(SPACE)
+                            .append(ASSIGN).append(tempType).append(SPACE);
+                    computation.append(result.getCode());
+                    if (!computation.toString().endsWith(END_STMT))
+                        computation.append(END_STMT);
+
+                    code.append(temp).append(tempType);
+                }
+                else {
+                    computation.append(result.getComputation());
+                    code.append(result.getCode());
+                }
             }
-//            code.insert(0, computationToAppend);
-//            code.append(codeToAppend);
         }
 
         code.append(")");
@@ -256,11 +292,38 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var params = table.getParameters(methodName);
         var fields = table.getFields();
 
-        var firstChildValue = (BinExprNode.getJmmChild(0).hasAttribute("value")) ?
-                BinExprNode.getJmmChild(0).get("value") : "";
+        String firstChildValue;
+        var firstChild = BinExprNode.getJmmChild(0);
+        while (true) {
+            if (firstChild.getKind().equals(IDENTIFIER.toString())) {
+                firstChildValue = firstChild.get("value");
+                break;
+            }
+            else if (firstChild.getKind().equals(PAREN_EXPR.toString())) {
+                firstChild = firstChild.getJmmChild(0);
+            }
+            else {
+                firstChildValue = "";
+                break;
+            }
+        }
 
-        var secondChildValue = (BinExprNode.getJmmChild(1).hasAttribute("value")) ?
-                BinExprNode.getJmmChild(1).get("value") : "";
+        String secondChildValue;
+        var secondChild = BinExprNode.getJmmChild(1);
+        while (true) {
+            if (secondChild.getKind().equals(IDENTIFIER.toString())) {
+                secondChildValue = secondChild.get("value");
+                break;
+            }
+            else if (secondChild.getKind().equals(PAREN_EXPR.toString())) {
+                secondChild = secondChild.getJmmChild(0);
+            }
+            else {
+                secondChildValue = "";
+                break;
+            }
+        }
+
 
         var isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));

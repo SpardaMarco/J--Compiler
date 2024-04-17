@@ -6,16 +6,14 @@ class Misc {
 
     }
 
-    public int one() {
-    int a;
-    a = 1;
-        return a;
-    }
-
     public int two(int a, int c) {
     int b;
     b = a + 1;
         return b;
+    }
+
+    public Misc three(Misc a, Misc b) {
+        return a;
     }
 
     public int foo() {
@@ -25,12 +23,13 @@ class Misc {
 
         m = new Misc();
         n = new Misc();
-        //i = 1+field;
-        //i = 1 + m.one();
-        //i = (1+(2)*(((3+1))));
+       // i = m.two(((1)), m.two(1,0));
 
-        //(m.two((m.one()+ m.two(1,0))*1+n.one(),0));
-        //i = (m.two((m.one()+ m.two(1,0))*1+n.one(),0));
-        return (m.two((m.one()+ m.two(1,0))*1+n.one(),0));
+        m = n.three((new Misc()), m.three(new Misc(), new Misc()));
+        //m = m.three((new Misc()), (new Misc()));
+
+
+
+        return 1;
     }
 }

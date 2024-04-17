@@ -34,6 +34,7 @@ public class TypeUtils {
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
             case PAREN_EXPR -> getExprType(expr.getChildren().get(0), table);
+            case OBJECT_DECLARATION -> new Type(expr.get("type"), expr.get("isArray").equals("true"));
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
