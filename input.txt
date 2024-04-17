@@ -1,0 +1,19 @@
+import Main;
+import java.util.Scanner;
+
+class Object {
+    Main x;
+    String y;
+
+    public static void main(String[] args) {
+        Object obj;
+        obj = new Object();
+        obj.call();
+    }
+
+    public int call() {
+        x = new Main();
+        return 1;
+    }
+
+}

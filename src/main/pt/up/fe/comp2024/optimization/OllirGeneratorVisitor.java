@@ -264,7 +264,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var locals = table.getLocalVariables(methodName);
         var params = table.getParameters(methodName);
 
-        var isNotLocal = fields.stream().noneMatch(f -> f.getName().equals(lhs));
+        var isNotLocal = locals.stream().noneMatch(f -> f.getName().equals(lhs));
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
 
         if (fields.stream().anyMatch(f -> f.getName().equals(lhs)) && isNotLocal && isNotParam) {
