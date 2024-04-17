@@ -118,7 +118,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var computation = new StringBuilder();
         var exprName = "";
         if (methodCallNode.getJmmChild(0).getKind().equals(PAREN_EXPR.toString())) {
-            var result = visit(methodCallNode.getJmmChild(0).getJmmChild(0));
+            var result = visit(methodCallNode.getJmmChild(0));
             code.append(result.getCode());
             computation.append(result.getComputation());
 
