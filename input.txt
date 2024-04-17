@@ -6,14 +6,16 @@ class Object {
     String y;
 
     public static void main(String[] args) {
-        int i;
-        i = 1*2+3/3-1;
+        Object obj;
+        Main z;
+        obj = new Object();
+        z = obj.call();
     }
 
     public Main call() {
         Main a;
         a = new Main();
-        return a;
+        return a.add();
     }
 
 }
