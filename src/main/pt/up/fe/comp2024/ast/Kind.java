@@ -24,7 +24,8 @@ public enum Kind {
     BINARY_OP,
     IDENTIFIER,
     INTEGER_LITERAL,
-    BOOLEAN_LITERAL
+    BOOLEAN_LITERAL,
+    PAREN_EXPR,
     ;
 
     private static final Set<Kind> STATEMENTS = Set.of(RETURN, EXPR_STMT, ASSIGN_STMT);

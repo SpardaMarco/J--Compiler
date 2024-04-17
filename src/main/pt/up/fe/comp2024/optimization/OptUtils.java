@@ -27,6 +27,10 @@ public class OptUtils {
         return tempNumber;
     }
 
+    public static int getCurrentTempNum() {
+        return tempNumber;
+    }
+
     public static String toOllirType(JmmNode typeNode) {
         PRIMITIVE_TYPE.checkOrThrow(typeNode);
 

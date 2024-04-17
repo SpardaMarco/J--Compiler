@@ -16,7 +16,8 @@ class Object {
 
     public int call(Object obj, Main xx, String y) {
         x = new Main();
-        io.println(new Main());
+        io.println((new Scanner()));
 
         return 1;
+}
 }
