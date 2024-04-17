@@ -299,8 +299,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(END_STMT);
             return code.toString();
         }
-
-        if (child.getKind().equals(IDENTIFIER.toString())) {
+        var isIdentifier = isNodeType(IDENTIFIER.toString(), child);
+        if (isIdentifier) {
             if (fields.stream().anyMatch(f -> f.getName().equals(child.get("value")))) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(thisType);
@@ -324,8 +324,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 return code.toString();
             }
         }
-
-        if (child.getKind().equals(OBJECT_DECLARATION.toString())) {
+        var isObjectDeclaration = isNodeType(OBJECT_DECLARATION.toString(), child);
+        if (isObjectDeclaration) {
             code.append(rhs.getComputation());
             code.append(lhs);
             code.append(typeString);
@@ -342,8 +342,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             return code.toString();
         }
-
-        if (child.getKind().equals(METHOD_CALL.toString()) || child.getKind().equals(FUNCTION_CALL.toString())) {
+        var isMethodCall = isNodeType(METHOD_CALL.toString(), child);
+        if (isMethodCall) {
             var newCode = new StringBuilder();
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);
