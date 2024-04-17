@@ -79,6 +79,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 conditionalExpression.getChild(0).put("type", "boolean");
                 conditionalExpression.getChild(0).put("isArray", "true");
             }
+
             return null;
         }
 

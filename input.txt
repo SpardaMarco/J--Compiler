@@ -1,15 +1,18 @@
 import Other;
+import Smth;
 
-class Test {
+class Test extends Smth {
 
+    int x;
 
     public static void main(String[] args) {
 
-        Other other;
-        if (other.getInt()[2]) {
+        1;
 
-        } else {
+        Test test;
 
-        }
+        new int [test.getSmth()];
+
+        [1,2,3];
     }
 }
