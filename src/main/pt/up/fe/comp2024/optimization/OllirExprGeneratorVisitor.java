@@ -221,21 +221,32 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code.toString());
     }
 
+    private boolean isNodeType (String nodeType, JmmNode node) {
+        var value = true;
+        while (value) {
+            if (node.getKind().equals(nodeType)) {
+                break;
+            }
+            else if (node.getKind().equals(PAREN_EXPR.toString())) {
+                node = node.getJmmChild(0);
+            }
+            else {
+                value = false;
+                break;
+            }
+        }
+        return value;
+    }
+
     private OllirExprResult visitBinExpr(JmmNode BinExprNode, Void unused) {
         var lhs = visit(BinExprNode.getJmmChild(0));
         var rhs = visit(BinExprNode.getJmmChild(1));
+        var lhsToAppend = "";
+        var rhsToAppend = "";
+        var lhsIsBinExpr = isNodeType(BINARY_OP.toString(), BinExprNode.getJmmChild(0));
+        var rhsIsBinExpr = isNodeType(BINARY_OP.toString(), BinExprNode.getJmmChild(1));
 
         StringBuilder computation = new StringBuilder();
-
-        computation.append(lhs.getComputation());
-        computation.append(rhs.getComputation());
-
-        Type resType = TypeUtils.getExprType(BinExprNode, table);
-        String resOllirType = OptUtils.toOllirType(resType);
-        String code = OptUtils.getTemp() + resOllirType;
-
-        computation.append(code).append(SPACE)
-                .append(ASSIGN).append(resOllirType).append(SPACE);
 
         var methodName = (BinExprNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
                 BinExprNode.getAncestor(METHOD_DECLARATION).get().get("name") :
@@ -253,70 +264,125 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         var isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
+        var isIntLiteral = isNodeType(INTEGER_LITERAL.toString(), BinExprNode.getJmmChild(0));
+        var isBoolLiteral = isNodeType(BOOLEAN_LITERAL.toString(), BinExprNode.getJmmChild(0));
 
-        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(0).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")))) {
-            var temp = OptUtils.getTemp();
-
-            computation.append("getfield(this, ").append(BinExprNode.getJmmChild(0).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(END_STMT);
-            computation.append(temp + resOllirType);
-            computation.append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
-            computation.append(code).append(SPACE);
-
-            code = temp + resOllirType;
+        if (!(!isNotLocal || !isNotParam || isIntLiteral || isBoolLiteral)) {
+            if (lhsIsBinExpr) {
+                computation.append(lhs.getComputation());
+                lhsToAppend = lhs.getCode();
+            }
+            else {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(lhs.getCode());
+                lhsToAppend = temp + tempType;
+            }
+            if (!computation.toString().endsWith(END_STMT))
+                computation.append(END_STMT);
+        }
+        else {
+            lhsToAppend = lhs.getCode();
         }
 
         isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(secondChildValue));
         isNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
+        isIntLiteral = isNodeType(INTEGER_LITERAL.toString(), BinExprNode.getJmmChild(1));
+        isBoolLiteral = isNodeType(BOOLEAN_LITERAL.toString(), BinExprNode.getJmmChild(1));
 
-        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(1).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(1).get("value")))) {
-            var temp = OptUtils.getTemp();
-
-            computation.append("getfield(this, ").append(BinExprNode.getJmmChild(1).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(END_STMT);
-            computation.append(temp + resOllirType);
-            computation.append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
-            computation.append(lhs.getCode()).append(SPACE);
-
-            Type type = TypeUtils.getExprType(BinExprNode, table);
-            computation.append(BinExprNode.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
-                    .append(code);
-
-            code = temp + resOllirType;
-
+        if (!(!isNotLocal || !isNotParam || isIntLiteral || isBoolLiteral)) {
+            if (rhsIsBinExpr) {
+                computation.append(rhs.getComputation());
+                rhsToAppend = rhs.getCode();
+            }
+            else {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(rhs.getCode());
+                rhsToAppend = temp + tempType;
+            }
             if (!computation.toString().endsWith(END_STMT))
                 computation.append(END_STMT);
-
-            return new OllirExprResult(code, computation);
+        }
+        else {
+            rhsToAppend = rhs.getCode();
         }
 
-        if (BinExprNode.getJmmChild(0).getKind().equals(METHOD_CALL.toString()) || BinExprNode.getJmmChild(1).getKind().equals(METHOD_CALL.toString())) {
-            computation.append(rhs.getCode());
+        Type resType = TypeUtils.getExprType(BinExprNode, table);
+        String resOllirType = OptUtils.toOllirType(resType);
+        String code = OptUtils.getTemp() + resOllirType;
 
-            var newCode = new StringBuilder();
-            Type type = TypeUtils.getExprType(BinExprNode, table);
+        computation.append(code).append(SPACE)
+                .append(ASSIGN).append(resOllirType).append(SPACE);
 
-            newCode.append("$");
-            newCode.append(OptUtils.getNextTempNum());
-            newCode.append(".");
-            newCode.append(lhs.getCode());
-            newCode.append(SPACE);
-            newCode.append(BinExprNode.get("op"));
-            newCode.append(OptUtils.toOllirType(type));
-            newCode.append(SPACE);
-            newCode.append(code);
 
-            return new OllirExprResult(newCode.toString(), computation);
-        }
+
+//        isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
+//        isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
+//        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(0).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")))) {
+//            var temp = OptUtils.getTemp();
+//
+//            computation.append("getfield(this, ").append(BinExprNode.getJmmChild(0).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(END_STMT);
+//            computation.append(temp + resOllirType);
+//            computation.append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
+//            computation.append(code).append(SPACE);
+//
+//            code = temp + resOllirType;
+//        }
+//
+//        isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(secondChildValue));
+//        isNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
+//
+//        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(1).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(1).get("value")))) {
+//            var temp = OptUtils.getTemp();
+//
+//            computation.append("getfield(this, ").append(BinExprNode.getJmmChild(1).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(END_STMT);
+//            computation.append(temp + resOllirType);
+//            computation.append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
+//            computation.append(lhs.getCode()).append(SPACE);
+//
+//            Type type = TypeUtils.getExprType(BinExprNode, table);
+//            computation.append(BinExprNode.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+//                    .append(code);
+//
+//            code = temp + resOllirType;
+//
+//            if (!computation.toString().endsWith(END_STMT))
+//                computation.append(END_STMT);
+//
+//            return new OllirExprResult(code, computation);
+//        }
+
+//        if (BinExprNode.getJmmChild(0).getKind().equals(METHOD_CALL.toString()) || BinExprNode.getJmmChild(1).getKind().equals(METHOD_CALL.toString())) {
+//            computation.append(rhsToAppend);
+//
+//            var newCode = new StringBuilder();
+//            Type type = TypeUtils.getExprType(BinExprNode, table);
+//
+//            newCode.append(lhsToAppend);
+//            newCode.append(SPACE);
+//            newCode.append(BinExprNode.get("op"));
+//            newCode.append(OptUtils.toOllirType(type));
+//            newCode.append(SPACE);
+//            newCode.append(code);
+//
+//            return new OllirExprResult(newCode.toString(), computation);
+//        }
 
         isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
         isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
-        var isLiteral = BinExprNode.getJmmChild(0).getKind().equals(INTEGER_LITERAL.toString()) || BinExprNode.getJmmChild(0).getKind().equals(BOOLEAN_LITERAL.toString());
+        var isLiteral = isNodeType(INTEGER_LITERAL.toString(), BinExprNode.getJmmChild(0)) || isNodeType(BOOLEAN_LITERAL.toString(), BinExprNode.getJmmChild(0));
         if (!BinExprNode.getJmmChild(0).hasAttribute("value") || isLiteral || !isNotLocal || !isNotParam) {
-            computation.append(lhs.getCode()).append(SPACE);
+            computation.append(lhsToAppend).append(SPACE);
         }
 
         Type type = TypeUtils.getExprType(BinExprNode, table);
         computation.append(BinExprNode.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
-                .append(rhs.getCode());
+                .append(rhsToAppend);
 
         if (!computation.toString().endsWith(END_STMT))
             computation.append(END_STMT);

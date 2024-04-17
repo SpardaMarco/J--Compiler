@@ -208,6 +208,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
+    private boolean isNodeType (String nodeType, JmmNode node) {
+        var value = true;
+        while (value) {
+            if (node.getKind().equals(nodeType)) {
+                break;
+            }
+            else if (node.getKind().equals(PAREN_EXPR.toString())) {
+                node = node.getJmmChild(0);
+            }
+            else {
+                value = false;
+                break;
+            }
+        }
+        return value;
+    }
+
     private String visitReturn(JmmNode returnNode, Void unused) {
         String methodName = returnNode.getAncestor(METHOD_DECLARATION).get().get("name");
         Type retType = table.getReturnType(methodName);
@@ -220,10 +237,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (returnNode.getNumChildren() > 0) {
             code = new StringBuilder();
             expr = exprVisitor.visit(returnNode.getJmmChild(0));
-
-            if (returnNode.getChild(0).getKind().equals(METHOD_CALL.toString())) {
+            var isMethodCall = isNodeType(METHOD_CALL.toString(), returnNode.getJmmChild(0));
+            if (isMethodCall) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
+                code.append(expr.getComputation());
                 code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
                 code.append(RETURN_STMT).append(OptUtils.toOllirType(retType)).append(SPACE).append(temp).append(tempType).append(END_STMT);
                 return code.toString();

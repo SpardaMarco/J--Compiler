@@ -1,25 +1,36 @@
-import io;
-import Extension;
-class Misc extends Extension{
-
-    int exampleField;
-
+class Misc {
+    int field;
     public static void main(String[] args) {
+    Misc m;
+    m.foo();
 
     }
 
-    public int foo(boolean exampleParam) {
-        int exampleLocal;
+    public int one() {
+    int a;
+    a = 1;
+        return a;
+    }
 
-        Misc exampleMisc;
-        exampleMisc = io.printMisc(new Misc());
+    public int two(int a, int c) {
+    int b;
+    b = a + 1;
+        return b;
+    }
 
-        exampleLocal = 0;
-        io.printInt(new Misc());
-        exampleLocal = 1;
-        io.printInt(((new Misc())));
+    public int foo() {
+        Misc m;
+        Misc n;
+        int i;
 
+        m = new Misc();
+        n = new Misc();
+        //i = 1+field;
+        //i = 1 + m.one();
+        //i = (1+(2)*(((3+1))));
 
-        return 0;
+        //(m.two((m.one()+ m.two(1,0))*1+n.one(),0));
+        //i = (m.two((m.one()+ m.two(1,0))*1+n.one(),0));
+        return (m.two((m.one()+ m.two(1,0))*1+n.one(),0));
     }
 }
