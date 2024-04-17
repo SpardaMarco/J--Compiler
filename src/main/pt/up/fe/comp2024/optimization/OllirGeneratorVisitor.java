@@ -268,6 +268,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
 
         if (fields.stream().anyMatch(f -> f.getName().equals(lhs)) && isNotLocal && isNotParam) {
+            code.append(rhs.getComputation());
             code.append("putfield(this,");
             code.append(SPACE);
             code.append(lhs);
