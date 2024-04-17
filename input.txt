@@ -19,6 +19,4 @@ class Object {
         io.println(new Main());
 
         return 1;
-    }
-
 }

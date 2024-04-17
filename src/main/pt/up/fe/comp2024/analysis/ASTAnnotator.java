@@ -79,6 +79,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 conditionalExpression.getChild(0).put("type", "boolean");
                 conditionalExpression.getChild(0).put("isArray", "true");
             }
+
             return null;
         }
 
@@ -305,23 +306,17 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
 
         private Void visitAttribute(JmmNode attribute, SymbolTable table) {
 
-            JmmNode object = attribute.getChild(0);
+            JmmNode array = attribute.getChild(0);
 
             String attributeName = attribute.get("name");
 
-            if (object.get("type").equals(table.getClassName()) || object.isInstance("This")) {
-
-                for (Symbol field: table.getFields()) {
-                    if (field.getName().equals(attributeName)) {
-
-                        attribute.put("type", field.getType().getName());
-                        attribute.put("isArray", field.getType().isArray() ? "true" : "false");
-                        return null;
-                    }
-                }
+            if (!attributeName.equals("length")) {
+                attribute.put("type", "invalid");
+                return null;
             }
 
-            attribute.put("type", "undefined");
+            attribute.put("type", "int");
+            attribute.put("isArray", "false");
 
             return null;
         }
