@@ -58,64 +58,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code.toString(), computation.toString());
     }
 
-//    private OllirExprResult visitMethodCall(JmmNode methodCallNode, Void unused) {
-//        var code = new StringBuilder();
-//        var computation = new StringBuilder();
-//        var exprHasValue = methodCallNode.getJmmChild(0).hasAttribute("value");
-//        var exprName = (exprHasValue) ?
-//                methodCallNode.getJmmChild(0).get("value") : methodCallNode.getJmmChild(0).get("name");
-//        var exprType = methodCallNode.getJmmChild(0).get("type");
-//        var name = methodCallNode.get("name");
-//
-//        var importsList = table.getImportsList();
-//        var methodSymbol = table.getMethodSymbol(name);
-//
-//        if (exprName.equals("this") || exprType.equals(table.getClassName())) {
-//            if (methodSymbol.isStatic()) {
-//                code.append("invokestatic(");
-//            }
-//            else code.append("invokevirtual(");
-//        }
-//
-//        else if (exprName.equals(table.getClassName()) || importsList.contains(exprName)) {
-//            code.append("invokestatic(");
-//        }
-//
-//        else {
-//            code.append("invokevirtual(");
-//        }
-//
-//        code.append(exprName);
-//
-//        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !exprName.equals("this"))
-//            code.append("." + exprType);
-//
-//        code.append(", ");
-//
-//        code.append("\"" + name + "\"");
-//
-//        if (methodCallNode.getNumChildren() > 1) {
-//            for (int i = 1; i < methodCallNode.getNumChildren(); i++) {
-//                code.append(",");
-//                code.append(SPACE);
-//                OllirExprResult result = visit(methodCallNode.getJmmChild(i));
-//                if (methodCallNode.getJmmChild(i).getKind().equals(OBJECT_DECLARATION.toString())) {
-//                    computation.append(result.getComputation());
-//                }
-//                code.append(result.getCode());
-//            }
-//        }
-//
-//        code.append(")");
-//
-//        var type = TypeUtils.getExprType(methodCallNode, table);
-//        var ollirType = OptUtils.toOllirType(type);
-//        code.append(ollirType);
-//        code.append(END_STMT);
-//
-//        return new OllirExprResult(code.toString(), computation.toString());
-//    }
-
     private OllirExprResult visitMethodCall(JmmNode methodCallNode, Void unused) {
         var code = new StringBuilder();
         var computation = new StringBuilder();
@@ -276,7 +218,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private OllirExprResult visitBinExpr(JmmNode BinExprNode, Void unused) {
         var lhs = visit(BinExprNode.getJmmChild(0));
-        var rhs = visit(BinExprNode.getJmmChild(1));
         var lhsToAppend = "";
         var rhsToAppend = "";
         var lhsIsBinExpr = isNodeType(BINARY_OP.toString(), BinExprNode.getJmmChild(0));
@@ -349,6 +290,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         else {
             lhsToAppend = lhs.getCode();
         }
+        var rhs = visit(BinExprNode.getJmmChild(1));
 
         isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(secondChildValue));
         isNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
@@ -439,7 +381,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
         isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
         var isLiteral = isNodeType(INTEGER_LITERAL.toString(), BinExprNode.getJmmChild(0)) || isNodeType(BOOLEAN_LITERAL.toString(), BinExprNode.getJmmChild(0));
-        if (!BinExprNode.getJmmChild(0).hasAttribute("value") || isLiteral || !isNotLocal || !isNotParam) {
+        var hasValue = BinExprNode.getJmmChild(0).hasAttribute("value");
+        var isField = hasValue && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")));
+        if (!BinExprNode.getJmmChild(0).hasAttribute("value") || isLiteral || !isNotLocal || !isNotParam || isField) {
             computation.append(lhsToAppend).append(SPACE);
         }
 

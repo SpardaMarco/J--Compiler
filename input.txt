@@ -1,6 +1,9 @@
 import io;
 class Misc {
     int field;
+    boolean field2;
+    Misc field3;
+    io field4;
     public static void main(String[] args) {
     Misc m;
     m.foo();
@@ -13,7 +16,7 @@ class Misc {
 
     public int two(int a, int c) {
     int b;
-    b = a + 1;
+    //b = a + 1;
         return b;
     }
 
@@ -23,19 +26,11 @@ class Misc {
 
     public int foo() {
         Misc m;
-        Misc n;
-        io io;
         int i;
-
         m = new Misc();
-        n = new Misc();
-       // i = m.two(((1)), m.two(1,0));
 
-        i = m.two((new Misc()).one(1), m.two(1,0));
-        //m = m.three((new Misc()), (new Misc()));
-
-
-
+        //i = m.one((field));
+        field = field + field * field / field;
         return 1;
     }
 }
