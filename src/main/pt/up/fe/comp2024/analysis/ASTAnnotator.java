@@ -63,8 +63,24 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("PrimitiveType", this::visitPrimitiveType);
             addVisit("ArrayType", this::visitArrayType);
             addVisit("VarDeclaration", this::visitVarDeclaration);
+            addVisit("IfStmt", this::visitConditionalNode);
+            addVisit("WhileStmt", this::visitConditionalNode);
         }
 
+        private Void visitConditionalNode(JmmNode conditionalNode, JmmSymbolTable symbolTable) {
+            JmmNode conditionalExpression = conditionalNode.getChild(0);
+
+            if (conditionalExpression.get("type").equals("undefined")) {
+                conditionalExpression.put("type", "boolean");
+                conditionalExpression.put("isArray", "false");
+            }  else if (conditionalExpression.get("type").equals("undefined_array_access")){
+                conditionalExpression.put("type", "boolean");
+                conditionalExpression.put("isArray", "false");
+                conditionalExpression.getChild(0).put("type", "boolean");
+                conditionalExpression.getChild(0).put("isArray", "true");
+            }
+            return null;
+        }
 
 
         private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
@@ -109,6 +125,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (operand.get("type") == "undefined") {
                 operand.put("type", type);
                 operand.put("isArray", "false");
+            }
+            else if (operand.get("type").equals("undefined_array_access")){
+                operand.put("type", type);
+                operand.put("isArray", "false");
+                operand.getChild(0).put("type", type);
+                operand.getChild(0).put("isArray", "true");
             }
         }
 
@@ -214,7 +236,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 return null;
             }
             else if (type.equals("undefined") || type.equals("empty_array")){
-                arrayAccess.put("type", "undefined");
+                arrayAccess.put("type", "undefined_array_access");
                 return null;
             }
             else if (array.get("isArray") == "false") {
@@ -351,6 +373,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (assignment.get("type").equals("undefined")) {
                 assignment.put("type", type);
                 assignment.put("isArray", isArray ? "true" : "false");
+            } else if (assignment.get("type").equals("undefined_array_access")){
+
+                assignment.put("type", type);
+                assignment.put("isArray", "false");
+                assignment.getChild(0).put("type", type);
+                assignment.getChild(0).put("isArray", "true");
             }
 
             if (assignment.get("type").equals("empty_array") && isArray){
@@ -382,6 +410,11 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (assignment.get("type").equals("undefined")) {
                 assignment.put("type", type);
                 assignment.put("isArray","false");
+            } else if (assignment.get("type").equals("undefined_array_access")){
+                assignment.put("type", type);
+                assignment.put("isArray", "false");
+                assignment.getChild(0).put("type", type);
+                assignment.getChild(0).put("isArray", "true");
             }
 
             return null;
