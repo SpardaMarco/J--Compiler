@@ -1,14 +1,12 @@
+import io;
+
 class Test {
 
-    int y;
     public static void main(String[] args) {
-
-        int[] x;
-        Test test;
-
-        test.y;
-        x.length;
-        x.y;
+        int a;
+        int[] arr;
+        a = 2;
+        arr[0] = a[0];
     }
 
 }

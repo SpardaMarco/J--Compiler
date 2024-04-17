@@ -40,11 +40,13 @@ public class IncompatibleAssignment extends AnalysisVisitor {
         String arrayType = arrayAssignStmt.get("type");
 
         JmmNode assigment = arrayAssignStmt.getChild(1);
+
         String assignmentType = assigment.get("type");
-        Boolean isAssignmentArray = assigment.get("isArray").equals("true");
 
         if (arrayType.equals("invalid") || assignmentType.equals("invalid"))
             return null;
+
+        Boolean isAssignmentArray = assigment.get("isArray").equals("true");
 
         if (isAssignmentArray || !assignmentType.equals(arrayType)) {
 
