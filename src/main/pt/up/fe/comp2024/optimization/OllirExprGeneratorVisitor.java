@@ -276,6 +276,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 computation.append(lhs.getComputation());
                 lhsToAppend = lhs.getCode();
             }
+            else if (lhs.getCode().startsWith("invokevirtual")) {
+                computation.append(lhs.getComputation());
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(lhs.getCode());
+                lhsToAppend = temp + tempType;
+            }
             else {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table));
@@ -301,6 +310,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             if (rhsIsBinExpr) {
                 computation.append(rhs.getComputation());
                 rhsToAppend = rhs.getCode();
+            }
+            else if (rhs.getCode().startsWith("invokevirtual")) {
+                computation.append(rhs.getComputation());
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(rhs.getCode());
+                rhsToAppend = temp + tempType;
             }
             else {
                 var temp = OptUtils.getTemp();
