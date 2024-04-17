@@ -219,6 +219,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (returnNode.getNumChildren() > 0) {
             code = new StringBuilder();
             expr = exprVisitor.visit(returnNode.getJmmChild(0));
+
+            if (returnNode.getChild(0).getKind().equals(METHOD_CALL.toString())) {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(retType);
+                code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
+                code.append(RETURN_STMT).append(OptUtils.toOllirType(retType)).append(SPACE).append(temp).append(tempType).append(END_STMT);
+                return code.toString();
+            }
         }
 
         code.append(expr.getComputation());
@@ -249,8 +257,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String typeString = OptUtils.toOllirType(thisType);
 
         var fields = table.getFields();
+        var methodName = (assignStmtNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
+                assignStmtNode.getAncestor(METHOD_DECLARATION).get().get("name") :
+                assignStmtNode.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
 
-        if (fields.stream().anyMatch(f -> f.getName().equals(lhs))) {
+        var locals = table.getLocalVariables(methodName);
+        var params = table.getParameters(methodName);
+
+        var isNotLocal = locals.stream().noneMatch(f -> f.getName().equals(lhs));
+        var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
+
+        if (fields.stream().anyMatch(f -> f.getName().equals(lhs)) && isNotLocal && isNotParam) {
+            code.append(rhs.getComputation());
             code.append("putfield(this,");
             code.append(SPACE);
             code.append(lhs);

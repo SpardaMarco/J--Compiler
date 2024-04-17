@@ -8,11 +8,5 @@ class Test extends Smth {
     public static void main(String[] args) {
 
         1;
-
-        Test test;
-
-        new int [test.getSmth()];
-
-        [1,2,3];
     }
 }
