@@ -122,9 +122,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var exprName = "";
         if (methodCallNode.getJmmChild(0).getKind().equals(PAREN_EXPR.toString())) {
             var result = visit(methodCallNode.getJmmChild(0));
-            code.append(result.getCode());
+//            code.append(result.getCode());
             computation.append(result.getComputation());
-
+            exprName = result.getCode();
         }
         else{
             var exprHasValue = methodCallNode.getJmmChild(0).hasAttribute("value");
@@ -156,7 +156,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         code.append(exprName);
 
-        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !exprName.equals("this"))
+        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !exprName.equals("this") && !methodCallNode.getJmmChild(0).getKind().equals(PAREN_EXPR.toString()))
             code.append("." + exprType);
 
         code.append(", ");
