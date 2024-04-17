@@ -154,6 +154,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         for (var i = 0; i < methodDeclNode.getNumChildren(); i++) {
             if (EXPR_STMT.check(methodDeclNode.getJmmChild(i))) {
                 OllirExprResult expr = exprVisitor.visit(methodDeclNode.getJmmChild(i));
+                code.append(expr.getComputation());
                 code.append(expr.getCode());
             }
 

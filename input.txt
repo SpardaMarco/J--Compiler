@@ -1,27 +1,25 @@
-import Main;
-import java.util.Scanner;
 import io;
-class Object {
-    Main x;
-    String y;
+import Extension;
+class Misc extends Extension{
+
+    int exampleField;
 
     public static void main(String[] args) {
-        Object obj;
-        String y;
-        int i;
-        i = ((1 + 2) * 3);
-        obj = new Object();
-        obj.call(obj, new Main(), y);
+
     }
 
-    public int foo() {
-        return 1;
+    public int foo(boolean exampleParam) {
+        int exampleLocal;
+
+        Misc exampleMisc;
+        exampleMisc = io.printMisc(new Misc());
+
+        exampleLocal = 0;
+        io.printInt(new Misc());
+        exampleLocal = 1;
+        io.printInt(((new Misc())));
+
+
+        return 0;
     }
-
-    public int call(Object obj, Main xx, String y ){
-        x = new Main();
-        io.println((((new Scanner()))));
-
-        return 1;
-}
 }

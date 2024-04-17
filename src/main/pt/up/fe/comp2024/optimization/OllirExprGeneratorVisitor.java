@@ -164,16 +164,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var codeToAppend = new StringBuilder();
             var computationToAppend = new StringBuilder();
             for (int i = 1; i < methodCallNode.getNumChildren(); i++) {
-                codeToAppend.append(",");
-                codeToAppend.append(SPACE);
+                code.append(",");
+                code.append(SPACE);
                 OllirExprResult result = visit(methodCallNode.getJmmChild(i));
 //                if (methodCallNode.getJmmChild(i).getKind().equals(OBJECT_DECLARATION.toString())) {
-                    computationToAppend.append(result.getComputation());
+                    computation.append(result.getComputation());
 //                }
-                codeToAppend.append(result.getCode());
+                code.append(result.getCode());
             }
-            code.insert(0, computationToAppend);
-            code.append(codeToAppend);
+//            code.insert(0, computationToAppend);
+//            code.append(codeToAppend);
         }
 
         code.append(")");
