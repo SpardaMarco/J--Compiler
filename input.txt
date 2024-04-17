@@ -1,12 +1,14 @@
-import Other;
-import Smth;
+class Test {
 
-class Test extends Smth {
-
-    int x;
-
+    int y;
     public static void main(String[] args) {
 
-        1;
+        int[] x;
+        Test test;
+
+        test.y;
+        x.length;
+        x.y;
     }
+
 }

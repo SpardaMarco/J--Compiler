@@ -21,38 +21,12 @@ public class InvalidFieldAccess extends AnalysisVisitor {
 
         String attributeName = attribute.get("name");
 
-        if (object.isInstance("Identifier") && object.get("value").equals(table.getClassName()))
-        {
-            String message = String.format(
-                    "Attribute '%s' is not statically accessible in class '%s'.",
-                    attributeName,
-                    table.getClassName()
-            );
-
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(attribute),
-                    NodeUtils.getColumn(attribute),
-                    message,
-                    null)
-            );
-
-            return null;
-        }
-
-        if (!object.get("type").equals(table.getClassName()) || table.classExtends())
-            return null;
-
-        if (!table.getFields().stream().anyMatch(
-                field -> field.getName().equals(attributeName)
-        )) {
+        if (attribute.get("type").equals("invalid")) {
 
             String message = String.format(
-                    "Attribute '%s' does not exist in class '%s'.",
-                    attributeName,
-                    table.getClassName()
+                    "Invalid access to attribute '%s'.",
+                    attributeName
             );
-
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(attribute),
@@ -61,6 +35,47 @@ public class InvalidFieldAccess extends AnalysisVisitor {
                     null)
             );
         }
+
+//        if (object.isInstance("Identifier") && object.get("value").equals(table.getClassName()))
+//        {
+//            String message = String.format(
+//                    "Attribute '%s' is not statically accessible in class '%s'.",
+//                    attributeName,
+//                    table.getClassName()
+//            );
+//
+//            addReport(Report.newError(
+//                    Stage.SEMANTIC,
+//                    NodeUtils.getLine(attribute),
+//                    NodeUtils.getColumn(attribute),
+//                    message,
+//                    null)
+//            );
+//
+//            return null;
+//        }
+//
+//        if (!object.get("type").equals(table.getClassName()) || table.classExtends())
+//            return null;
+//
+//        if (!table.getFields().stream().anyMatch(
+//                field -> field.getName().equals(attributeName)
+//        )) {
+//
+//            String message = String.format(
+//                    "Attribute '%s' does not exist in class '%s'.",
+//                    attributeName,
+//                    table.getClassName()
+//            );
+//
+//            addReport(Report.newError(
+//                    Stage.SEMANTIC,
+//                    NodeUtils.getLine(attribute),
+//                    NodeUtils.getColumn(attribute),
+//                    message,
+//                    null)
+//            );
+//        }
         return null;
     }
 }
