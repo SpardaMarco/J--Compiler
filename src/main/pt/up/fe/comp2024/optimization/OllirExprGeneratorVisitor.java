@@ -161,9 +161,24 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE);
 
+        var methodName = (BinExprNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
+                BinExprNode.getAncestor(METHOD_DECLARATION).get().get("name") :
+                BinExprNode.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
+
+        var locals = table.getLocalVariables(methodName);
+        var params = table.getParameters(methodName);
         var fields = table.getFields();
 
-        if (BinExprNode.getJmmChild(0).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")))) {
+        var firstChildValue = (BinExprNode.getJmmChild(0).hasAttribute("value")) ?
+                BinExprNode.getJmmChild(0).get("value") : "";
+
+        var secondChildValue = (BinExprNode.getJmmChild(1).hasAttribute("value")) ?
+                BinExprNode.getJmmChild(1).get("value") : "";
+
+        var isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
+        var isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
+
+        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(0).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")))) {
             var temp = OptUtils.getTemp();
 
             computation.append("getfield(this, ").append(BinExprNode.getJmmChild(0).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(0), table))).append(END_STMT);
@@ -174,7 +189,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             code = temp + resOllirType;
         }
 
-        if (BinExprNode.getJmmChild(1).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(1).get("value")))) {
+        isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(secondChildValue));
+        isNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
+
+        if (isNotLocal && isNotParam && BinExprNode.getJmmChild(1).hasAttribute("value") && fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(1).get("value")))) {
             var temp = OptUtils.getTemp();
 
             computation.append("getfield(this, ").append(BinExprNode.getJmmChild(1).get("value")).append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(")").append(OptUtils.toOllirType(TypeUtils.getExprType(BinExprNode.getJmmChild(1), table))).append(END_STMT);
@@ -213,7 +231,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             return new OllirExprResult(newCode.toString(), computation);
         }
 
-        if (!BinExprNode.getJmmChild(0).hasAttribute("value") || !fields.stream().anyMatch(f -> f.getName().equals(BinExprNode.getJmmChild(0).get("value")))) {
+        isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(firstChildValue));
+        isNotParam = params.stream().noneMatch(p -> p.getName().equals(firstChildValue));
+        var isLiteral = BinExprNode.getJmmChild(0).getKind().equals(INTEGER_LITERAL.toString()) || BinExprNode.getJmmChild(0).getKind().equals(BOOLEAN_LITERAL.toString());
+        if (!BinExprNode.getJmmChild(0).hasAttribute("value") || isLiteral || !isNotLocal || !isNotParam) {
             computation.append(lhs.getCode()).append(SPACE);
         }
 
@@ -232,8 +253,24 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         Type type = TypeUtils.getExprType(varRefNode, table);
         String ollirType = OptUtils.toOllirType(type);
 
-        var fields = table.getFields();
+        var methodName = (varRefNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
+                varRefNode.getAncestor(METHOD_DECLARATION).get().get("name") :
+                varRefNode.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
 
+        var locals = table.getLocalVariables(methodName);
+        var params = table.getParameters(methodName);
+
+        if (locals.stream().anyMatch(l -> l.getName().equals(id))) {
+            String code = id + ollirType;
+            return new OllirExprResult(code);
+        }
+
+        if (params.stream().anyMatch(p -> p.getName().equals(id))) {
+            String code = id + ollirType;
+            return new OllirExprResult(code);
+        }
+
+        var fields = table.getFields();
         if (fields.stream().anyMatch(f -> f.getName().equals(id))) {
             String code = "getfield(this, " + id + ollirType + ")" + ollirType;
             return new OllirExprResult(code);
