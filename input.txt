@@ -5,9 +5,11 @@ class Test {
 
     public static void main(String[] args) {
 
-        boolean x;
-
         Other other;
-        x = other.getInt()[2] && false;
+        if (other.getInt()[2]) {
+
+        } else {
+
+        }
     }
 }

@@ -63,8 +63,24 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             addVisit("PrimitiveType", this::visitPrimitiveType);
             addVisit("ArrayType", this::visitArrayType);
             addVisit("VarDeclaration", this::visitVarDeclaration);
+            addVisit("IfStmt", this::visitConditionalNode);
+            addVisit("WhileStmt", this::visitConditionalNode);
         }
 
+        private Void visitConditionalNode(JmmNode conditionalNode, JmmSymbolTable symbolTable) {
+            JmmNode conditionalExpression = conditionalNode.getChild(0);
+
+            if (conditionalExpression.get("type").equals("undefined")) {
+                conditionalExpression.put("type", "boolean");
+                conditionalExpression.put("isArray", "false");
+            }  else if (conditionalExpression.get("type").equals("undefined_array_access")){
+                conditionalExpression.put("type", "boolean");
+                conditionalExpression.put("isArray", "false");
+                conditionalExpression.getChild(0).put("type", "boolean");
+                conditionalExpression.getChild(0).put("isArray", "true");
+            }
+            return null;
+        }
 
 
         private Void visitIntegerLiteral(JmmNode integerLiteral, SymbolTable table) {
