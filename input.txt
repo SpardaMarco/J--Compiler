@@ -1,21 +1,13 @@
-import Main;
-import java.util.Scanner;
+import Other;
 
-class Object {
-    Main x;
-    String y;
+class Test {
+
 
     public static void main(String[] args) {
-        Object obj;
-        Main z;
-        obj = new Object();
-        z = obj.call();
-    }
 
-    public Main call() {
-        Main a;
-        a = new Main();
-        return a.add();
-    }
+        boolean x;
 
+        Other other;
+        x = other.getInt()[2] && false;
+    }
 }

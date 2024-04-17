@@ -110,6 +110,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 operand.put("type", type);
                 operand.put("isArray", "false");
             }
+            else if (operand.get("type").equals("undefined_array_access")){
+                operand.put("type", type);
+                operand.put("isArray", "false");
+                operand.getChild(0).put("type", type);
+                operand.getChild(0).put("isArray", "true");
+            }
         }
 
         private void updateUndefinedBinaryOperands(JmmNode binaryOp, String type) {
@@ -214,7 +220,7 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
                 return null;
             }
             else if (type.equals("undefined") || type.equals("empty_array")){
-                arrayAccess.put("type", "undefined");
+                arrayAccess.put("type", "undefined_array_access");
                 return null;
             }
             else if (array.get("isArray") == "false") {
@@ -351,6 +357,12 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (assignment.get("type").equals("undefined")) {
                 assignment.put("type", type);
                 assignment.put("isArray", isArray ? "true" : "false");
+            } else if (assignment.get("type").equals("undefined_array_access")){
+
+                assignment.put("type", type);
+                assignment.put("isArray", "false");
+                assignment.getChild(0).put("type", type);
+                assignment.getChild(0).put("isArray", "true");
             }
 
             if (assignment.get("type").equals("empty_array") && isArray){
@@ -382,6 +394,11 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
             if (assignment.get("type").equals("undefined")) {
                 assignment.put("type", type);
                 assignment.put("isArray","false");
+            } else if (assignment.get("type").equals("undefined_array_access")){
+                assignment.put("type", type);
+                assignment.put("isArray", "false");
+                assignment.getChild(0).put("type", type);
+                assignment.getChild(0).put("isArray", "true");
             }
 
             return null;
