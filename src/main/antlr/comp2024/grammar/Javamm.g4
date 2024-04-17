@@ -47,6 +47,7 @@ FALSE : 'false';
 
 // Types
 INT : 'int' ;
+STRING : 'String';
 BOOLEAN : 'boolean';
 VARARGSUFFIX : '...';
 VOID : 'void' ;
@@ -78,7 +79,7 @@ varDecl
 methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN params?  RPAREN LCURLY
     (varDecl)* (stmt)* returnStmt RCURLY #MethodDeclaration
-    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=ID LPAREN ID LBRACKET RBRACKET paramName=ID RPAREN LCURLY
+    | (PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;}) VOID name=ID LPAREN STRING LBRACKET RBRACKET paramName=ID RPAREN LCURLY
     (varDecl)* (stmt)* RCURLY #MainMethodDeclaration
     ;
 

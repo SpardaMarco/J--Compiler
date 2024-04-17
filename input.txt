@@ -7,18 +7,20 @@ class Object {
 
     public static void main(String[] args) {
         Object obj;
-        String s;
-        s = new String();
+        String y;
+        int i;
+        i = ((1 + 2) * 3);
         obj = new Object();
+        obj.call(obj, new Main(), y);
     }
 
     public int foo() {
         return 1;
     }
 
-    public int call(Object obj, Main xx, String y) {
+    public int call(Object obj, Main xx, String y ){
         x = new Main();
-        io.println((new Scanner()));
+        io.println((((new Scanner()))));
 
         return 1;
 }
