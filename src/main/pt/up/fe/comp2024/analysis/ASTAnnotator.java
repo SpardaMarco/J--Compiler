@@ -388,14 +388,21 @@ public class ASTAnnotator extends PreorderJmmVisitor<JmmSymbolTable, Void> {
         }
 
         public Void visitReturn(JmmNode returnNode, JmmSymbolTable table) {
-                JmmNode expression = returnNode.getChild(0);
+            JmmNode expression = returnNode.getChild(0);
 
-                returnNode.put("type", expression.get("type"));
+            Type returnType = table.getReturnType(currentMethod);
 
-                if (!expression.get("type").equals("invalid") && !expression.get("type").equals("undefined"))
-                    returnNode.put("isArray", expression.get("isArray"));
+            if (expression.get("type").equals("undefined")){
+                expression.put("type", returnType.getName());
+                expression.put("isArray", returnType.isArray() ? "true" : "false");
+            }
 
-                return null;
+            returnNode.put("type", expression.get("type"));
+
+            if (!expression.get("type").equals("invalid"))
+                returnNode.put("isArray", expression.get("isArray"));
+
+            return null;
         }
 
         private Void visitPrimitiveType(JmmNode primitiveType, JmmSymbolTable symbolTable) {

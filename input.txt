@@ -14,12 +14,13 @@ class Object {
         i = x*(2+3)/x-x;
         x = i;
         i = x + x * x/x;
+
     }
 
     public Main call() {
         Main a;
         a = new Main();
-        return a;
+        return a.add();
     }
 
 }

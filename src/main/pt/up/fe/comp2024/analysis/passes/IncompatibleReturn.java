@@ -32,12 +32,6 @@ public class IncompatibleReturn extends AnalysisVisitor {
 
         Boolean isMethodReturnArray = returnType.isArray();
 
-        if (returnNodeType.equals("undefined")) {
-            returnNode.put("type", methodReturnType);
-            returnNode.put("isArray", isMethodReturnArray ? "true" : "false");
-            return null;
-        }
-
         Boolean isReturnNodeArray = returnNode.get("isArray").equals("true");
 
 
