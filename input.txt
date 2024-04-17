@@ -1,20 +1,19 @@
 import Main;
+import java.util.Scanner;
 
 class Object {
+    Main x;
+    String y;
 
-
-    int[] x;
-    boolean y;
     public static void main(String[] args) {
-
+        int i;
+        i = 1*2+3/3-1;
     }
 
-    public int foo(int[] x){
-
-        x = new int [0];
-
-        x[2] = [1,2];
-
-        return 1;
+    public Main call() {
+        Main a;
+        a = new Main();
+        return a;
     }
+
 }
