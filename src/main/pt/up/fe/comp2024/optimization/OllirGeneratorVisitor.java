@@ -334,7 +334,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
         var isIdentifier = isNodeType(IDENTIFIER.toString(), child);
         if (isIdentifier) {
-            if (fields.stream().anyMatch(f -> f.getName().equals(child.get("value")))) {
+            var isLocal = locals.stream().anyMatch(f -> f.getName().equals(child.get("value")));
+            var isParam = params.stream().anyMatch(p -> p.getName().equals(child.get("value")));
+            if (isLocal || isParam) {
                 code.append(lhs);
                 code.append(typeString);
                 code.append(SPACE);
@@ -342,6 +344,30 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 code.append(typeString);
                 code.append(SPACE);
                 code.append(rhs.getCode());
+                code.append(END_STMT);
+                return code.toString();
+            }
+            if (fields.stream().anyMatch(f -> f.getName().equals(child.get("value")))) {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(thisType);
+                code.append(rhs.getComputation());
+                code.append(temp);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(rhs.getCode());
+                if (!code.toString().endsWith(END_STMT))
+                    code.append(END_STMT);
+                code.append(lhs);
+                code.append(typeString);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(typeString);
+                code.append(SPACE);
+                code.append(temp);
+                code.append(tempType);
                 code.append(END_STMT);
                 return code.toString();
             }
