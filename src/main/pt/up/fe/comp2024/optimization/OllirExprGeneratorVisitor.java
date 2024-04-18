@@ -122,7 +122,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         code.append(exprName);
 
-        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !exprName.equals("this") && !methodCallNode.getJmmChild(0).getKind().equals(PAREN_EXPR.toString()))
+        if (!exprType.equals("invalid") && !exprType.equals("undefined") && !methodCallNode.getJmmChild(0).getKind().equals(PAREN_EXPR.toString()))
             code.append("." + exprType);
 
         code.append(", ");

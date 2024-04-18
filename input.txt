@@ -34,11 +34,7 @@ class Misc {
 
         // shadow de variaveis
 
-        field = 1;
-        field = field1;
-        field1 = 1;
-        field1 = (field1 + field);
-        field = (field + field1);
+        field = m.two(this.one(2),field1) + this.one(1);
 
 
         //m = new Misc();
