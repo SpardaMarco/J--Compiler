@@ -1,0 +1,11 @@
+import io;
+
+class Misc {
+
+    int x;
+
+    public int foo() {
+
+        return 1 + x;
+    }
+}
