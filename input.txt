@@ -5,6 +5,7 @@ class Misc {
     Misc field3;
     io field4;
     String field5;
+    io io;
     public static void main(String[] args) {
     Misc m;
     m.foo();
@@ -29,14 +30,16 @@ class Misc {
         Misc m;
         int i;
         String s;
-        m = new Misc();
+        //m = new Misc();
 
-        s = field5;
-        field5 = s;
+        //s = field5;
+        //field3 = new Misc();
+        //io.println(1);
+        field3 = field3.three(field3, field3);
 
-        i = m.two(1+2*2,2);
-        i = m.two((1+2+3+4),2*3*4);
-        i = field;
+        //i = m.two(1+2*2,2);
+        //i = m.two((1+2+3+4),2*3*4);
+        //i = field;
 
         //i = m.one((field));
         //field = (new Misc()).one(1) + (new Misc()).one(1);

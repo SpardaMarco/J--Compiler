@@ -70,8 +70,32 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
         else{
             var exprHasValue = methodCallNode.getJmmChild(0).hasAttribute("value");
-            exprName = (exprHasValue) ?
-                    methodCallNode.getJmmChild(0).get("value") : methodCallNode.getJmmChild(0).get("name");
+            var methodName = (methodCallNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
+                    methodCallNode.getAncestor(METHOD_DECLARATION).get().get("name") :
+                    methodCallNode.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
+            var params = table.getParameters(methodName);
+            var locals = table.getLocalVariables(methodName);
+            var fields = table.getFields();
+            var isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+            var isNotParam = params.stream().noneMatch(p -> p.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+            var isField = fields.stream().anyMatch(f -> f.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+            if (isNotLocal && isNotParam && isField) {
+                var result = visit(methodCallNode.getJmmChild(0));
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(0), table));
+                computation.append(result.getComputation());
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(result.getCode());
+                if (!computation.toString().endsWith(END_STMT))
+                    computation.append(END_STMT);
+
+                exprName = temp;
+            }
+            else {
+                exprName = (exprHasValue) ?
+                        methodCallNode.getJmmChild(0).get("value") : methodCallNode.getJmmChild(0).get("name");
+            }
         }
 
         var exprType = methodCallNode.getJmmChild(0).get("type");
