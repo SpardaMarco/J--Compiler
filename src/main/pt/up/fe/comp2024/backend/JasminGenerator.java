@@ -393,10 +393,14 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         var code = new StringBuilder();
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        if (operand.getName().equals("this")) {
+        var reg = 0;
+        if (currentMethod.getVarTable().get(operand.getName()) != null) {
+            reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        }
+        else if (operand.getName().equals("this")) {
             reg = 0;
         }
+
         switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
                 if (operand instanceof ArrayOperand) {
