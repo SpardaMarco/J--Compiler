@@ -1,39 +1,25 @@
 import io;
 class Misc {
-    int field;
-    int field1;
-    boolean field2;
-    Misc field3;
-    io field4;
-    String field5;
-    io io;
+
+    int x; int y;
+
     public static void main(String[] args) {
-    Misc m;
-    m.foo();
-
-    }
-
-    public int one(int a) {
-        return a;
-    }
-
-    public int two(int a, int c) {
-    int b;
-    //b = a + 1;
-        return b;
-    }
-
-    public Misc three(Misc a, Misc b) {
-        return a;
-    }
-
-    public int foo() {
         Misc m;
-        int field;
-        String s;
+        m = new Misc();
+        m.foo(1+123+321*3, 2, 3);
+    }
 
-        // shadow de variaveis
 
-        return 1+field+field1*1;
+    public int foo(int z, int m, int n) {
+        int i;
+        int j;
+        int k;
+        i = 1*322*4+23;
+        j = this.foo(1, 2, 3);
+        k = 1;
+        this.foo(i, j, k);
+        this.foo(1*322*4+23, this.foo(1, 2, 3), 1);
+
+        return this.foo(1*322*4+23, this.foo(1, 2, 3), 1);
     }
 }
