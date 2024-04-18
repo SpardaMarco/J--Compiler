@@ -4,6 +4,7 @@ class Misc {
     boolean field2;
     Misc field3;
     io field4;
+    String field5;
     public static void main(String[] args) {
     Misc m;
     m.foo();
@@ -27,10 +28,14 @@ class Misc {
     public int foo() {
         Misc m;
         int i;
+        String s;
         m = new Misc();
 
-        //i = m.two(1+2*2,2);
-        //i = m.two((1+2+3+4),2*3*4);
+        s = field5;
+        field5 = s;
+
+        i = m.two(1+2*2,2);
+        i = m.two((1+2+3+4),2*3*4);
         i = field;
 
         //i = m.one((field));
