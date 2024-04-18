@@ -335,24 +335,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isIdentifier = isNodeType(IDENTIFIER.toString(), child);
         if (isIdentifier) {
             if (fields.stream().anyMatch(f -> f.getName().equals(child.get("value")))) {
-                var temp = OptUtils.getTemp();
-                var tempType = OptUtils.toOllirType(thisType);
-                code.append(temp);
-                code.append(tempType);
-                code.append(SPACE);
-                code.append(ASSIGN);
-                code.append(tempType);
-                code.append(SPACE);
-                code.append(rhs.getCode());
-                code.append(END_STMT);
                 code.append(lhs);
                 code.append(typeString);
                 code.append(SPACE);
                 code.append(ASSIGN);
                 code.append(typeString);
                 code.append(SPACE);
-                code.append(temp);
-                code.append(tempType);
+                code.append(rhs.getCode());
                 code.append(END_STMT);
                 return code.toString();
             }

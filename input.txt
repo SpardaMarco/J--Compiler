@@ -28,14 +28,22 @@ class Misc {
 
     public int foo() {
         Misc m;
-        int i;
+        int field;
         String s;
+
+        // shadow de variaveis
+
+        field = 1;
+        field = field;
+
+
         //m = new Misc();
 
         //s = field5;
         //field3 = new Misc();
         //io.println(1);
-        field3 = field3.three(field3, field3);
+        //m = new Misc();
+        //i = i*i+i+i;
 
         //i = m.two(1+2*2,2);
         //i = m.two((1+2+3+4),2*3*4);
