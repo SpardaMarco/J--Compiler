@@ -246,7 +246,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 isNotLocal = table.getLocalVariables(methodName).stream().noneMatch(f -> f.getName().equals(returnNode.getJmmChild(0).get("value")));
                 isNotParam = table.getParameters(methodName).stream().noneMatch(p -> p.getName().equals(returnNode.getJmmChild(0).get("value")));
             }
-            if (table.getFields().stream().anyMatch(f -> f.getName().equals(returnNode.getJmmChild(0).get("value"))) && isNotLocal && isNotParam) {
+            var value = returnNode.getJmmChild(0).hasAttribute("value") ? returnNode.getJmmChild(0).get("value") : "";
+            if (table.getFields().stream().anyMatch(f -> f.getName().equals(value)) && isNotLocal && isNotParam) {
                 code.append(expr.getComputation());
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
@@ -264,6 +265,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 code.append(RETURN_STMT).append(OptUtils.toOllirType(retType)).append(SPACE).append(temp).append(tempType).append(END_STMT);
                 return code.toString();
             }
+
         }
 
         code.append(expr.getComputation());
