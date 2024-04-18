@@ -239,6 +239,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code = new StringBuilder();
             expr = exprVisitor.visit(returnNode.getJmmChild(0));
             var isMethodCall = isNodeType(METHOD_CALL.toString(), returnNode.getJmmChild(0));
+            var isIdentifier = isNodeType(IDENTIFIER.toString(), returnNode.getJmmChild(0));
+            var isNotLocal = true;
+            var isNotParam = true;
+            if (isIdentifier) {
+                isNotLocal = table.getLocalVariables(methodName).stream().noneMatch(f -> f.getName().equals(returnNode.getJmmChild(0).get("value")));
+                isNotParam = table.getParameters(methodName).stream().noneMatch(p -> p.getName().equals(returnNode.getJmmChild(0).get("value")));
+            }
+            if (table.getFields().stream().anyMatch(f -> f.getName().equals(returnNode.getJmmChild(0).get("value"))) && isNotLocal && isNotParam) {
+                code.append(expr.getComputation());
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(retType);
+                code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
+                if (!code.toString().endsWith(END_STMT))
+                    code.append(END_STMT);
+                code.append(RETURN_STMT).append(OptUtils.toOllirType(retType)).append(SPACE).append(temp).append(tempType).append(END_STMT);
+                return code.toString();
+            }
             if (isMethodCall) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
