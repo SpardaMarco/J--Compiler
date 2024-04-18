@@ -29,8 +29,12 @@ class Misc {
         int i;
         m = new Misc();
 
+        //i = m.two(1+2*2,2);
+        //i = m.two((1+2+3+4),2*3*4);
+        //field = field;
+
         //i = m.one((field));
-        field = (new Misc()).one(1) + (new Misc()).one(1);
+        //field = (new Misc()).one(1) + (new Misc()).one(1);
         //field3 = new Misc();
         return 1;
     }

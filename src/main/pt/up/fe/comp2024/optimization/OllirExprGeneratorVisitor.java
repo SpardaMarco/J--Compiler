@@ -134,8 +134,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
                 var isNotLocal = locals == null || locals.stream().noneMatch(l -> l.getName().equals(childValue));
                 var isNotParam = params == null || params.stream().noneMatch(p -> p.getName().equals(childValue));
+                var isBinExpr = isNodeType(BINARY_OP.toString(), methodCallNode.getJmmChild(i));
                 var isObjectDecl = isNodeType(OBJECT_DECLARATION.toString(), methodCallNode.getJmmChild(i));
-                if (!(isLiteral || !isNotLocal || !isNotParam || isObjectDecl)) {
+                if (!(isLiteral || !isNotLocal || !isNotParam || isObjectDecl || isBinExpr)) {
                     var temp = OptUtils.getTemp();
                     var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(i), table));
                     computation.append(result.getComputation());
