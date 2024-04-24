@@ -206,7 +206,6 @@ public class JasminGenerator {
             case invokespecial -> code.append(getSpecialCall(call));
             case invokestatic -> code.append(getStaticCall(call));
             case invokevirtual -> code.append(getVirtualCall(call));
-            case invokeinterface -> code.append(getInterfaceCall(call));
             case NEW -> code.append(getNewCall(call));
             case arraylength -> code.append(getArrayLengthCall(call));
             case ldc -> {
@@ -215,8 +214,6 @@ public class JasminGenerator {
             }
             default -> throw new NotImplementedException(call.getInvocationType());
         }
-
-        updateStackSize(-call.getArguments().size());
 
         return code.toString();
     }
@@ -366,7 +363,7 @@ public class JasminGenerator {
             var label = method.getLabels(inst);
             if (label != null) {
                 for (var l : label) {
-                    instCode.append(TAB).append(l).append(":").append(NL);
+                    instCode.append(NL).append(l).append(":");
                 }
             }
             instCode.append(StringLines.getLines(generators.apply(inst)).stream()
@@ -534,6 +531,7 @@ public class JasminGenerator {
         }
 
         code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+        updateStackSize(call.getReturnType().getTypeOfElement() == ElementType.VOID ? 0 : -1);
 
         return code.toString();
     }
@@ -546,7 +544,9 @@ public class JasminGenerator {
         var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
 
         // arguments
+        var arguments = 0;
         for (var arg : call.getArguments()) {
+            arguments++;
             code.append(generators.apply(arg));
         }
 
@@ -557,6 +557,7 @@ public class JasminGenerator {
         }
 
         code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
+        updateStackSize(call.getReturnType().getTypeOfElement() == ElementType.VOID ? -arguments : -(arguments - 1));
 
         return code.toString();
     }
@@ -572,7 +573,9 @@ public class JasminGenerator {
         code.append(generators.apply(call.getCaller()));
 
         // arguments
+        var arguments = 1;
         for (var arg : call.getArguments()) {
+            arguments++;
             code.append(generators.apply(arg));
         }
 
@@ -583,32 +586,7 @@ public class JasminGenerator {
         }
 
         code.append(")").append(getTypeDescriptor(call.getReturnType())).append(NL);
-
-        return code.toString();
-    }
-
-    private String getInterfaceCall(CallInstruction call) {
-        var code = new StringBuilder();
-
-        var caller = (Operand) call.getCaller();
-        var className = getFullClassName(((ClassType) caller.getType()).getName());
-        var methodName = ((LiteralElement) call.getMethodName()).getLiteral().replace("\"", "");
-
-        // load caller
-        code.append(generators.apply(call.getCaller()));
-
-        // arguments
-        for (var arg : call.getArguments()) {
-            code.append(generators.apply(arg));
-        }
-
-        code.append("invokeinterface ").append(className).append("/").append(methodName).append("(");
-
-        for (var arg : call.getArguments()) {
-            code.append(getTypeDescriptor(arg.getType()));
-        }
-
-        code.append(")").append(getTypeDescriptor(call.getReturnType())).append(" ").append(call.getArguments().size()).append(NL);
+        updateStackSize(call.getReturnType().getTypeOfElement() == ElementType.VOID ? -arguments : -(arguments - 1));
 
         return code.toString();
     }
@@ -618,7 +596,9 @@ public class JasminGenerator {
 
         var caller = (Operand) call.getCaller();
 
+        var arguments = -1;
         for (var arg : call.getArguments()) {
+            arguments++;
             code.append(generators.apply(arg));
         }
 
@@ -628,6 +608,8 @@ public class JasminGenerator {
             var className = getFullClassName(caller.getName());
             code.append("new ").append(className).append(NL);
         }
+
+        updateStackSize(-arguments);
 
         return code.toString();
     }
