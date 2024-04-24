@@ -1,25 +1,10 @@
 import io;
-class Misc {
 
-    int x; int y;
+class Test {
 
-    public static void main(String[] args) {
-        Misc m;
-        m = new Misc();
-        m.foo(1+123+321*3, 2, 3);
-    }
+	public static void main(String[] args) {
+    	Test test;
+		test = new Test();
+	}
 
-
-    public int foo(int z, int m, int n) {
-        int i;
-        int j;
-        int k;
-        i = 1*322*4+23;
-        j = this.foo(1, 2, 3);
-        k = 1;
-        this.foo(i, j, k);
-        this.foo(1*322*4+23, this.foo(1, 2, 3), 1);
-
-        return this.foo(1*322*4+23, this.foo(1, 2, 3), 1);
-    }
 }
