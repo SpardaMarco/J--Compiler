@@ -27,6 +27,7 @@ public class JasminGenerator {
     Method currentMethod;
     int stackSize = 99;
     int currentStackSize = 0;
+    int jumpIndex = 0;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -175,9 +176,8 @@ public class JasminGenerator {
         // apply operation
         var op = getOperation(unaryOp.getOperation());
 
-        // if it's a boolean operation, we expect the caller to add the label
         if (unaryOp.getOperation().getOpType() == OperationType.NOTB) {
-            code.append(op).append(" ");
+            code.append("iconst_1").append(NL).append(op).append(NL);
         } else {
             code.append(op).append(NL);
         }
@@ -190,9 +190,21 @@ public class JasminGenerator {
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
+        String operation = null;
+        if (binaryOp.getOperation().getOpType() == OperationType.LTH
+                || binaryOp.getOperation().getOpType() == OperationType.LTE
+                || binaryOp.getOperation().getOpType() == OperationType.GTH
+                || binaryOp.getOperation().getOpType() == OperationType.GTE) {
+            operation = getBooleanOperation(binaryOp.getOperation());
+        }
 
         // apply operation
-        code.append(getOperation(binaryOp.getOperation())).append(NL);
+        if (operation == null) {
+            code.append(getOperation(binaryOp.getOperation())).append(NL);
+        } else {
+            code.append(getOperation(new Operation(OperationType.SUB, new Type(ElementType.INT32)))).append(NL);
+            code.append(buildJump(operation)).append(NL);
+        }
 
         updateStackSize(-1);
 
@@ -385,6 +397,12 @@ public class JasminGenerator {
         var locals = method.getVarTable().size();
         if (!method.isStaticMethod()) {
             locals++;
+            for (var variable : method.getVarTable().values()) {
+                if (variable.getVarType().getTypeOfElement() == ElementType.THIS) {
+                    locals--;
+                    break;
+                }
+            }
         }
         code.append(TAB).append(".limit locals ").append(locals).append(NL);
         // Add code
@@ -490,12 +508,22 @@ public class JasminGenerator {
     private String getOperation(Operation operation) {
         return switch (operation.getOpType()) {
             case ADD -> "iadd";
-            case SUB -> "isub";
+            case SUB, LTH -> "isub";
             case MUL -> "imul";
             case DIV -> "idiv";
-            case LTH -> "if_icmplt";
-            case NOTB -> "ifeq";
+            case NOTB -> "ixor";
             case ANDB -> "iand";
+            default -> throw new NotImplementedException(operation.getOpType());
+        };
+    }
+
+    private String getBooleanOperation(Operation operation) {
+        return switch (operation.getOpType()) {
+            case LTH -> "iflt";
+            case LTE -> "ifle";
+            case GTH -> "ifgt";
+            case GTE -> "ifge";
+            case ANDB -> "ifne";
             default -> throw new NotImplementedException(operation.getOpType());
         };
     }
@@ -609,17 +637,18 @@ public class JasminGenerator {
             code.append("new ").append(className).append(NL);
         }
 
-        updateStackSize(-arguments);
-
+        if (arguments > 0) {
+            updateStackSize(-arguments);
+        }
         return code.toString();
     }
 
     private String getArrayOperand(ArrayOperand array) {
         var code = new StringBuilder();
-
-        code.append(generators.apply(array));
-
-        code.append(generators.apply(array.getIndexOperands().get(0)));
+        var reg = getReg(array);
+        updateStackSize(1);
+        code.append("aload").append(reg < 4 ? "_" : " ").append(reg).append(NL);
+        code.append(generators.apply(array.getIndexOperands().get(0))).append(NL);
 
         return code.toString();
     }
@@ -690,23 +719,16 @@ public class JasminGenerator {
         if (inst instanceof BinaryOpInstruction binaryOp) {
             switch (binaryOp.getOperation().getOpType()) {
                 case LTH -> {
-                    var left = binaryOp.getLeftOperand();
-                    var right = binaryOp.getRightOperand();
-                    var leftIsLiteral = left.isLiteral();
-                    var rightIsLiteral = right.isLiteral();
-                    int value = -1;
-                    if (leftIsLiteral && rightIsLiteral) { // both are literals
-                        op = "iflt";
-                        value = 0;
-                    } else if (!leftIsLiteral && rightIsLiteral) { // right is literal
-                        value = Integer.parseInt(((LiteralElement) right).getLiteral());
-                        op = value == 0 ? "iflt" : "if_icmplt";
-                    } else if (leftIsLiteral) { // left is literal
-                        value = Integer.parseInt(((LiteralElement) left).getLiteral());
-                        op = value == 0 ? "ifgt" : "if_icmplt";
-                    } else {
-                        op = "if_icmplt";
-                    }
+                    return "iflt";
+                }
+                case LTE -> {
+                    return "ifle";
+                }
+                case GTH -> {
+                    return "ifgt";
+                }
+                case GTE -> {
+                    return "ifge";
                 }
                 case ANDB -> {
                     return "ifne";
@@ -733,8 +755,11 @@ public class JasminGenerator {
 
         if (inst instanceof BinaryOpInstruction binaryOp) {
             switch (operation) {
-                case "iflt" -> code.append(generators.apply(binaryOp.getLeftOperand()));
-                case "ifgt" -> code.append(generators.apply(binaryOp.getRightOperand()));
+                case "iflt", "ifle", "ifgt", "ifge" -> {
+                    code.append(generators.apply(binaryOp.getLeftOperand()));
+                    code.append(generators.apply(binaryOp.getRightOperand()));
+                    code.append("isub").append(NL);
+                }
                 case "ifne" -> code.append(generators.apply(binaryOp));
                 default -> {
                     code.append(generators.apply(binaryOp.getLeftOperand()));
@@ -751,5 +776,14 @@ public class JasminGenerator {
     private void updateStackSize(int num) {
         currentStackSize += num;
         stackSize = Math.max(stackSize, currentStackSize);
+    }
+
+    private String buildJump(String operation) {
+        return "\n" + operation + " jump_" + jumpIndex + NL +
+                "iconst_0" + NL +
+                "goto end_" + jumpIndex + NL +
+                "\njump_" + jumpIndex + ":" + NL +
+                "iconst_1" + NL +
+                "\nend_" + jumpIndex++ + ":" + NL;
     }
 }
