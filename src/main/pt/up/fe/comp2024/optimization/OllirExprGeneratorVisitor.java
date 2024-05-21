@@ -34,6 +34,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_LITERAL, this::visitBoolean);
         addVisit(ARRAY_ACCESS_OP, this::visitArrayAccess);
+        addVisit(ARRAY_DECLARATION, this::visitArrayDecl);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -72,6 +73,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
         var type = TypeUtils.getExprType(arrayAccessNode, table);
         code.append(OptUtils.toOllirType(type));
+
+        return new OllirExprResult(code.toString(), computation.toString());
+    }
+
+    private OllirExprResult visitArrayDecl(JmmNode arrayDeclNode, Void unused) {
+        var code = new StringBuilder();
+        var computation = new StringBuilder();
+
+        var expr = visit(arrayDeclNode.getJmmChild(0));
+        
 
         return new OllirExprResult(code.toString(), computation.toString());
     }

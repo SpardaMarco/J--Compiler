@@ -37,7 +37,7 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        System.out.println(parserResult.getRootNode().toTree());
+        //System.out.println(parserResult.getRootNode().toTree());
 
         JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         //table.print();
@@ -50,7 +50,7 @@ public class Launcher {
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
-        //System.out.println(semanticsResult.getRootNode().toTree());
+        System.out.println(semanticsResult.getRootNode().toTree());
         //System.out.println(semanticsResult.getReports());
         TestUtils.noErrors(semanticsResult.getReports());
 

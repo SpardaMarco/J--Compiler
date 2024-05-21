@@ -1,17 +1,9 @@
-import io;
+import ioPlus;
+class ArrayInit {
 
-class Arithmetic_and {
 	public static void main(String[] args) {
-		boolean a;
-		Arithmetic_and c;
-
-		c = new Arithmetic_and();
-
-		a = true && c.p(1);
+	    int[] a;
+        a = new int[5];
+        //ioPlus.printResult(a.length);
 	}
-
-	boolean p(int value) {
-   	    io.print(value);
-   	    return true;
-   	}
 }

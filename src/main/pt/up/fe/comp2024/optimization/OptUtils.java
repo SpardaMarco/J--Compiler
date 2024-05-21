@@ -1,13 +1,7 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.specs.comp.ollir.Instruction;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
-
-import java.util.List;
-import java.util.Optional;
 
 import static pt.up.fe.comp2024.ast.Kind.PRIMITIVE_TYPE;
 
@@ -40,7 +34,9 @@ public class OptUtils {
     }
 
     public static String toOllirType(Type type) {
-        return toOllirType(type.getName());
+        String ollirType = "";
+        if (type.isArray()) ollirType += ".array";
+        return ollirType + toOllirType(type.getName());
     }
 
     private static String toOllirType(String typeName) {

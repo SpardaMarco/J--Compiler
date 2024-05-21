@@ -76,9 +76,10 @@ public class TypeUtils {
 
         String id;
 
-        var isAssignStmt = varRefExpr.getKind().equals(ASSIGN_STMT.toString()) || varRefExpr.getKind().equals(ARRAY_ASSIGN_STMT.toString());
+        var isAssignStmt = varRefExpr.getKind().equals(ASSIGN_STMT.toString());
+        var isArrayAssignStmt = varRefExpr.getKind().equals(ARRAY_ASSIGN_STMT.toString());
 
-        if (isAssignStmt) {
+        if (isAssignStmt || isArrayAssignStmt) {
             id = varRefExpr.get("name");
         } else id = varRefExpr.get("value");
 
@@ -103,7 +104,9 @@ public class TypeUtils {
             }
         }
 
-        return new Type(VOID_TYPE_NAME, false);
+        var isArray = varRefExpr.get("isArray").equals("true");
+
+        return new Type(VOID_TYPE_NAME, isArray);
     }
 
     /**
