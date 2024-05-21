@@ -37,7 +37,7 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
-        //System.out.println(parserResult.getRootNode().toTree());
+        System.out.println(parserResult.getRootNode().toTree());
 
         JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
         //table.print();

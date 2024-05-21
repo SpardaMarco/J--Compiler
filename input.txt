@@ -1,13 +1,17 @@
 import io;
 
-class Arithmetic_not {
+class Arithmetic_and {
 	public static void main(String[] args) {
 		boolean a;
+		Arithmetic_and c;
 
-        a = !true;
+		c = new Arithmetic_and();
 
-        io.println(a);
+		a = true && c.p(1);
 	}
 
-
+	boolean p(int value) {
+   	    io.print(value);
+   	    return true;
+   	}
 }

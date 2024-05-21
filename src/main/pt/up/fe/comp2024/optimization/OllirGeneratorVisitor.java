@@ -55,6 +55,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(IF_STMT, this::visitIfStmt);
         addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -301,7 +302,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(GOTO);
         code.append(SPACE);
         code.append(IF);
-        var temp = OptUtils.getNextTempNum() + 1;
+        var temp = OptUtils.getCurrentTempNum() + 1;
         code.append(temp);
         code.append(END_STMT);
 
@@ -357,8 +358,33 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
+    private String visitArrayAssignStmt(JmmNode arrayAssignStmtNode, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        var lhs = arrayAssignStmtNode.get("name");
+        Type thisType = TypeUtils.getExprType(arrayAssignStmtNode, table);
+
+        var expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(0));
+        code.append(expr.getComputation());
+
+        lhs += "[" + expr.getCode() + "]" + OptUtils.toOllirType(thisType);
+        code.append(lhs);
+
+        expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
+
+        code.append(SPACE);
+        code.append(ASSIGN);
+        code.append(OptUtils.toOllirType(thisType));
+        code.append(SPACE);
+        code.append(expr.getCode());
+        code.append(END_STMT);
+
+        return code.toString();
+    }
+
     private String visitAssignStmt(JmmNode assignStmtNode, Void unused) {
         var lhs = assignStmtNode.get("name");
+
         var child = assignStmtNode.getJmmChild(0);
         var rhs = exprVisitor.visit(child);
 
@@ -552,7 +578,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         for (var child : node.getChildren()) {
-            code.append(visit(child));
+            if (fromString(child.getKind()).isExpr() && node.getParent().getKind().equals(SCOPE_STMT.toString())) {
+                code.append(exprVisitor.visit(child).getCode());
+            } else code.append(visit(child));
         }
 
         return code.toString();

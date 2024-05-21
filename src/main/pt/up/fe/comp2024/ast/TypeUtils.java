@@ -36,11 +36,11 @@ public class TypeUtils {
         Type type = switch (kind) {
             case METHOD_CALL -> getMethodCallType(expr);
             case BINARY_OP -> getBinExprType(expr);
-            case IDENTIFIER, ASSIGN_STMT -> getVarExprType(expr, table);
+            case IDENTIFIER, ASSIGN_STMT, ARRAY_ASSIGN_STMT -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
             case PAREN_EXPR -> getExprType(expr.getChildren().get(0), table);
-            case OBJECT_DECLARATION -> new Type(expr.get("type"), expr.get("isArray").equals("true"));
+            case OBJECT_DECLARATION, ARRAY_ACCESS_OP -> new Type(expr.get("type"), expr.get("isArray").equals("true"));
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -76,7 +76,9 @@ public class TypeUtils {
 
         String id;
 
-        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) {
+        var isAssignStmt = varRefExpr.getKind().equals(ASSIGN_STMT.toString()) || varRefExpr.getKind().equals(ARRAY_ASSIGN_STMT.toString());
+
+        if (isAssignStmt) {
             id = varRefExpr.get("name");
         } else id = varRefExpr.get("value");
 
