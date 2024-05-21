@@ -148,7 +148,6 @@ public class JasminGenerator {
         }
         switch (lhs.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> {
-                // TODO: CONFIRM IF THIS IS CORRECT
                 if (currentMethod.getVarTable().get(lhs.getName()).getVarType().getTypeOfElement() == ElementType.ARRAYREF) {
                     code.append("iastore").append(NL);
                     updateStackSize(-3);
