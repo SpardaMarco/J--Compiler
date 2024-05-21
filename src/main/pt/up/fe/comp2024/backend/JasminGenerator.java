@@ -177,7 +177,9 @@ public class JasminGenerator {
         var op = getOperation(unaryOp.getOperation());
 
         if (unaryOp.getOperation().getOpType() == OperationType.NOTB) {
+            updateStackSize(1);
             code.append("iconst_1").append(NL).append(op).append(NL);
+            updateStackSize(-1);
         } else {
             code.append(op).append(NL);
         }
