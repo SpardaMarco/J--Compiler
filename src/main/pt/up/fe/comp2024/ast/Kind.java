@@ -17,6 +17,7 @@ public enum Kind {
     PRIMITIVE_TYPE,
     PARAMS,
     IF_STMT,
+    WHILE_STMT,
     EXPR_STMT,
     ASSIGN_STMT,
     OBJECT_DECLARATION,
@@ -28,7 +29,7 @@ public enum Kind {
     PAREN_EXPR,
     ;
 
-    private static final Set<Kind> STATEMENTS = Set.of(RETURN, EXPR_STMT, IF_STMT,ASSIGN_STMT);
+    private static final Set<Kind> STATEMENTS = Set.of(RETURN, EXPR_STMT, IF_STMT, WHILE_STMT, ASSIGN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(METHOD_CALL, BINARY_OP, IDENTIFIER, INTEGER_LITERAL, BOOLEAN_LITERAL);
 
     private final String name;

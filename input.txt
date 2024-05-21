@@ -2,26 +2,13 @@ import io;
 import Quicksort;
 
 class CompileBasic extends Quicksort {
-
     int intField;
     boolean boolField;
 
-    public int method1() {
-        int intLocal1;
-        boolean boolLocal1;
-
-        if (boolLocal1) {
-            intLocal1 = 1;
-        } else {
-            intLocal1 = 2;
+    int method1() {
+        while(boolField) {
+            intField = intField + 1;
         }
-
-        if (boolLocal1) {
-            intLocal1 = 3;
-        } else {
-            intLocal1 = 4;
-        }
-
-        return intLocal1;
+        return intField;
     }
 }

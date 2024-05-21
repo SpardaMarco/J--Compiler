@@ -30,6 +30,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String GOTO = "goto";
     private final String IF = "if";
     private final String ENDIF = "endif";
+    private final String WHILE_COND = "whileCond";
+    private final String WHILE_END = "whileEnd";
+    private final String WHILE_LOOP = "whileLoop";
 
     private final SymbolTable table;
 
@@ -50,6 +53,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN, this::visitReturn);
         addVisit(PARAMS, this::visitParam);
         addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
@@ -320,6 +324,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(ENDIF);
         code.append(temp);
         code.append(":").append("\n");
+
+        return code.toString();
+    }
+
+    private String visitWhileStmt(JmmNode whileStmt, Void unused) {
+        StringBuilder code = new StringBuilder();
+        var temp = OptUtils.getNextTempNum() + 1;
+
+        code.append(WHILE_COND).append(temp);
+        code.append(":").append("\n");
+
+        var expr = exprVisitor.visit(whileStmt.getJmmChild(0));
+        // code.append(expr.getCode());
 
         return code.toString();
     }
