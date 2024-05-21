@@ -27,6 +27,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String METHOD = ".method";
     private final String STATIC = "static";
     private final String RETURN_STMT = "ret";
+    private final String GOTO = "goto";
+    private final String IF = "if";
+    private final String ENDIF = "endif";
 
     private final SymbolTable table;
 
@@ -46,7 +49,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(MAIN_METHOD_DECLARATION, this::visitMainMethodDecl);
         addVisit(RETURN, this::visitReturn);
         addVisit(PARAMS, this::visitParam);
-//        addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(IF_STMT, this::visitIfStmt);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
@@ -281,9 +284,45 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return id + typeCode;
     }
 
-//    private String visitIfStmt(JmmNode ifStmt, Void unused) {
-//
-//    }
+    private String visitIfStmt(JmmNode ifStmt, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        code.append(IF);
+
+        var expr = exprVisitor.visit(ifStmt.getJmmChild(0));
+        var exprCode = expr.getCode();
+        code.append("(").append(exprCode).append(")");
+
+        code.append(SPACE);
+        code.append(GOTO);
+        code.append(SPACE);
+        code.append(IF);
+        var temp = OptUtils.getNextTempNum() + 1;
+        code.append(temp);
+        code.append(END_STMT);
+
+        var stmt = ifStmt.getJmmChild(2);
+        code.append(visit(stmt));
+
+        code.append(GOTO);
+        code.append(SPACE);
+        code.append(ENDIF);
+        code.append(temp);
+        code.append(END_STMT);
+
+        code.append(IF);
+        code.append(temp);
+        code.append(":").append("\n");
+
+        stmt = ifStmt.getJmmChild(1);
+        code.append(visit(stmt));
+
+        code.append(ENDIF);
+        code.append(temp);
+        code.append(":").append("\n");
+
+        return code.toString();
+    }
 
     private String visitAssignStmt(JmmNode assignStmtNode, Void unused) {
         var lhs = assignStmtNode.get("name");

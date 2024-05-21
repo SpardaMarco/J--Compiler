@@ -1,13 +1,10 @@
 package pt.up.fe.comp2024;
 
-import org.specs.comp.ollir.ClassUnit;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
-import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp2024.analysis.ASTAnnotator;
 import pt.up.fe.comp2024.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2024.backend.JasminBackendImpl;
@@ -18,9 +15,7 @@ import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
 
-import java.io.File;
 import java.util.Map;
-import java.util.Optional;
 
 public class Launcher {
 
@@ -44,8 +39,9 @@ public class Launcher {
 
         // Print AST
         //System.out.println(parserResult.getRootNode().toTree());
+
         JmmSymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
-        table.print();
+        //table.print();
         new ASTAnnotator().visit(parserResult.getRootNode(), table);
 
         // SymbolTable table = JmmSymbolTableBuilder.build(parserResult.getRootNode());
@@ -55,8 +51,8 @@ public class Launcher {
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
-        System.out.println(semanticsResult.getRootNode().toTree());
-        System.out.println(semanticsResult.getReports());
+        //System.out.println(semanticsResult.getRootNode().toTree());
+        //System.out.println(semanticsResult.getReports());
         TestUtils.noErrors(semanticsResult.getReports());
 
         // Optimization stage
@@ -71,7 +67,7 @@ public class Launcher {
         JasminBackendImpl jasminGen = new JasminBackendImpl();
         // OllirResult ollirResult = new OllirResult(code, config);
         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        System.out.println(jasminResult.getJasminCode());
+        //System.out.println(jasminResult.getJasminCode());
         TestUtils.noErrors(jasminResult.getReports());
 
     }
