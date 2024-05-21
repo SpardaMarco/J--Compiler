@@ -51,7 +51,7 @@ public class Launcher {
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
 
-        //System.out.println(semanticsResult.getRootNode().toTree());
+        System.out.println(semanticsResult.getRootNode().toTree());
         //System.out.println(semanticsResult.getReports());
         TestUtils.noErrors(semanticsResult.getReports());
 

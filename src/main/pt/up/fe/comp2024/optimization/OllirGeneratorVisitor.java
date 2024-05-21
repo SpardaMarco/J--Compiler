@@ -330,13 +330,29 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitWhileStmt(JmmNode whileStmt, Void unused) {
         StringBuilder code = new StringBuilder();
-        var temp = OptUtils.getNextTempNum() + 1;
+        var temp = OptUtils.getTemp() + ".bool";
+        var tempNum = OptUtils.getCurrentTempNum() + 1;
 
-        code.append(WHILE_COND).append(temp);
-        code.append(":").append("\n");
+        var whileCond = WHILE_COND + tempNum;
+        var whileLoop = WHILE_LOOP + tempNum;
+        var whileEnd = WHILE_END + tempNum;
+
+        code.append(whileCond).append(":").append("\n");
 
         var expr = exprVisitor.visit(whileStmt.getJmmChild(0));
-        // code.append(expr.getCode());
+        code.append(temp).append(SPACE);
+        code.append(ASSIGN).append(".bool").append(SPACE);
+        code.append(expr.getCode()).append(END_STMT);
+
+        code.append(IF).append(SPACE).append("(").append(temp).append(")").append(SPACE);
+        code.append(GOTO).append(SPACE).append(whileLoop).append(END_STMT);
+        code.append(GOTO).append(SPACE).append(whileEnd).append(END_STMT);
+
+        code.append(whileLoop).append(":").append("\n");
+        var stmt = whileStmt.getJmmChild(1);
+        code.append(visit(stmt));
+        code.append(GOTO).append(SPACE).append(whileCond).append(END_STMT);
+        code.append(whileEnd).append(":").append("\n");
 
         return code.toString();
     }
