@@ -16,6 +16,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
+    private final String NOT = "!";
 
     private final JmmSymbolTable table;
 
@@ -27,6 +28,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     protected void buildVisitor() {
         addVisit(OBJECT_DECLARATION, this::visitObjectDecl);
         addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(UNARY_OP, this::visitUnaryExpr);
         addVisit(BINARY_OP, this::visitBinExpr);
         addVisit(IDENTIFIER, this::visitVarRef);
         addVisit(INTEGER_LITERAL, this::visitInteger);
@@ -112,13 +114,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             if (methodSymbol.isStatic()) {
                 code.append("invokestatic(");
             } else code.append("invokevirtual(");
-        }
-
-        else if (exprName.equals(table.getClassName()) || importsList.contains(exprName)) {
+        } else if (exprName.equals(table.getClassName()) || importsList.contains(exprName)) {
             code.append("invokestatic(");
-        }
-
-        else {
+        } else {
             code.append("invokevirtual(");
         }
 
@@ -178,9 +176,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                         computation.append(END_STMT);
 
                     code.append(temp).append(tempType);
-                }
-
-                else {
+                } else {
                     computation.append(result.getComputation());
                     code.append(result.getCode());
                 }
@@ -194,6 +190,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         code.append(END_STMT);
 
         return new OllirExprResult(code.toString(), computation.toString());
+    }
+
+    private OllirExprResult visitUnaryExpr(JmmNode unaryExprNode, Void unused) {
+        var code = new StringBuilder();
+
+        code.append(NOT).append(".bool").append(SPACE);
+        code.append(visit(unaryExprNode.getJmmChild(0)).getCode());
+
+        return new OllirExprResult(code.toString());
     }
 
     private OllirExprResult visitBinExpr(JmmNode binExprNode, Void unused) {

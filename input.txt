@@ -1,14 +1,13 @@
 import io;
-import Quicksort;
 
-class CompileBasic extends Quicksort {
-    int intField;
-    boolean boolField;
+class Arithmetic_not {
+	public static void main(String[] args) {
+		boolean a;
 
-    int method1() {
-        while(boolField) {
-            intField = intField + 1;
-        }
-        return intField;
-    }
+        a = !true;
+
+        io.println(a);
+	}
+
+
 }
