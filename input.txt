@@ -1,9 +1,15 @@
-import ioPlus;
-class ArrayInit {
+import io;
 
-	public static void main(String[] args) {
-	    int[] a;
-        a = new int[5];
-        ioPlus.printResult(a.length);
-	}
+class ArrayInitialization {
+
+    public static void main(String[] args) {
+    }
+
+    int foo() {
+        int[] a;
+
+        a = [1, 2, 3, 4];
+
+        return a[2];
+    }
 }

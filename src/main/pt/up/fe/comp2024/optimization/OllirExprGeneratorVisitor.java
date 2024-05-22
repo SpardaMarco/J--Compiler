@@ -37,6 +37,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(ARRAY_ACCESS_OP, this::visitArrayAccess);
         addVisit(ARRAY_DECLARATION, this::visitArrayDecl);
         addVisit(ATTRIBUTE, this::visitAttribute);
+        addVisit(ARRAY_EXPRESSION, this::visitArrayExpression);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -101,7 +102,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var code = new StringBuilder();
 
         var child = attributeNode.getChild(0);
-        
+
         var id = child.get("value");
         var idType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
 
@@ -111,6 +112,36 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var thisType = attributeNode.get("type");
         var type = OptUtils.toOllirType(new Type(thisType, false));
         code.append(type);
+
+        return new OllirExprResult(code.toString(), "");
+    }
+
+    private OllirExprResult visitArrayExpression(JmmNode arrayExpression, Void unused) {
+        var code = new StringBuilder();
+
+        var parent = arrayExpression.getParent();
+        var parentType = parent.get("type");
+        var parentName = parent.get("name");
+
+        var parentOllirType = OptUtils.toOllirType(new Type(parentType, true));
+
+        var numChildren = arrayExpression.getNumChildren();
+
+        code.append("new(array,").append(SPACE).append(numChildren).append(".i32").append(")");
+        code.append(parentOllirType);
+        code.append(END_STMT);
+
+        var childrenType = arrayExpression.getChild(0).get("type");
+        var childrenOllirType = OptUtils.toOllirType(new Type(childrenType, false));
+
+        for (var i = 0; i < numChildren; i++) {
+            code.append(parentName);
+            code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
+            code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
+            var childValue = arrayExpression.getChild(i).get("value");
+            code.append(childValue).append(childrenOllirType);
+            code.append(END_STMT);
+        }
 
         return new OllirExprResult(code.toString(), "");
     }
