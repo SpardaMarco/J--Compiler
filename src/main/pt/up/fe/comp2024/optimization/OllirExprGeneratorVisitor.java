@@ -17,6 +17,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
     private final String NOT = "!";
+    private final String ARRAY_LENGTH = "arraylength";
 
     private final JmmSymbolTable table;
 
@@ -35,6 +36,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(BOOLEAN_LITERAL, this::visitBoolean);
         addVisit(ARRAY_ACCESS_OP, this::visitArrayAccess);
         addVisit(ARRAY_DECLARATION, this::visitArrayDecl);
+        addVisit(ATTRIBUTE, this::visitAttribute);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -88,11 +90,29 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(expr.getComputation());
 
         code.append("new(array,").append(SPACE);
-        code.append(expr.getCode() + ")");
+        code.append(expr.getCode()).append(")");
 
         code.append(type);
 
         return new OllirExprResult(code.toString(), computation.toString());
+    }
+
+    private OllirExprResult visitAttribute(JmmNode attributeNode, Void unused) {
+        var code = new StringBuilder();
+
+        var child = attributeNode.getChild(0);
+        
+        var id = child.get("value");
+        var idType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
+
+        code.append(ARRAY_LENGTH);
+        code.append("(").append(id).append(idType).append(")");
+
+        var thisType = attributeNode.get("type");
+        var type = OptUtils.toOllirType(new Type(thisType, false));
+        code.append(type);
+
+        return new OllirExprResult(code.toString(), "");
     }
 
     private OllirExprResult visitMethodCall(JmmNode methodCallNode, Void unused) {
