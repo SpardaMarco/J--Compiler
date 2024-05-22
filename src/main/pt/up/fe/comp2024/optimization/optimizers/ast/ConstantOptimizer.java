@@ -1,10 +1,10 @@
-package pt.up.fe.comp2024.optimization.optimizers;
+package pt.up.fe.comp2024.optimization.optimizers.ast;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PostorderJmmVisitor;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
-public abstract class ConstantOptimizer extends PostorderJmmVisitor<JmmSymbolTable, Void>  {
+public abstract class ConstantOptimizer extends PostorderJmmVisitor<JmmSymbolTable, Void> {
 
     private int optimizations = 0;
 
