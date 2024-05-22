@@ -1,18 +1,27 @@
-import Hello;
+import ioPlus;
+class ComplexArrayAccess {
 
-class PropWithLoop extends Hello {
-
-    public static void main(String[] args) {
-
-        PropWithLoop x;
-        x = new PropWithLoop();
-        x.bar(3 + 4);
-
+    public int func(int a) {
+        return a;
     }
 
-    public int foo(){
-	  int x;
-	  x = 1 + 2;
-	  return 1;
+	public static void main(String[] args) {
+	    int[] a;
+        int i;
+        ComplexArrayAccess d;
+        d = new ComplexArrayAccess();
+        a = new int[5];
+        a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
+		a[4] = 5;
+        i = 1;
+        ioPlus.printResult(a[d.func(0)]);
+        ioPlus.printResult(a[i]);
+        ioPlus.printResult(a[4/2]);
+        ioPlus.printResult(a[a[2]]);
+        ioPlus.printResult(a[a.length -1 ]);
+
 	}
 }

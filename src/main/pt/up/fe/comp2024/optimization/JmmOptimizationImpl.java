@@ -22,6 +22,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
 
+
         String numRegisters = ollirResult.getConfig().get("registerAllocation");
 
         if (numRegisters == null || numRegisters.equals("-1")) return ollirResult;
