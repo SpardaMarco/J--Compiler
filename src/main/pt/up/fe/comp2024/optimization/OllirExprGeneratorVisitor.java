@@ -512,24 +512,19 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 childResultToAppend = temp + tempType;
             }
 
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
             if (childKind.equals(UNARY_OP.toString())) {
-                var temp = OptUtils.getTemp();
-                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
                 computation.append(temp).append(tempType).append(SPACE)
                         .append(ASSIGN).append(tempType).append(SPACE).append(childResultToAppend);
-                if (!computation.toString().endsWith(END_STMT))
-                    computation.append(END_STMT);
-                computation.append("if (").append(temp).append(tempType).append(") goto ").append(falseLabel).append(END_STMT);
 
             } else {
-                var temp = OptUtils.getTemp();
-                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
                 computation.append(temp).append(tempType).append(SPACE)
                         .append(ASSIGN).append(tempType).append(SPACE).append(NOT).append(".bool").append(SPACE).append(childResultToAppend);
-                if (!computation.toString().endsWith(END_STMT))
-                    computation.append(END_STMT);
-                computation.append("if (").append(temp).append(tempType).append(") goto ").append(falseLabel).append(END_STMT);
             }
+            if (!computation.toString().endsWith(END_STMT))
+                computation.append(END_STMT);
+            computation.append("if (").append(temp).append(tempType).append(") goto ").append(falseLabel).append(END_STMT);
         }
 
         var lastChild = children.get(children.size() - 1);
