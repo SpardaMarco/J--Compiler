@@ -4,13 +4,8 @@ class VarargsAndArrayInit {
     int[] b;
     int a;
 
-
-    int foo() {
-        return 1;
-    }
-
     int bar() {
-        if (! (true)) {
+        if (! (true) && (3 < 5)) {
             a =  2;
         } else {
             a = 3;
