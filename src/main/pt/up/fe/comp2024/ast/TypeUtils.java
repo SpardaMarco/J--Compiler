@@ -14,8 +14,14 @@ public class TypeUtils {
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
     }
-    public static String getBooleanTypeName() { return BOOLEAN_TYPE_NAME; }
-    public static String getVoidTypeName() { return VOID_TYPE_NAME; }
+
+    public static String getBooleanTypeName() {
+        return BOOLEAN_TYPE_NAME;
+    }
+
+    public static String getVoidTypeName() {
+        return VOID_TYPE_NAME;
+    }
 
     /**
      * Gets the {@link Type} of an arbitrary expression.
@@ -30,11 +36,12 @@ public class TypeUtils {
         Type type = switch (kind) {
             case METHOD_CALL -> getMethodCallType(expr);
             case BINARY_OP -> getBinExprType(expr);
-            case IDENTIFIER, ASSIGN_STMT -> getVarExprType(expr, table);
+            case IDENTIFIER, ASSIGN_STMT, ARRAY_ASSIGN_STMT -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOLEAN_LITERAL -> new Type(BOOLEAN_TYPE_NAME, false);
             case PAREN_EXPR -> getExprType(expr.getChildren().get(0), table);
-            case OBJECT_DECLARATION -> new Type(expr.get("type"), expr.get("isArray").equals("true"));
+            case OBJECT_DECLARATION, ARRAY_ACCESS_OP, ATTRIBUTE ->
+                    new Type(expr.get("type"), expr.get("isArray").equals("true"));
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -46,8 +53,7 @@ public class TypeUtils {
             return new Type(VOID_TYPE_NAME, false);
         }
 
-        Type methodCallType = new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
-        return methodCallType;
+        return new Type(methodCall.get("type"), methodCall.get("isArray").equals("true"));
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {
@@ -55,7 +61,7 @@ public class TypeUtils {
 
         return switch (operator) {
             case "*", "/", "+", "-" -> new Type(INT_TYPE_NAME, false);
-            case  "<", "&&" -> new Type(BOOLEAN_TYPE_NAME, false);
+            case "<", "&&" -> new Type(BOOLEAN_TYPE_NAME, false);
 
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
@@ -65,14 +71,18 @@ public class TypeUtils {
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         String methodName;
 
-        if (varRefExpr.getAncestor(METHOD_DECLARATION).isPresent()) methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
-
-        else methodName = varRefExpr.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
+        if (varRefExpr.getAncestor(METHOD_DECLARATION).isPresent()) {
+            methodName = varRefExpr.getAncestor(METHOD_DECLARATION).get().get("name");
+        } else methodName = varRefExpr.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
 
         String id;
 
-        if (varRefExpr.getKind().equals(ASSIGN_STMT.toString())) id = varRefExpr.get("name");
-        else id = varRefExpr.get("value");
+        var isAssignStmt = varRefExpr.getKind().equals(ASSIGN_STMT.toString());
+        var isArrayAssignStmt = varRefExpr.getKind().equals(ARRAY_ASSIGN_STMT.toString());
+
+        if (isAssignStmt || isArrayAssignStmt) {
+            id = varRefExpr.get("name");
+        } else id = varRefExpr.get("value");
 
         var locals = table.getLocalVariables(methodName);
         for (var local : locals) {
@@ -95,7 +105,9 @@ public class TypeUtils {
             }
         }
 
-        return new Type(VOID_TYPE_NAME, false);
+        var isArray = varRefExpr.get("isArray").equals("true");
+
+        return new Type(VOID_TYPE_NAME, isArray);
     }
 
     /**
