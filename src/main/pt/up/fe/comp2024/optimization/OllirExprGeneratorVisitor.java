@@ -515,6 +515,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
             if (childKind.equals(UNARY_OP.toString())) {
+                childResultToAppend = childResultToAppend.replace("!.bool ", "");
                 computation.append(temp).append(tempType).append(SPACE)
                         .append(ASSIGN).append(tempType).append(SPACE).append(childResultToAppend);
 
