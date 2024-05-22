@@ -303,10 +303,26 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitIfStmt(JmmNode ifStmt, Void unused) {
         StringBuilder code = new StringBuilder();
 
-
         var expr = exprVisitor.visit(ifStmt.getJmmChild(0));
         var exprCode = expr.getCode();
         code.append(expr.getComputation());
+
+        var isUnaryOp = ifStmt.getChild(0).getKind().equals(UNARY_OP.toString());
+
+        if (isUnaryOp) {
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(ifStmt.getJmmChild(0), table));
+            code.append(temp);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append(exprCode);
+            code.append(END_STMT);
+            exprCode = temp + tempType;
+        }
+
         code.append(IF);
         code.append("(").append(exprCode).append(")");
 
@@ -378,16 +394,162 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         Type thisType = TypeUtils.getExprType(arrayAssignStmtNode, table);
 
         var expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(0));
+
+        var indexIsMethodCall = isNodeType(METHOD_CALL.toString(), arrayAssignStmtNode.getJmmChild(0));
+        var indexIsArrayAccess = isNodeType(ARRAY_ACCESS_OP.toString(), arrayAssignStmtNode.getJmmChild(0));
+        var indexIsIdentifier = isNodeType(IDENTIFIER.toString(), arrayAssignStmtNode.getJmmChild(0));
+
         code.append(expr.getComputation());
 
-        lhs += "[" + expr.getCode() + "]" + OptUtils.toOllirType(thisType);
-        code.append(lhs);
+        var fields = table.getFields();
+        var methodName = (arrayAssignStmtNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
+                arrayAssignStmtNode.getAncestor(METHOD_DECLARATION).get().get("name") :
+                arrayAssignStmtNode.getAncestor(MAIN_METHOD_DECLARATION).get().get("name");
 
+        var locals = table.getLocalVariables(methodName);
+        var params = table.getParameters(methodName);
+
+        var isNotLocal = locals.stream().noneMatch(f -> f.getName().equals(lhs));
+        var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
+        var isField = fields.stream().anyMatch(f -> f.getName().equals(lhs));
+
+        if (isField && isNotLocal && isNotParam) {
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(thisType);
+
+            code.append(temp);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append("getfield(this,");
+            code.append(SPACE);
+            code.append(lhs);
+            code.append(OptUtils.toOllirType(thisType));
+            code.append(")");
+            code.append(OptUtils.toOllirType(thisType));
+            code.append(END_STMT);
+
+            var rhs = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
+            code.append(rhs.getComputation());
+
+            if (indexIsArrayAccess || indexIsMethodCall || indexIsIdentifier) {
+                if (indexIsIdentifier) {
+                    var indexIsNotLocal = locals.stream().noneMatch(f -> f.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+                    var indexIsNotParam = params.stream().noneMatch(p -> p.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+                    var indexIsField = fields.stream().anyMatch(f -> f.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+
+                    if (indexIsField && indexIsNotLocal && indexIsNotParam) {
+                        var tempIndex = OptUtils.getTemp();
+                        var tempIndexType = OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table));
+
+                        code.append(tempIndex);
+                        code.append(tempIndexType);
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(tempIndexType);
+                        code.append(SPACE);
+                        code.append("getfield(this,");
+                        code.append(SPACE);
+                        code.append(arrayAssignStmtNode.getJmmChild(0).get("value"));
+                        code.append(OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table)));
+                        code.append(")");
+                        code.append(OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table)));
+                        code.append(END_STMT);
+
+                        code.append(temp);
+                        code.append('[');
+                        code.append(tempIndex);
+                        code.append(tempIndexType);
+                        code.append(']');
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(rhs.getCode());
+                        if (!code.toString().endsWith(END_STMT))
+                            code.append(END_STMT);
+
+                        return code.toString();
+                    } else {
+                        code.append(temp);
+                        code.append('[');
+                        code.append(expr.getCode());
+                        code.append(']');
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
+
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(expr.getCode());
+                        code.append(END_STMT);
+
+                        return code.toString();
+                    }
+                } else {
+                    var tempIndex = OptUtils.getTemp();
+                    var tempIndexType = OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table));
+
+                    code.append(tempIndex);
+                    code.append(tempIndexType);
+                    code.append(SPACE);
+                    code.append(ASSIGN);
+                    code.append(tempIndexType);
+                    code.append(SPACE);
+                    code.append(expr.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+
+                    code.append(temp);
+                    code.append('[');
+                    code.append(tempIndex);
+                    code.append(tempIndexType);
+                    code.append(']');
+                    code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                    code.append(SPACE);
+                    code.append(ASSIGN);
+                    code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                    code.append(SPACE);
+                    code.append(rhs.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+
+                    return code.toString();
+                }
+
+            }
+
+
+            code.append(temp);
+            code.append('[');
+            code.append(expr.getCode());
+            code.append(']');
+            code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+
+            return code.toString();
+        }
+
+        code.append(lhs);
+        code.append('[');
+        code.append(expr.getCode());
+        code.append(']');
+        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
         expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
 
         code.append(SPACE);
         code.append(ASSIGN);
-        code.append(OptUtils.toOllirType(thisType));
+        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
         code.append(SPACE);
         code.append(expr.getCode());
         code.append(END_STMT);
@@ -417,9 +579,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
 
         if (fields.stream().anyMatch(f -> f.getName().equals(lhs)) && isNotLocal && isNotParam) {
-            code.append(rhs.getComputation());
 
             var isMethodCall = isNodeType(METHOD_CALL.toString(), child);
+            var isArrayDecl = isNodeType(ARRAY_DECLARATION.toString(), child);
             var isIdentifier = isNodeType(IDENTIFIER.toString(), child);
             var isNotLocalId = true;
             var isNotParamId = true;
@@ -429,9 +591,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 isNotParamId = params.stream().noneMatch(p -> p.getName().equals(child.get("value")));
             }
 
-            if (isMethodCall || (isNotLocalId && isNotParamId && isIdentifier)) {
+            if (isMethodCall || isArrayDecl || (isNotLocalId && isNotParamId && isIdentifier)) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(thisType);
+                code.append(rhs.getComputation());
 
                 code.append(temp);
                 code.append(tempType);
@@ -441,6 +604,35 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 code.append(SPACE);
                 code.append(rhs.getCode());
 
+                if (!code.toString().endsWith(END_STMT))
+                    code.append(END_STMT);
+
+                code.append("putfield(this,");
+                code.append(SPACE);
+                code.append(lhs);
+                code.append(typeString);
+                code.append(",");
+                code.append(SPACE);
+                code.append(temp);
+                code.append(tempType);
+                code.append(").V");
+                code.append(END_STMT);
+
+                return code.toString();
+            }
+
+            var isArrayExpr = child.getKind().equals(ARRAY_EXPRESSION.toString());
+            if (isArrayExpr) {
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(thisType);
+
+                code.append(temp);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(ASSIGN);
+                code.append(tempType);
+                code.append(SPACE);
+                code.append(rhs.getComputation());
                 if (!code.toString().endsWith(END_STMT))
                     code.append(END_STMT);
 
@@ -562,6 +754,27 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             newCode.append(tempType);
             newCode.append(END_STMT);
             return newCode.toString();
+        }
+
+        var isArrayExpr = child.getKind().equals(ARRAY_EXPRESSION.toString());
+        if (isArrayExpr) {
+
+            code.append(lhs);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(rhs.getComputation());
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+
+            code.append(rhs.getCode());
+
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+
+            return code.toString();
         }
 
         var rhsCode = rhs.getComputation();
