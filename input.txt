@@ -1,20 +1,34 @@
-import ioPlus;
+/*import ioPlus;
 class SimpleWhileStat {
-    boolean b;
+    int[] b;
 
 
     public boolean func(boolean c){
-        boolean a;
+        int[] a;
+        b = [1,2,3,4,5];
 
-        //a = a && ((b));
-        if ((1<2) && a && b && this.func(a) && (b && (b) && c && this.func(a))) {
-        a = true;
-        }
-        else {
-        a = false;
-        }
-        //a = (1<2 && a);
         return true;
+    }
+
+}*/
+
+import io;
+
+class VarargsAndArrayInit {
+    int[] b;
+
+
+    int foo(int[] ar, int b, int... a) {
+        return 1;
+    }
+
+    int bar() {
+        int res;
+        b = new int[5];
+
+        res = this.foo([1, 2, 3], b[0], 4, 5, 6, 7, 8);
+
+        return res;
     }
 
 }
