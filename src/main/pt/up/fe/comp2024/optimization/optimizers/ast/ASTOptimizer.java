@@ -1,4 +1,4 @@
-package pt.up.fe.comp2024.optimization.optimizers;
+package pt.up.fe.comp2024.optimization.optimizers.ast;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;

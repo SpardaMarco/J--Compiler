@@ -172,7 +172,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var methodSymbol = table.getMethodSymbol(name);
 
         if (exprName.equals("this") || exprType.equals(table.getClassName())) {
-            if (methodSymbol.isStatic()) {
+            if (methodSymbol == null && table.classExtends()) {
+                code.append("invokevirtual(");
+            } else if (methodSymbol.isStatic()) {
                 code.append("invokestatic(");
             } else code.append("invokevirtual(");
         } else if (exprName.equals(table.getClassName()) || importsList.contains(exprName)) {

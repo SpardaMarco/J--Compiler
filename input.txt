@@ -1,20 +1,18 @@
-class PropWithLoop {
+import Hello;
+
+class PropWithLoop extends Hello {
+
+    public static void main(String[] args) {
+
+        PropWithLoop x;
+        x = new PropWithLoop();
+        x.bar(3 + 4);
+
+    }
+
     public int foo(){
-	  int a;
-	  int i;
-	  int b;
-
-        b = 5;
-	   a = 10;
-	   i = 0;
-	   while (i < b){
-           a = a + 1;
-       }
-       i = a;
-       // com i
-       a = 20;
-       i = a;
-
-	  return i;
+	  int x;
+	  x = 1 + 2;
+	  return 1;
 	}
 }
