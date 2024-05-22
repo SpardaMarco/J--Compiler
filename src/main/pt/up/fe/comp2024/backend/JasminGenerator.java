@@ -635,6 +635,7 @@ public class JasminGenerator {
             code.append("newarray ").append(arrayType.getElementType().getTypeOfElement() == ElementType.INT32 ? "int" : "boolean").append(NL);
         } else {
             var className = getFullClassName(caller.getName());
+            updateStackSize(1);
             code.append("new ").append(className).append(NL);
         }
 

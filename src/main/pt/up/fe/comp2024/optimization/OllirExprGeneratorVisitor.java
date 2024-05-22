@@ -529,6 +529,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         Type resType = TypeUtils.getExprType(binExprNode, table);
         String resOllirType = OptUtils.toOllirType(resType);
+
+        if (binExprNode.getParent().getKind().equals(ASSIGN_STMT.toString())) {
+            StringBuilder code = new StringBuilder();
+            code.append(lhsToAppend).append(SPACE).append(op).append(resOllirType).append(SPACE);
+            code.append(rhsToAppend);
+            if (!code.toString().endsWith(END_STMT))
+                code.append(END_STMT);
+            return new OllirExprResult(code.toString(), computation.toString());
+        }
+
         String code = OptUtils.getTemp() + resOllirType;
 
         computation.append(code).append(SPACE)
