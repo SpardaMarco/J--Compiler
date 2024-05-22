@@ -39,8 +39,7 @@ public class ColorGraph {
         return liveRange1.a <= liveRange2.b && liveRange1.b >= liveRange2.a;
     }
 
-    // return null if cant paint with numColors
-    private HashMap<Integer, HashSet<String>> paintWithColors(int numColors) {
+    public HashMap<Integer, HashSet<String>> paintWithColors(int numColors) {
 
         HashMap<String, Integer> colors = new HashMap<>();
         Stack<String> registersToPaint = new Stack<>();

@@ -35,7 +35,8 @@ public class RegisterOptimizer {
 
             String prefix = ollirCode.substring(0, begin + 1);
             String method = ollirCode.substring(begin + 1, end);
-            String optimizedMethod = new MethodRegisterOptimizer(method).optimize();
+
+            String optimizedMethod = new MethodRegisterOptimizer(method).optimize(numRegisters);
 
             stringBuilder.append(prefix);
             stringBuilder.append(optimizedMethod);

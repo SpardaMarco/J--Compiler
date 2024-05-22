@@ -16,13 +16,17 @@ public class MethodRegisterOptimizer {
         this.method = method;
     }
 
-    public String optimize() {
+    public String optimize(int numRegisters) {
 
-        buildBasicBlocks();
+        buildLiveRanges();
+//        ColorGraph colorGraph = new ColorGraph(liveRanges);
+//        if (colorGraph.paintWithColors(numRegisters) == null) {
+//            return null;
+//        }
         return method;
     }
 
-    private void buildBasicBlocks() {
+    private void buildLiveRanges() {
 
         OllirMethodStream stream = new OllirMethodStream(method);
 
