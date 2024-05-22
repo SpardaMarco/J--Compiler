@@ -1,17 +1,20 @@
 import ioPlus;
 class SimpleWhileStat {
+    boolean b;
 
 
-    public int func(int a){
-        int c;
-        int i;
-        i = 0;
+    public boolean func(boolean c){
+        boolean a;
 
-        while (i < a) {
-            i = i + 1;
+        //a = a && ((b));
+        if ((1<2) && a && b && this.func(a) && (b && (b) && c && this.func(a))) {
+        a = true;
         }
-
-        return i;
+        else {
+        a = false;
+        }
+        //a = (1<2 && a);
+        return true;
     }
 
 }
