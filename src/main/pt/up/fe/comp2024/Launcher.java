@@ -2,6 +2,7 @@ package pt.up.fe.comp2024;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp2024.analysis.ASTAnnotator;
@@ -68,8 +69,8 @@ public class Launcher {
         JasminBackendImpl jasminGen = new JasminBackendImpl();
 
         // OllirResult ollirResult = new OllirResult(code, config);
-        //JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        //System.out.println(jasminResult.getJasminCode());
+        JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+//        System.out.println(jasminResult.getJasminCode());
         //TestUtils.noErrors(jasminResult.getReports());
     }
 }
