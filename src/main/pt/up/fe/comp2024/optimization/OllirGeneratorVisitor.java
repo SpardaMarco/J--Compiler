@@ -303,10 +303,26 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitIfStmt(JmmNode ifStmt, Void unused) {
         StringBuilder code = new StringBuilder();
 
-
         var expr = exprVisitor.visit(ifStmt.getJmmChild(0));
         var exprCode = expr.getCode();
         code.append(expr.getComputation());
+
+        var isUnaryOp = ifStmt.getChild(0).getKind().equals(UNARY_OP.toString());
+
+        if (isUnaryOp) {
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(ifStmt.getJmmChild(0), table));
+            code.append(temp);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(tempType);
+            code.append(SPACE);
+            code.append(exprCode);
+            code.append(END_STMT);
+            exprCode = temp + tempType;
+        }
+
         code.append(IF);
         code.append("(").append(exprCode).append(")");
 
