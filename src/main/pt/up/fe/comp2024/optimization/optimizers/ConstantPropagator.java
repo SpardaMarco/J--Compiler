@@ -111,21 +111,19 @@ public class ConstantPropagator extends ConstantOptimizer {
     }
 
     private boolean refersConditionedAssignment(JmmNode node) {
-        if (isPartOfCondition(node)) {
-            if (node.getAncestor("IfStmt").isPresent()) {
-                JmmNode ifStmt = node.getAncestor("IfStmt").get();
-                if (ifStmt.getDescendants("AssignStmt").stream().anyMatch(
-                        n -> n.get("name").equals(node.get("value"))
-                )) {
-                    return true;
-                }
+        if (node.getAncestor("IfStmt").isPresent()) {
+            JmmNode ifStmt = node.getAncestor("IfStmt").get();
+            if (ifStmt.getDescendants("AssignStmt").stream().anyMatch(
+                    n -> n.get("name").equals(node.get("value"))
+            )) {
+                return true;
             }
-            if (node.getAncestor("WhileStmt").isPresent()) {
-                JmmNode whileStmt = node.getAncestor("WhileStmt").get();
-                return whileStmt.getDescendants("AssignStmt").stream().anyMatch(
-                        n -> n.get("name").equals(node.get("value"))
-                );
-            }
+        }
+        if (node.getAncestor("WhileStmt").isPresent()) {
+            JmmNode whileStmt = node.getAncestor("WhileStmt").get();
+            return whileStmt.getDescendants("AssignStmt").stream().anyMatch(
+                    n -> n.get("name").equals(node.get("value"))
+            );
         }
         return false;
     }
