@@ -1,10 +1,16 @@
-
-class SimpleWhileStat {
-
-    public int func(boolean c){
-        int a;
-
-        a = (1 + 2 * 3 + 4 / 5) + 6;
-        return a;
+class RegAlloc {
+    public int soManyRegisters(int arg){
+       int a;
+       int b;
+       int c;
+       int d;
+       a = 0;
+       b = a;
+       c = b;
+       d = c;
+       return d;
     }
+
+	public static void main(String[] args) {
+	}
 }

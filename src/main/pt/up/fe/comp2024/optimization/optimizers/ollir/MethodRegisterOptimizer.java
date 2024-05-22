@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MethodRegisterOptimizer {
 
@@ -67,18 +69,35 @@ public class MethodRegisterOptimizer {
     private List<String> getRegisters(String statement) {
         List<String> registers = new ArrayList<>();
 
-        while (true) {
-            int registerBegin = statement.indexOf("tmp");
-            if (registerBegin == -1) {
-                break;
-            }
-            int registerEnd = statement.substring(registerBegin).indexOf(".");
+//        while (true) {
+//            int registerBegin = statement.indexOf("tmp");
+//            if (registerBegin == -1) {
+//                break;
+//            }
+//            int registerEnd = statement.substring(registerBegin).indexOf(".");
+//
+//            registers.add(statement.substring(registerBegin, registerBegin + registerEnd));
+//            statement = statement.substring(registerBegin + registerEnd);
+//        }
 
-            registers.add(statement.substring(registerBegin, registerBegin + registerEnd));
-            statement = statement.substring(registerBegin + registerEnd);
+        String regex = "\\b([a-zA-Z][a-zA-Z0-9]*)\\.[a-zA-Z0-9_]+\\b";
+        Pattern pattern = Pattern.compile(regex);
+
+        Matcher matcher = pattern.matcher(statement);
+        ArrayList<String> registerNames = new ArrayList<>();
+
+        while (matcher.find()) {
+            // Group 1 is the register name
+            String registerName = matcher.group(1);
+            if (!registerName.startsWith("new") && !registerName.startsWith("ret"))
+                registerNames.add(registerName);
         }
 
-        return registers;
+        // Print the extracted register names for the current statement
+        System.out.println("Statement: " + statement);
+        System.out.println("Register Names: " + registerNames);
+
+        return registerNames;
     }
 
     private void updateLiveRanges(String register, Integer line) {
