@@ -303,10 +303,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitIfStmt(JmmNode ifStmt, Void unused) {
         StringBuilder code = new StringBuilder();
 
-        code.append(IF);
 
         var expr = exprVisitor.visit(ifStmt.getJmmChild(0));
         var exprCode = expr.getCode();
+        code.append(expr.getComputation());
+        code.append(IF);
         code.append("(").append(exprCode).append(")");
 
         code.append(SPACE);
@@ -352,6 +353,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(whileCond).append(":").append("\n");
 
         var expr = exprVisitor.visit(whileStmt.getJmmChild(0));
+        code.append(expr.getComputation());
         code.append(temp).append(SPACE);
         code.append(ASSIGN).append(".bool").append(SPACE);
         code.append(expr.getCode()).append(END_STMT);
