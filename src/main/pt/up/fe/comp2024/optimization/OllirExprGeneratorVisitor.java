@@ -121,11 +121,51 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var type = TypeUtils.getExprType(arrayAccessNode, table);
             code.append(OptUtils.toOllirType(type));
         } else {
-            var secondChildValue = (hasValue) ? secondChild.get("value") : secondChild.get("name");
-            var secondChildType = TypeUtils.getExprType(secondChild, table);
-            code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
-            var type = TypeUtils.getExprType(arrayAccessNode, table);
-            code.append(OptUtils.toOllirType(type));
+            var isMethodCall = secondChild.getKind().equals(METHOD_CALL.toString());
+            var isArrayAccess = secondChild.getKind().equals(ARRAY_ACCESS_OP.toString());
+            var isIdentifier = secondChild.getKind().equals(IDENTIFIER.toString());
+
+            if (isMethodCall || isArrayAccess || isIdentifier) {
+                if (isIdentifier) {
+                    var secondChildValue = (hasValue) ? secondChild.get("value") : secondChild.get("name");
+                    var indexIsNotLocal = locals.stream().noneMatch(l -> l.getName().equals(secondChildValue));
+                    var indexIsNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
+                    var indexIsField = fields.stream().anyMatch(f -> f.getName().equals(secondChildValue));
+                    if (indexIsNotLocal && indexIsNotParam && indexIsField) {
+                        var result = visit(secondChild);
+                        var temp = OptUtils.getTemp();
+                        var tempType = OptUtils.toOllirType(TypeUtils.getExprType(secondChild, table));
+                        computation.append(result.getComputation());
+                        computation.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+                        computation.append(result.getCode()).append(END_STMT);
+                        code.append(firstChildValue).append("[").append(temp).append(tempType).append("]");
+                        var type = TypeUtils.getExprType(arrayAccessNode, table);
+                        code.append(OptUtils.toOllirType(type));
+                    } else {
+                        var secondChildType = TypeUtils.getExprType(secondChild, table);
+                        code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
+                        var type = TypeUtils.getExprType(arrayAccessNode, table);
+                        code.append(OptUtils.toOllirType(type));
+                    }
+
+                } else {
+                    var temp = OptUtils.getTemp();
+                    var tempType = OptUtils.toOllirType(TypeUtils.getExprType(secondChild, table));
+                    computation.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+                    computation.append(visit(secondChild).getCode());
+                    if (!computation.toString().endsWith(END_STMT))
+                        computation.append(END_STMT);
+                    code.append(firstChildValue).append("[").append(temp).append(tempType).append("]");
+                    var type = TypeUtils.getExprType(arrayAccessNode, table);
+                    code.append(OptUtils.toOllirType(type));
+                }
+            } else {
+                var secondChildValue = (hasValue) ? secondChild.get("value") : secondChild.get("name");
+                var secondChildType = TypeUtils.getExprType(secondChild, table);
+                code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
+                var type = TypeUtils.getExprType(arrayAccessNode, table);
+                code.append(OptUtils.toOllirType(type));
+            }
         }
 
         return new OllirExprResult(code.toString(), computation.toString());

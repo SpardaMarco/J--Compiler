@@ -378,6 +378,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         Type thisType = TypeUtils.getExprType(arrayAssignStmtNode, table);
 
         var expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(0));
+
+        var indexIsMethodCall = isNodeType(METHOD_CALL.toString(), arrayAssignStmtNode.getJmmChild(0));
+        var indexIsArrayAccess = isNodeType(ARRAY_ACCESS_OP.toString(), arrayAssignStmtNode.getJmmChild(0));
+        var indexIsIdentifier = isNodeType(IDENTIFIER.toString(), arrayAssignStmtNode.getJmmChild(0));
+
         code.append(expr.getComputation());
 
         var fields = table.getFields();
@@ -391,6 +396,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isNotLocal = locals.stream().noneMatch(f -> f.getName().equals(lhs));
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
         var isField = fields.stream().anyMatch(f -> f.getName().equals(lhs));
+
         if (isField && isNotLocal && isNotParam) {
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);
@@ -411,6 +417,95 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             var rhs = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
             code.append(rhs.getComputation());
+
+            if (indexIsArrayAccess || indexIsMethodCall || indexIsIdentifier) {
+                if (indexIsIdentifier) {
+                    var indexIsNotLocal = locals.stream().noneMatch(f -> f.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+                    var indexIsNotParam = params.stream().noneMatch(p -> p.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+                    var indexIsField = fields.stream().anyMatch(f -> f.getName().equals(arrayAssignStmtNode.getJmmChild(0).get("value")));
+
+                    if (indexIsField && indexIsNotLocal && indexIsNotParam) {
+                        var tempIndex = OptUtils.getTemp();
+                        var tempIndexType = OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table));
+
+                        code.append(tempIndex);
+                        code.append(tempIndexType);
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(tempIndexType);
+                        code.append(SPACE);
+                        code.append("getfield(this,");
+                        code.append(SPACE);
+                        code.append(arrayAssignStmtNode.getJmmChild(0).get("value"));
+                        code.append(OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table)));
+                        code.append(")");
+                        code.append(OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table)));
+                        code.append(END_STMT);
+
+                        code.append(temp);
+                        code.append('[');
+                        code.append(tempIndex);
+                        code.append(tempIndexType);
+                        code.append(']');
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(rhs.getCode());
+                        if (!code.toString().endsWith(END_STMT))
+                            code.append(END_STMT);
+
+                        return code.toString();
+                    } else {
+                        code.append(temp);
+                        code.append('[');
+                        code.append(expr.getCode());
+                        code.append(']');
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        expr = exprVisitor.visit(arrayAssignStmtNode.getJmmChild(1));
+
+                        code.append(SPACE);
+                        code.append(ASSIGN);
+                        code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                        code.append(SPACE);
+                        code.append(expr.getCode());
+                        code.append(END_STMT);
+
+                        return code.toString();
+                    }
+                } else {
+                    var tempIndex = OptUtils.getTemp();
+                    var tempIndexType = OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table));
+
+                    code.append(tempIndex);
+                    code.append(tempIndexType);
+                    code.append(SPACE);
+                    code.append(ASSIGN);
+                    code.append(tempIndexType);
+                    code.append(SPACE);
+                    code.append(expr.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+
+                    code.append(temp);
+                    code.append('[');
+                    code.append(tempIndex);
+                    code.append(tempIndexType);
+                    code.append(']');
+                    code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                    code.append(SPACE);
+                    code.append(ASSIGN);
+                    code.append(OptUtils.toOllirType(new Type(thisType.getName(), false)));
+                    code.append(SPACE);
+                    code.append(rhs.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+
+                    return code.toString();
+                }
+
+            }
 
 
             code.append(temp);
