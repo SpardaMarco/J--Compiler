@@ -1,20 +1,10 @@
-import ioPlus;
 class SimpleWhileStat {
-    boolean b;
 
+    public int func(boolean c){
+        int a;
 
-    public boolean func(boolean c){
-        boolean a;
-
-        //a = a && ((b));
-        if ((1<2) && a && b && this.func(a) && (b && (b) && c && this.func(a))) {
-        a = true;
-        }
-        else {
-        a = false;
-        }
-        //a = (1<2 && a);
-        return true;
+        a = (1 + 2 * 3 + 4 / 5) + 6;
+        return a;
     }
 
 }

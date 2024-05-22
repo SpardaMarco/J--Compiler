@@ -48,13 +48,14 @@ public class ColorGraph {
 
         while (!registersToPaint.isEmpty()) {
             String register = registersToPaint.pop();
+
             for (int color = 0; color < numColors; color++) {
                 if (canPaintRegWith(register, color, colors) && hasDegreeLessThan(numColors, register)) {
                     colors.put(register, color);
                     break;
                 }
             }
-            if (colors.get(register) == -1) {
+            if (colors.get(register) == null) {
                 return null;
             }
         }
@@ -70,7 +71,11 @@ public class ColorGraph {
     }
 
     private boolean canPaintRegWith(String register, int color, HashMap<String, Integer> colors) {
-        return edges.stream().noneMatch(edge -> edge.a.equals(register) && colors.get(edge.b) == color);
+        return edges.stream().noneMatch(edge ->
+                edge.a.equals(register) &&
+                        colors.get(edge.b) != null &&
+                        colors.get(edge.b) == color
+        );
     }
 
     private boolean hasDegreeLessThan(int degree, String register) {

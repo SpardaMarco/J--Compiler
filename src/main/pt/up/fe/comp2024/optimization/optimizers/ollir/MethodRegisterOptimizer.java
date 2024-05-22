@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class MethodRegisterOptimizer {
@@ -19,11 +20,34 @@ public class MethodRegisterOptimizer {
     public String optimize(int numRegisters) {
 
         buildLiveRanges();
-//        ColorGraph colorGraph = new ColorGraph(liveRanges);
-//        if (colorGraph.paintWithColors(numRegisters) == null) {
-//            return null;
-//        }
-        return method;
+        ColorGraph colorGraph = new ColorGraph(liveRanges);
+        if (numRegisters == 0) {
+            while (true) {
+                numRegisters++;
+                HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
+                if (allocation != null) {
+                    String optimizedMethod = method;
+                    for (Integer optRegIndex : allocation.keySet()) {
+                        for (String reg : allocation.get(optRegIndex)) {
+                            optimizedMethod = optimizedMethod.replace(reg, "tmp" + optRegIndex);
+                        }
+                    }
+                    return optimizedMethod;
+                }
+            }
+        } else {
+            HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
+            if (allocation == null) {
+                return null;
+            }
+            String optimizedMethod = method;
+            for (Integer optRegIndex : allocation.keySet()) {
+                for (String reg : allocation.get(optRegIndex)) {
+                    optimizedMethod = optimizedMethod.replace(reg, "tmp" + optRegIndex);
+                }
+            }
+            return optimizedMethod;
+        }
     }
 
     private void buildLiveRanges() {
@@ -60,7 +84,7 @@ public class MethodRegisterOptimizer {
     private void updateLiveRanges(String register, Integer line) {
 
         if (liveRanges.get(register) == null) {
-            liveRanges.put(register, new Pair<>(line, line));
+            liveRanges.put(register, new Pair<>(line + 1, line + 1));
         } else {
             liveRanges.put(register, new Pair<>(liveRanges.get(register).a, line));
         }
