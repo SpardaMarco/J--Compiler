@@ -1,16 +1,10 @@
-import io;
+import ioPlus;
+class ArrayInit {
 
-Arithmetic_not {
+	public static void main(String[] args) {
+	    int[] a;
+        a = new int[5];
+        //ioPlus.printResult(a.length);
+	}
 
-    .method public static main(args.array.String).V {
-
-        a.bool :=.bool 1.i32 <.bool 2.i32;
-
-        ret.V;
-
-    }
-
-    .construct Arithmetic_not().V {
-        invokespecial(this, "<init>").V;
-    }
 }
