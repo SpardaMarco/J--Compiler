@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
+import java.util.ArrayList;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -82,7 +84,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var computation = new StringBuilder();
 
         var expr = visit(arrayDeclNode.getJmmChild(0));
-        
+
 
         return new OllirExprResult(code.toString(), computation.toString());
     }
@@ -229,14 +231,51 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code);
     }
 
+    private ArrayList<JmmNode> buildAndChildren(JmmNode binExprNode) {
+        ArrayList<JmmNode> children = new ArrayList<>();
+        for (var i = 0; i < binExprNode.getNumChildren(); i++) {
+            var child = binExprNode.getJmmChild(i);
+            if (child.getKind().equals(BINARY_OP.toString()) && child.get("op").equals("&&")) {
+                children.addAll(buildAndChildren(child));
+            } else {
+                children.add(child);
+            }
+        }
+        return children;
+    }
+
     private OllirExprResult visitAndExpr(JmmNode binExprNode) {
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
+        ArrayList<JmmNode> children = buildAndChildren(binExprNode);
 
-        for (var i = 0; i < binExprNode.getNumChildren() - 1; i++) {
-            var child = binExprNode.getJmmChild(i);
+        String falseLabel = "falseLabel" + (OptUtils.getCurrentTempNum() + 1);
+        String endLabel = "endLabel" + (OptUtils.getCurrentTempNum() + 1);
+        String result = OptUtils.getTemp() + ".bool";
+        for (var i = 0; i < children.size() - 1; i++) {
+            var child = children.get(i);
+            var childResult = visit(child);
 
+            var temp = OptUtils.getTemp();
+            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
+            computation.append(temp).append(tempType).append(SPACE)
+                    .append(ASSIGN).append(tempType).append(SPACE).append(NOT).append(".bool").append(SPACE).append(childResult.getCode());
+            if (!computation.toString().endsWith(END_STMT))
+                computation.append(END_STMT);
+            computation.append("if (").append(temp).append(tempType).append(") goto ").append(falseLabel).append(END_STMT);
         }
+
+        var lastChild = children.get(children.size() - 1);
+        var lastChildResult = visit(lastChild);
+
+        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append(lastChildResult.getCode());
+        if (!computation.toString().endsWith(END_STMT))
+            computation.append(END_STMT);
+        computation.append("goto ").append(endLabel).append(END_STMT);
+        computation.append(falseLabel).append(":").append('\n');
+        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
+        computation.append(endLabel).append(":").append('\n');
+        code.append(result);
 
         return new OllirExprResult(code.toString(), computation.toString());
     }
