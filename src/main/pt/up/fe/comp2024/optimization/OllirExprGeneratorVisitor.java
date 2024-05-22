@@ -72,12 +72,23 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var firstChildValue = firstChild.get("value");
 
         var secondChild = arrayAccessNode.getJmmChild(1);
-        var secondChildValue = secondChild.get("value");
-        var secondChildType = TypeUtils.getExprType(secondChild, table);
+        var hasValue = secondChild.hasAttribute("value");
+        var hasName = secondChild.hasAttribute("name");
 
-        code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
-        var type = TypeUtils.getExprType(arrayAccessNode, table);
-        code.append(OptUtils.toOllirType(type));
+        if (!hasValue && !hasName) {
+            var result = visit(secondChild);
+            computation.append(result.getComputation());
+            code.append(firstChildValue).append("[").append(result.getCode()).append("]");
+            var type = TypeUtils.getExprType(arrayAccessNode, table);
+            code.append(OptUtils.toOllirType(type));
+        } else {
+            var secondChildValue = (hasValue) ? secondChild.get("value") : secondChild.get("name");
+            var secondChildType = TypeUtils.getExprType(secondChild, table);
+
+            code.append(firstChildValue).append("[").append(secondChildValue).append(OptUtils.toOllirType(secondChildType)).append("]");
+            var type = TypeUtils.getExprType(arrayAccessNode, table);
+            code.append(OptUtils.toOllirType(type));
+        }
 
         return new OllirExprResult(code.toString(), computation.toString());
     }
