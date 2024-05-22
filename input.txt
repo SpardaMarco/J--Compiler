@@ -1,20 +1,22 @@
-class PropWithLoop {
-    public int foo(){
-	  int a;
-	  int i;
-	  int b;
-
-        b = 5;
-	   a = 10;
-	   i = 0;
-	   while (i < b){
-           a = a + 1;
-       }
-       i = a;
-       // com i
-       a = 20;
-       i = a;
-
-	  return i;
+import io;
+	public static void main(String[] args) {
+	    int[] a;
+        a = new int[5];
+        ioPlus.printResult(a.length);
 	}
+
+}
+
+class ArrayInitialization {
+
+    public static void main(String[] args) {
+    }
+
+    int foo() {
+        int[] a;
+
+        a = [1, 2, 3, 4];
+
+        return a[2];
+    }
 }
