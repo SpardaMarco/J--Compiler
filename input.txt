@@ -16,18 +16,17 @@ import io;
 
 class VarargsAndArrayInit {
     int[] b;
+    int a;
 
 
-    int foo(int[] ar, int b, int... a) {
+    int foo() {
         return 1;
     }
 
     int bar() {
         int res;
         b = new int[5];
-
-        res = this.foo([1, 2, 3], b[0], 4, 5, 6, 7, 8);
-
+        b[0] = b[a];
         return res;
     }
 
