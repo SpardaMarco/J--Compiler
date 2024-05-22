@@ -1,4 +1,4 @@
-import ioPlus;
+/*import ioPlus;
 class SimpleWhileStat {
     int[] b;
 
@@ -8,6 +8,27 @@ class SimpleWhileStat {
         b = [1,2,3,4,5];
 
         return true;
+    }
+
+}*/
+
+import io;
+
+class VarargsAndArrayInit {
+    int[] b;
+
+
+    int foo(int[] ar, int b, int... a) {
+        return 1;
+    }
+
+    int bar() {
+        int res;
+        b = new int[5];
+
+        res = this.foo([1, 2, 3], b[0], 4, 5, 6, 7, 8);
+
+        return res;
     }
 
 }

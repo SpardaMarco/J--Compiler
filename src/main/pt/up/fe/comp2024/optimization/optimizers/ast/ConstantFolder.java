@@ -1,4 +1,4 @@
-package pt.up.fe.comp2024.optimization.optimizers;
+package pt.up.fe.comp2024.optimization.optimizers.ast;
 
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
@@ -12,7 +12,8 @@ public class ConstantFolder extends ConstantOptimizer {
     }
 
     @Override
-    protected void cleanUp() {}
+    protected void cleanUp() {
+    }
 
     @Override
     protected void buildVisitor() {
