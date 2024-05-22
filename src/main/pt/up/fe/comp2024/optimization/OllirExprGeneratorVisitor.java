@@ -239,15 +239,27 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
             var locals = table.getLocalVariables(ancestor.get("name"));
             var params = table.getParameters(ancestor.get("name"));
-
-            for (int i = 1; i < methodCallNode.getNumChildren(); i++) {
+            int index = 1;
+            boolean isVararg = false;
+            for (index = 1; index < methodCallNode.getNumChildren(); index++) {
                 code.append(",");
                 code.append(SPACE);
-                OllirExprResult result = visit(methodCallNode.getJmmChild(i));
 
-                var isLiteral = isNodeType(INTEGER_LITERAL.toString(), methodCallNode.getJmmChild(i)) || isNodeType(BOOLEAN_LITERAL.toString(), methodCallNode.getJmmChild(i));
+                // get method in symbol table
+                var method = table.getMethodSymbol(name);
+                if (method != null) {
+                    isVararg = method.getParams().get(index - 1).isVararg();
+                    if (isVararg) {
+                        break;
+                    }
+                }
+
+
+                OllirExprResult result = visit(methodCallNode.getJmmChild(index));
+
+                var isLiteral = isNodeType(INTEGER_LITERAL.toString(), methodCallNode.getJmmChild(index)) || isNodeType(BOOLEAN_LITERAL.toString(), methodCallNode.getJmmChild(index));
                 String childValue;
-                var child = methodCallNode.getJmmChild(i);
+                var child = methodCallNode.getJmmChild(index);
 
                 while (true) {
                     if (child.getKind().equals(IDENTIFIER.toString())) {
@@ -263,12 +275,12 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
                 var isNotLocal = locals == null || locals.stream().noneMatch(l -> l.getName().equals(childValue));
                 var isNotParam = params == null || params.stream().noneMatch(p -> p.getName().equals(childValue));
-                var isBinExpr = isNodeType(BINARY_OP.toString(), methodCallNode.getJmmChild(i));
-                var isObjectDecl = isNodeType(OBJECT_DECLARATION.toString(), methodCallNode.getJmmChild(i));
+                var isBinExpr = isNodeType(BINARY_OP.toString(), methodCallNode.getJmmChild(index));
+                var isObjectDecl = isNodeType(OBJECT_DECLARATION.toString(), methodCallNode.getJmmChild(index));
 
                 if (!(isLiteral || !isNotLocal || !isNotParam || isObjectDecl || isBinExpr)) {
                     var temp = OptUtils.getTemp();
-                    var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(i), table));
+                    var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(index), table));
 
                     computation.append(result.getComputation());
                     computation.append(temp).append(tempType).append(SPACE)
@@ -282,6 +294,39 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 } else {
                     computation.append(result.getComputation());
                     code.append(result.getCode());
+                }
+            }
+
+            if (isVararg) {
+                var thisType = methodCallNode.getJmmChild(index).get("type");
+                var typeVarArg = OptUtils.toOllirType(new Type(thisType, true));
+                var temp = OptUtils.getTemp();
+                var numOfArgs = methodCallNode.getNumChildren() - index;
+                var currArg = 0;
+
+                computation.append(temp).append(typeVarArg).append(SPACE)
+                        .append(ASSIGN).append(typeVarArg).append(SPACE);
+                computation.append("new(array,").append(SPACE);
+                computation.append(numOfArgs).append(".int32").append(")").append(typeVarArg).append(END_STMT);
+                code.append(temp).append(typeVarArg);
+
+                for (index = index; index < methodCallNode.getNumChildren(); index++) {
+                    var result = visit(methodCallNode.getJmmChild(index));
+                    var tempType = OptUtils.toOllirType(TypeUtils.getExprType(methodCallNode.getJmmChild(index), table));
+                    computation.append(result.getComputation());
+                    var newTemp = OptUtils.getTemp();
+
+                    computation.append(newTemp).append(tempType).append(SPACE)
+                            .append(ASSIGN).append(tempType).append(SPACE).append(result.getCode());
+                    if (!computation.toString().endsWith(END_STMT))
+                        computation.append(END_STMT);
+
+                    computation.append(temp).append('[').append(currArg).append(".int32").append(']').append(tempType).append(SPACE)
+                            .append(ASSIGN).append(typeVarArg).append(SPACE).append(newTemp).append(tempType);
+                    if (!computation.toString().endsWith(END_STMT))
+                        computation.append(END_STMT);
+
+                    currArg++;
                 }
             }
         }
