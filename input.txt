@@ -3,14 +3,13 @@ class SimpleIfElseStat {
     int[] b;
     int a;
     boolean c;
-    boolean foo() {
-    return true;
+    int[] foo(int[] c) {
+    return c;
     }
 
     int bar() {
-        b = new int[10];
-        a = b[0];
-        b[0] = a;
+        //this.foo([1,2,3,4,5,6,7,8,9,10]);
+       this.foo(new int[10]);
 
         return 1;
     }
