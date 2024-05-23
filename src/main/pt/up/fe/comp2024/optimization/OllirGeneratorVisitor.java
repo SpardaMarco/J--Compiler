@@ -237,6 +237,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             var isArrDecl = isNodeType(ARRAY_DECLARATION.toString(), returnNode.getJmmChild(0));
             var isArrExpr = isNodeType(ARRAY_EXPRESSION.toString(), returnNode.getJmmChild(0));
             var isAttr = isNodeType(ATTRIBUTE.toString(), returnNode.getJmmChild(0));
+            var isUnaryOp = isNodeType(UNARY_OP.toString(), returnNode.getJmmChild(0));
 
             var isNotLocal = true;
             var isNotParam = true;
@@ -263,7 +264,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 return code.toString();
             }
 
-            if (isMethodCall || isArrExpr || isArrDecl || isAttr) {
+            if (isMethodCall || isArrExpr || isArrDecl || isAttr || isUnaryOp) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
 
