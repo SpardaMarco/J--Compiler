@@ -1,13 +1,18 @@
 import ioPlus;
 class SimpleIfElseStat {
 
-
-    public int func(){
-
-		int a;
-
-		a = ((1 + 1) + (1 + 1)) + 1;
-
-        return a;
+    int[] b;
+    int a;
+    boolean c;
+    int[] foo(int[] c) {
+    return c;
     }
+
+    int bar() {
+        //this.foo([1,2,3,4,5,6,7,8,9,10]);
+       this.foo(new int[10]);
+
+        return 1;
+    }
+
 }
