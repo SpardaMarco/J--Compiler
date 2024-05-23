@@ -50,7 +50,7 @@ public class ColorGraph {
         while (!registersToPaint.isEmpty()) {
             String register = registersToPaint.pop();
 
-            if (!hasDegreeLessThan(numColors, register)) {
+            if (!hasDegreeLessThan(numColors, register, spills)) {
                 spills.add(register);
                 continue;
             }
@@ -99,7 +99,9 @@ public class ColorGraph {
         );
     }
 
-    private boolean hasDegreeLessThan(int degree, String register) {
-        return edges.stream().filter(edge -> edge.a.equals(register)).count() < degree;
+    private boolean hasDegreeLessThan(int degree, String register, HashSet<String> spills) {
+        return edges.stream().filter(edge ->
+                edge.a.equals(register) && !spills.contains(edge.b)
+        ).count() < degree;
     }
 }

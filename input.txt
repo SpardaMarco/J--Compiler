@@ -5,7 +5,6 @@ class SimpleIfElseStat {
     boolean c;
     boolean foo() {
     return true;
-
     }
 
     int bar() {
