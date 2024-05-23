@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MethodRegisterOptimizer {
 
@@ -71,40 +73,40 @@ public class MethodRegisterOptimizer {
     private List<String> getRegisters(String statement) {
         List<String> registers = new ArrayList<>();
 
-        while (true) {
-
-            if (statement.contains(":=")) {
-                statement = statement.substring(statement.indexOf(":=") + 2);
-            }
-
-            int registerBegin = statement.indexOf("tmp");
-            if (registerBegin == -1) {
-                break;
-            }
-            int registerEnd = statement.substring(registerBegin).indexOf(".");
-
-            registers.add(statement.substring(registerBegin, registerBegin + registerEnd));
-            statement = statement.substring(registerBegin + registerEnd);
-        }
-
-//        int assignIndex = statement.indexOf(":=");
-//        if (assignIndex != -1)
-//            statement = statement.substring(assignIndex + 2);
+//        while (true) {
 //
-//        String regex = "\\b([a-zA-Z][a-zA-Z0-9]*)\\.[a-zA-Z0-9_]+\\b";
-//        Pattern pattern = Pattern.compile(regex);
+//            if (statement.contains(":=")) {
+//                statement = statement.substring(statement.indexOf(":=") + 2);
+//            }
 //
-//        Matcher matcher = pattern.matcher(statement);
-//        ArrayList<String> registerNames = new ArrayList<>();
+//            int registerBegin = statement.indexOf("tmp");
+//            if (registerBegin == -1) {
+//                break;
+//            }
+//            int registerEnd = statement.substring(registerBegin).indexOf(".");
 //
-//        while (matcher.find()) {
-//
-//            String registerName = matcher.group(1);
-//            if (validRegister(registerName))
-//                registerNames.add(registerName);
+//            registers.add(statement.substring(registerBegin, registerBegin + registerEnd));
+//            statement = statement.substring(registerBegin + registerEnd);
 //        }
 
-        return registers;
+        int assignIndex = statement.indexOf(":=");
+        if (assignIndex != -1)
+            statement = statement.substring(assignIndex + 2);
+
+        String regex = "\\b([a-zA-Z][a-zA-Z0-9]*)\\.[a-zA-Z0-9_]+\\b";
+        Pattern pattern = Pattern.compile(regex);
+
+        Matcher matcher = pattern.matcher(statement);
+        ArrayList<String> registerNames = new ArrayList<>();
+
+        while (matcher.find()) {
+
+            String registerName = matcher.group(1);
+            if (validRegister(registerName))
+                registerNames.add(registerName);
+        }
+
+        return registerNames;
     }
 
     private boolean validRegister(String registerName) {

@@ -38,7 +38,9 @@ public class ConstantPropagator extends ConstantOptimizer {
             }
         }
         if (allRemoved) {
-            declarations.get(id).detach();
+            JmmNode declaration = declarations.get(id);
+            if (declaration != null)
+                declaration.detach();
         }
     }
 
@@ -92,17 +94,15 @@ public class ConstantPropagator extends ConstantOptimizer {
     private boolean isValidLiteral(JmmNode identifier, String id) {
         return assignments.containsKey(id) &&
                 !assignmentsConditioned.get(id).peek() &&
-                !refersConditionedAssignment(identifier);
+                !isConditioned(identifier);
     }
 
-    private boolean isPartOfCondition(JmmNode node) {
+    private boolean isConditioned(JmmNode identifier) {
+        return !isPartOfIfCondition(identifier) && refersConditionedAssignment(identifier);
+    }
 
-        if (node.getAncestor("WhileStmt").isPresent()) {
-            JmmNode whileStmt = node.getAncestor("WhileStmt").get();
-            if (whileStmt.getChild(0).getDescendantsAndSelfStream().anyMatch(n -> n == node)) {
-                return true;
-            }
-        }
+    private boolean isPartOfIfCondition(JmmNode node) {
+
         if (node.getAncestor("IfStmt").isPresent()) {
             JmmNode ifStmt = node.getAncestor("IfStmt").get();
             return ifStmt.getChild(0).getDescendantsAndSelfStream().anyMatch(n -> n == node);

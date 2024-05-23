@@ -1,6 +1,16 @@
 class Main {
-    int foo(int b) {
-        this.foo([1, 2, 3][0]);
-        return 1;
-    }
+    int x;
+	int foo() {
+
+
+        x = 1;
+
+        if (x < 1) {
+            x = 2;
+        } else {
+            x = 3;
+        }
+
+        return x;
+	}
 }
