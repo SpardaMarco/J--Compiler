@@ -246,10 +246,34 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var childrenType = arrayExpression.getChild(0).get("type");
             var childrenOllirType = OptUtils.toOllirType(new Type(childrenType, false));
 
-
             for (var i = 0; i < numChildren; i++) {
-                if (arrayExpression.getChild(i).getKind().equals(ARRAY_ACCESS_OP.toString())) {
-                    var result = visit(arrayExpression.getChild(i));
+                var child = arrayExpression.getChild(i);
+
+                var isChildParenExpr = child.getKind().equals(PAREN_EXPR.toString());
+                var isChildBinaryOp = child.getKind().equals(BINARY_OP.toString());
+                var isChildArrayAccessOp = child.getKind().equals(ARRAY_ACCESS_OP.toString());
+
+                var result = visit(arrayExpression.getChild(i));
+
+                if (isChildParenExpr) {
+                    result = visit(child.getJmmChild(0));
+                    isChildBinaryOp = child.getJmmChild(0).getKind().equals(BINARY_OP.toString());
+                    isChildArrayAccessOp = child.getJmmChild(0).getKind().equals(ARRAY_ACCESS_OP.toString());
+                }
+
+                if (isChildBinaryOp) {
+                    computation.append(result.getComputation());
+
+                    parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
+
+                    code.append(parentName);
+                    code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
+                    code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
+                    code.append(result.getCode());
+                    code.append(END_STMT);
+
+                    continue;
+                } else if (isChildArrayAccessOp) {
                     computation.append(result.getComputation());
 
                     var temp = OptUtils.getTemp();
@@ -270,6 +294,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
                     continue;
                 }
+
+                if (isChildParenExpr) continue;
 
                 code.append(parentName);
                 code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
