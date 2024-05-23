@@ -234,6 +234,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             var isMethodCall = isNodeType(METHOD_CALL.toString(), returnNode.getJmmChild(0));
             var isIdentifier = isNodeType(IDENTIFIER.toString(), returnNode.getJmmChild(0));
+            var isArrDecl = isNodeType(ARRAY_DECLARATION.toString(), returnNode.getJmmChild(0));
+            var isArrExpr = isNodeType(ARRAY_EXPRESSION.toString(), returnNode.getJmmChild(0));
+
             var isNotLocal = true;
             var isNotParam = true;
 
@@ -259,12 +262,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 return code.toString();
             }
 
-            if (isMethodCall) {
+            if (isMethodCall || isArrExpr || isArrDecl) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
 
                 code.append(expr.getComputation());
-                code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
+                if (!isArrExpr) {
+                    code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+                } else {
+                    code.append(expr.getCode());
+                    if (!code.toString().endsWith(END_STMT))
+                        code.append(END_STMT);
+                }
                 code.append(RETURN_STMT).append(OptUtils.toOllirType(retType)).append(SPACE).append(temp).append(tempType).append(END_STMT);
 
                 return code.toString();
@@ -272,7 +283,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         }
 
-        if (returnNode.getChild(0).getKind().equals(ARRAY_ACCESS_OP.toString())) {
+        if (isNodeType(ARRAY_ACCESS_OP.toString(), returnNode.getJmmChild(0))) {
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(retType);
 

@@ -1,17 +1,19 @@
-import ioPlus;
-class SimpleIfElseStat {
-    int[] b;
-    int a;
-    boolean c;
-    int[] foo(int[] c) {
-    return c;
+import io;
+
+class ArrayInitialization {
+
+    public static void main(String[] args) {
+        ArrayInitialization a;
+        a = new ArrayInitialization();
+
+        io.println(a.foo());
     }
 
-    int bar() {
-        //this.foo([1,2,3,4,5,6,7,8,9,10]);
-       this.foo(new int[10]);
+    int foo() {
+        int[] a;
 
-        return 1;
+        a = [1, 2, 3, 4];
+
+        return a[2];
     }
-
 }

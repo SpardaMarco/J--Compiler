@@ -214,15 +214,30 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
 
         JmmNode parent = arrayExpression.getParent();
+        while (true) {
+            if (parent.getKind().equals(PAREN_EXPR.toString())) {
+                parent = parent.getParent();
+            } else {
+                break;
+            }
+        }
+
         var parentType = parent.get("type");
-        var parentName = parent.get("name");
-        if (arrayExpression.getParent().getKind().equals(METHOD_CALL.toString())) {
+        var parentName = "";
+        if (arrayExpression.getParent().getKind().equals(METHOD_CALL.toString())
+                || arrayExpression.getParent().getKind().equals(RETURN.toString())) {
             parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
+        } else {
+            parentName = parent.get("name");
         }
 
         var parentOllirType = OptUtils.toOllirType(new Type(parentType, true));
 
         var numChildren = arrayExpression.getNumChildren();
+
+        if (arrayExpression.getParent().getKind().equals(RETURN.toString())) {
+            computation.append(parentName).append(parentOllirType).append(SPACE).append(ASSIGN).append(parentOllirType).append(SPACE);
+        }
 
         computation.append("new(array,").append(SPACE).append(numChildren).append(".i32").append(")");
         computation.append(parentOllirType);
