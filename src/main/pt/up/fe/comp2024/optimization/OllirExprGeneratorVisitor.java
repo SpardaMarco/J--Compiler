@@ -262,7 +262,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
             if (isChildBinaryOp) {
                 computation.append(result.getComputation());
-                
+
                 parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
 
                 code.append(parentName);
