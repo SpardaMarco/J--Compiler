@@ -1,13 +1,17 @@
 class Main {
-    int x;
-	int foo() {
 
-	    x = 1;
+    int foo() {
 
-        while( 1 < 10) {
-            x = x + 1;
+        int a;
+        int b;
+        int c;
+        int d;
+
+        a = 0;
+        b = a;
+        c = b;
+        d = c;
+
+        return d;
         }
-
-        return x;
-	}
 }

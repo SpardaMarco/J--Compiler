@@ -60,6 +60,7 @@ public class MethodRegisterOptimizer {
 
         OllirMethodStream stream = new OllirMethodStream(method);
 
+
         int line = 0;
         String statement;
         while ((statement = stream.nextStatement()) != null) {

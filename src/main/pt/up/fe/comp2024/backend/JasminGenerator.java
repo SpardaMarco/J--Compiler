@@ -9,6 +9,7 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -395,7 +396,12 @@ public class JasminGenerator {
         // Add limits
         code.append(TAB).append(".limit stack ").append(stackSize).append(NL);
         // Add locals limit
-        var locals = method.getVarTable().size();
+
+        HashSet<Integer> virtualRegs = new HashSet<>();
+        for (String reg : method.getVarTable().keySet()) {
+            virtualRegs.add(method.getVarTable().get(reg).getVirtualReg());
+        }
+        var locals = virtualRegs.size();
         if (!method.isStaticMethod()) {
             locals++;
             for (var variable : method.getVarTable().values()) {

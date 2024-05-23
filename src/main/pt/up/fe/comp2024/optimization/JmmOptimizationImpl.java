@@ -27,7 +27,9 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         if (numRegisters == null || numRegisters.equals("-1")) return ollirResult;
 
-        return new RegisterOptimizer(ollirResult, Integer.parseInt(numRegisters)).optimize();
+        new RegisterOptimizer(ollirResult, Integer.parseInt(numRegisters)).optimize();
+
+        return ollirResult;
     }
 
     @Override
