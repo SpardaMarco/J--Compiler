@@ -1,15 +1,11 @@
 class Main {
-
     int x;
 	int foo() {
 
+	    x = 1;
 
-        x = 1;
-
-        if (x < 1) {
-            x = 2;
-        } else {
-            x = 3;
+        while( 1 < 10) {
+            x = x + 1;
         }
 
         return x;

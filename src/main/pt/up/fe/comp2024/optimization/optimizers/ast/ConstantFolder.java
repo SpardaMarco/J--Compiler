@@ -75,6 +75,8 @@ public class ConstantFolder extends ConstantOptimizer {
         };
         JmmNode resultNode = new JmmNodeImpl("IntegerLiteral");
         resultNode.put("value", Integer.toString(result));
+        resultNode.put("type", "int");
+        resultNode.put("isArray", "false");
         return resultNode;
     }
 
@@ -84,6 +86,8 @@ public class ConstantFolder extends ConstantOptimizer {
         boolean result = leftValue && rightValue;
         JmmNode resultNode = new JmmNodeImpl("BooleanLiteral");
         resultNode.put("value", Boolean.toString(result));
+        resultNode.put("type", "boolean");
+        resultNode.put("isArray", "false");
         return resultNode;
     }
 
@@ -93,6 +97,8 @@ public class ConstantFolder extends ConstantOptimizer {
         boolean result = leftValue < rightValue;
         JmmNode resultNode = new JmmNodeImpl("BooleanLiteral");
         resultNode.put("value", Boolean.toString(result));
+        resultNode.put("type", "boolean");
+        resultNode.put("isArray", "false");
         return resultNode;
     }
 }
