@@ -38,7 +38,9 @@ public class ConstantPropagator extends ConstantOptimizer {
             }
         }
         if (allRemoved) {
-            declarations.get(id).detach();
+            JmmNode declaration = declarations.get(id);
+            if (declaration != null)
+                declaration.detach();
         }
     }
 

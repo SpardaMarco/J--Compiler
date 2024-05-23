@@ -1,23 +1,14 @@
-import ioPlus;
-class ArrayAccess {
-    int k;
+class Main {
 
-	public int foo(int[] a, int b) {
-		int result;
-
-		result = a[0];
-		result = a[1] + a[2];
-		result = result + a[3];
-		result = 1 + a[4];
-
-		a[k] = 5;
-	    a[0] = 1;
-		a[1] = 2;
-		a[2] = 3;
-		a[3] = 4;
+    int x;
+	int foo() {
 
 
-		return result;
+        x = 1;
+
+
+
+        return x;
 	}
 }
 
