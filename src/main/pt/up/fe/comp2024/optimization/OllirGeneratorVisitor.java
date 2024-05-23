@@ -426,7 +426,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
         var isField = fields.stream().anyMatch(f -> f.getName().equals(lhs));
 
-        if (isField && isNotLocal && isNotParam) {
+        if ((isField && isNotLocal && isNotParam) || indexIsMethodCall) {
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);
 
@@ -535,7 +535,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 }
 
             }
-
 
             code.append(temp);
             code.append('[');
