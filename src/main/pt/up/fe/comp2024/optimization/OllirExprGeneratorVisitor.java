@@ -196,7 +196,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         var child = attributeNode.getChild(0);
 
-        var id = child.get("value");
+        var hasValue = child.hasAttribute("value");
+        var id = (hasValue) ? child.get("value") : child.get("name");
         var idType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
 
         code.append(ARRAY_LENGTH);
