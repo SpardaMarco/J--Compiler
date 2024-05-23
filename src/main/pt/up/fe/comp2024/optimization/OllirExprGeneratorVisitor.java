@@ -212,7 +212,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var code = new StringBuilder();
         var computation = new StringBuilder();
 
-
         JmmNode parent = arrayExpression.getParent();
         while (true) {
             if (parent.getKind().equals(PAREN_EXPR.toString())) {
@@ -224,7 +223,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         var parentType = parent.get("type");
         var parentName = "";
-        if (arrayExpression.getParent().getKind().equals(METHOD_CALL.toString())
+        if (parent.getKind().equals(METHOD_CALL.toString())
                 || arrayExpression.getParent().getKind().equals(RETURN.toString())) {
             parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
         } else {

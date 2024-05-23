@@ -1,10 +1,6 @@
 import io;
 
 class VarargsAndArrayInit {
-
-
-
-
     int foo(int[] ar, int... a) {
         return ar.length + a.length;
     }
@@ -12,9 +8,8 @@ class VarargsAndArrayInit {
     int bar() {
         int res;
 
-        res = this.foo([1, 2, 3], 4, 5, 6, 7, 8);
+        res = this.foo((([1, 2, 3])), 4, 5, 6, 7, 8);
 
         return res;
     }
-
 }
