@@ -23,6 +23,7 @@ public class RegisterOptimizer {
     public void optimize() {
 
         for (Method method : ollirClass.getMethods()) {
+            HashSet<String> declaredRegisters = new HashSet<>();
             HashMap<String, Pair<Integer, Integer>> liveRanges = new HashMap<>();
             for (String register : method.getVarTable().keySet()) {
                 String type = method.getVarTable().get(register).getVarType().toString();
@@ -31,8 +32,12 @@ public class RegisterOptimizer {
                 for (Instruction instruction : method.getInstructions()) {
                     String instructionString = instruction.toString();
                     if (instructionString.contains(registerName)) {
-                        liveRanges.putIfAbsent(register, new Pair<>(line + 1, line + 1));
-                        liveRanges.put(register, new Pair<>(liveRanges.get(register).a, line));
+                        if (!declaredRegisters.contains(register)) {
+                            declaredRegisters.add(register);
+                        } else {
+                            liveRanges.putIfAbsent(register, new Pair<>(line, line));
+                            liveRanges.put(register, new Pair<>(liveRanges.get(register).a, line));
+                        }
                     }
                     line++;
                 }
