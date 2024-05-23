@@ -302,7 +302,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 code.append(parentName);
                 code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
                 code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
-                var childValue = arrayExpression.getChild(i).get("value");
+                var hasValue = child.hasAttribute("value");
+                var childValue = (hasValue) ? arrayExpression.getChild(i).get("value") : arrayExpression.getChild(i).get("name");
                 code.append(childValue).append(childrenOllirType);
                 code.append(END_STMT);
             }
