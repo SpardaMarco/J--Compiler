@@ -72,6 +72,11 @@ public class MethodRegisterOptimizer {
         List<String> registers = new ArrayList<>();
 
         while (true) {
+
+            if (statement.contains(":=")) {
+                statement = statement.substring(statement.indexOf(":=") + 2);
+            }
+
             int registerBegin = statement.indexOf("tmp");
             if (registerBegin == -1) {
                 break;
