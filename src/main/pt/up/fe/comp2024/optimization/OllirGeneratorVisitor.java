@@ -236,6 +236,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             var isIdentifier = isNodeType(IDENTIFIER.toString(), returnNode.getJmmChild(0));
             var isArrDecl = isNodeType(ARRAY_DECLARATION.toString(), returnNode.getJmmChild(0));
             var isArrExpr = isNodeType(ARRAY_EXPRESSION.toString(), returnNode.getJmmChild(0));
+            var isAttr = isNodeType(ATTRIBUTE.toString(), returnNode.getJmmChild(0));
+            var isUnaryOp = isNodeType(UNARY_OP.toString(), returnNode.getJmmChild(0));
 
             var isNotLocal = true;
             var isNotParam = true;
@@ -262,7 +264,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 return code.toString();
             }
 
-            if (isMethodCall || isArrExpr || isArrDecl) {
+            if (isMethodCall || isArrExpr || isArrDecl || isAttr || isUnaryOp) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(retType);
 
@@ -424,7 +426,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isNotParam = params.stream().noneMatch(p -> p.getName().equals(lhs));
         var isField = fields.stream().anyMatch(f -> f.getName().equals(lhs));
 
-        if (isField && isNotLocal && isNotParam) {
+        if ((isField && isNotLocal && isNotParam) || indexIsMethodCall || indexIsIdentifier) {
             var temp = OptUtils.getTemp();
             var tempType = OptUtils.toOllirType(thisType);
 
@@ -469,7 +471,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                         code.append(OptUtils.toOllirType(TypeUtils.getExprType(arrayAssignStmtNode.getJmmChild(0), table)));
                         code.append(END_STMT);
 
-                        code.append(temp);
+                        code.append(lhs);
                         code.append('[');
                         code.append(tempIndex);
                         code.append(tempIndexType);
@@ -533,7 +535,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 }
 
             }
-
 
             code.append(temp);
             code.append('[');

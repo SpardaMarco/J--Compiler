@@ -1,13 +1,23 @@
-class VarargsAndArrayInit {
+import ioPlus;
+class ArrayAccess {
+    int k;
 
-    int foo(int... a) {
-        return 1;
-    }
+	public int foo(int[] a, int b) {
+		int result;
 
-    int bar() {
+		result = a[0];
+		result = a[1] + a[2];
+		result = result + a[3];
+		result = 1 + a[4];
 
-        this.foo();
+		a[k] = 5;
+	    a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
 
-        return 1;
-    }
+
+		return result;
+	}
 }
+
