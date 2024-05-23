@@ -328,10 +328,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var locals = table.getLocalVariables(methodName);
             var fields = table.getFields();
 
-            var isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(methodCallNode.getJmmChild(0).get("value")));
-            var isNotParam = params.stream().noneMatch(p -> p.getName().equals(methodCallNode.getJmmChild(0).get("value")));
-            var isField = fields.stream().anyMatch(f -> f.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+            var isNotLocal = false;
+            var isNotParam = false;
+            var isField = false;
 
+            if (exprHasValue) {
+                isNotLocal = locals.stream().noneMatch(l -> l.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+                isNotParam = params.stream().noneMatch(p -> p.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+                isField = fields.stream().anyMatch(f -> f.getName().equals(methodCallNode.getJmmChild(0).get("value")));
+            }
+            
             if (isNotLocal && isNotParam && isField) {
                 var result = visit(methodCallNode.getJmmChild(0));
 
