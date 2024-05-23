@@ -43,18 +43,37 @@ public class ColorGraph {
 
         HashMap<String, Integer> colors = new HashMap<>();
         Stack<String> registersToPaint = new Stack<>();
+        HashSet<String> spills = new HashSet<>();
 
         registers.forEach(registersToPaint::push);
 
         while (!registersToPaint.isEmpty()) {
             String register = registersToPaint.pop();
+
+            if (!hasDegreeLessThan(numColors, register)) {
+                spills.add(register);
+                continue;
+            }
             for (int color = 0; color < numColors; color++) {
-                if (canPaintRegWith(register, color, colors) && hasDegreeLessThan(numColors, register)) {
+
+                if (canPaintRegWith(register, color, colors, spills)) {
                     colors.put(register, color);
                     break;
                 }
             }
-            if (colors.get(register) == -1) {
+            if (colors.get(register) == null) {
+                return null;
+            }
+        }
+
+        for (String spill : spills) {
+            for (int color = 0; color < numColors; color++) {
+                if (canPaintRegWith(spill, color, colors, new HashSet<>())) {
+                    colors.put(spill, color);
+                    break;
+                }
+            }
+            if (colors.get(spill) == null) {
                 return null;
             }
         }
@@ -69,8 +88,15 @@ public class ColorGraph {
         return coloredRegisters;
     }
 
-    private boolean canPaintRegWith(String register, int color, HashMap<String, Integer> colors) {
-        return edges.stream().noneMatch(edge -> edge.a.equals(register) && colors.get(edge.b) == color);
+    private boolean canPaintRegWith(
+            String register, int color, HashMap<String, Integer> colors, HashSet<String> spills
+    ) {
+        return edges.stream().noneMatch(edge ->
+                edge.a.equals(register) &&
+                        colors.get(edge.b) != null &&
+                        colors.get(edge.b) == color &&
+                        !spills.contains(edge.b)
+        );
     }
 
     private boolean hasDegreeLessThan(int degree, String register) {

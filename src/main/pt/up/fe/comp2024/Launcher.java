@@ -71,7 +71,7 @@ public class Launcher {
 
 //        OllirResult ollirResult = new OllirResult(code, config);
         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-//        System.out.println(jasminResult.getJasminCode());
+        System.out.println(jasminResult.getJasminCode());
         TestUtils.noErrors(jasminResult.getReports());
     }
 }

@@ -1,4 +1,5 @@
-import io;
+import ioPlus;
+class SimpleIfElseStat {
 
 class VarargsAndArrayInit {
     int[] b;
