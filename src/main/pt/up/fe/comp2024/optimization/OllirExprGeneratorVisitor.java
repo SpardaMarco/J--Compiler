@@ -513,6 +513,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         String falseLabel = "falseLabel" + (OptUtils.getCurrentTempNum() + 1);
         String endLabel = "endLabel" + (OptUtils.getCurrentTempNum() + 1);
+        String conditionLabel = "condition" + (OptUtils.getCurrentTempNum() + 1) + "Label";
         String result = OptUtils.getTemp() + ".bool";
         var methodName = (binExprNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
                 binExprNode.getAncestor(METHOD_DECLARATION).get().get("name") :
@@ -561,14 +562,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     computation.append(END_STMT);
                 childResultToAppend = temp + tempType;
             }
-
-            var temp = OptUtils.getTemp();
-            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
-            computation.append(temp).append(tempType).append(SPACE)
-                    .append(ASSIGN).append(tempType).append(SPACE).append(NOT).append(".bool").append(SPACE).append(childResultToAppend);
-            if (!computation.toString().endsWith(END_STMT))
-                computation.append(END_STMT);
-            computation.append("if (").append(temp).append(tempType).append(") goto ").append(falseLabel).append(END_STMT);
+            String nextJump = conditionLabel + i;
+            computation.append("if (").append(childResultToAppend).append(") goto ").append(nextJump).append(END_STMT);
+            computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
+            computation.append("goto ").append(endLabel).append(END_STMT);
+            computation.append(nextJump).append(":").append('\n');
         }
 
         var lastChild = children.get(children.size() - 1);
@@ -578,9 +576,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append(lastChildResult.getCode());
         if (!computation.toString().endsWith(END_STMT))
             computation.append(END_STMT);
-        computation.append("goto ").append(endLabel).append(END_STMT);
-        computation.append(falseLabel).append(":").append('\n');
-        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
+//        computation.append("goto ").append(endLabel).append(END_STMT);
+//        computation.append(falseLabel).append(":").append('\n');
+//        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
         computation.append(endLabel).append(":").append('\n');
         code.append(result);
 
