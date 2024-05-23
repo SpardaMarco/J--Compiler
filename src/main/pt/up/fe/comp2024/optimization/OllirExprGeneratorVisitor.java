@@ -69,10 +69,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var computation = new StringBuilder();
 
         var firstChild = arrayAccessNode.getJmmChild(0);
-        var firstChildValue = firstChild.get("value");
+        var hasValue = firstChild.hasAttribute("value");
+        var firstChildValue = (hasValue) ? firstChild.get("value") : firstChild.get("name");
 
         var secondChild = arrayAccessNode.getJmmChild(1);
-        var hasValue = secondChild.hasAttribute("value");
+        hasValue = secondChild.hasAttribute("value");
         var hasName = secondChild.hasAttribute("name");
         var isArrayAccessOp = secondChild.getKind().equals(ARRAY_ACCESS_OP.toString());
 
