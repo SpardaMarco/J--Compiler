@@ -246,6 +246,27 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var childrenOllirType = OptUtils.toOllirType(new Type(childrenType, false));
 
         for (var i = 0; i < numChildren; i++) {
+            if (arrayExpression.getChild(i).getKind().equals(ARRAY_ACCESS_OP.toString())) {
+                var result = visit(arrayExpression.getChild(i));
+                computation.append(result.getComputation());
+
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(arrayExpression.getChild(i), table));
+
+                code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+
+                code.append(result.getCode());
+                code.append(END_STMT);
+
+                code.append(parentName);
+                code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
+                code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
+                code.append(temp).append(tempType);
+                code.append(END_STMT);
+
+                continue;
+            }
+
             code.append(parentName);
             code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
             code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
