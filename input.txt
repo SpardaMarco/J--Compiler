@@ -1,16 +1,20 @@
-class VarargsAndArrayInit {
+import io;
 
+class VarargsAndArrayInit {
     //int[] p;
 
-    //int foo(int ar, int... a) {
-        //return ar + a.length;
-    //}
+    int foo(int ar, int... a) {
+        return ar + a.length;
+    }
 
-    boolean bar() {
-        //int res;
+    int bar() {
+        int res;
         int[] t;
         t = new int[3];
         //p = new int[3];
-        return !(!(true && false));
+
+        res = this.foo((t[1]));
+
+        return res;
     }
 }

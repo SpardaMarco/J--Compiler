@@ -61,8 +61,10 @@ public class Launcher {
         System.out.println(semanticsResult.getRootNode().toTree());
         OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
+        System.out.println(ollirResult.getOllirCode());
         ollirResult = ollirGen.optimize(ollirResult);
 
+        TestUtils.noErrors(ollirResult.getReports());
         // Print OLLIR code
         System.out.println(ollirResult.getOllirCode());
 
