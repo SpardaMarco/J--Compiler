@@ -416,7 +416,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 computation.append(temp).append(typeVarArg).append(SPACE)
                         .append(ASSIGN).append(typeVarArg).append(SPACE);
                 computation.append("new(array,").append(SPACE);
-                computation.append(numOfArgs).append(".int32").append(")").append(typeVarArg).append(END_STMT);
+                computation.append(numOfArgs).append(".i32").append(")").append(typeVarArg).append(END_STMT);
                 code.append(temp).append(typeVarArg);
 
                 for (index = index; index < methodCallNode.getNumChildren(); index++) {
@@ -430,7 +430,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     if (!computation.toString().endsWith(END_STMT))
                         computation.append(END_STMT);
 
-                    computation.append(temp).append('[').append(currArg).append(".int32").append(']').append(tempType).append(SPACE)
+                    computation.append(temp).append('[').append(currArg).append(".i32").append(']').append(tempType).append(SPACE)
                             .append(ASSIGN).append(typeVarArg).append(SPACE).append(newTemp).append(tempType);
                     if (!computation.toString().endsWith(END_STMT))
                         computation.append(END_STMT);
