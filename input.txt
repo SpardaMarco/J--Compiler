@@ -1,9 +1,14 @@
 class Main {
     int x;
+
+    int[] bar(int a) {
+        return new int[10];
+    }
+
 	int foo() {
         int y;
-        //y = [0,1][0];
-        x = [0,1][0];
+        //y = (this.bar(1+1))[0];
+        x = (this.bar(1+1))[0];
 
         return x;
 	}

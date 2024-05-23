@@ -71,6 +71,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var firstChild = arrayAccessNode.getJmmChild(0);
         var hasValue = firstChild.hasAttribute("value");
         var firstChildValue = (hasValue) ? firstChild.get("value") : firstChild.hasAttribute("name") ? firstChild.get("name") : "";
+        var firstChildIsMethodCall = isNodeType(METHOD_CALL.toString(), firstChild);
+        if (firstChildIsMethodCall) {
+            firstChildValue = "";
+        }
 
         var secondChild = arrayAccessNode.getJmmChild(1);
         hasValue = secondChild.hasAttribute("value");
@@ -96,11 +100,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var tempType = OptUtils.toOllirType(TypeUtils.getExprType(firstChild, table));
 
             if (firstChildValue.isEmpty()) {
-                computation.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
-                computation.append(result.getComputation());
-                if (!computation.toString().endsWith(END_STMT))
-                    computation.append(END_STMT);
-                computation.append(result.getCode());
+                if (firstChildIsMethodCall) {
+                    computation.append(result.getComputation());
+                    computation.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+                    computation.append(result.getCode());
+
+                } else {
+                    computation.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+                    computation.append(result.getComputation());
+                    if (!computation.toString().endsWith(END_STMT))
+                        computation.append(END_STMT);
+                    computation.append(result.getCode());
+                }
             } else {
                 computation.append(result.getComputation());
                 computation.append(temp).append(tempType).append(SPACE)
