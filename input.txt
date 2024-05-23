@@ -3,9 +3,15 @@ import io;
 class VarargsAndArrayInit {
     int[] b;
     int a;
+    boolean c;
+    boolean foo() {
+    return true;
+
+    }
 
     int bar() {
-        if (! (true) && (3 < 5)) {
+        c = true;
+        if (!(!c) && !(true)) {
             a =  2;
         } else {
             a = 3;
