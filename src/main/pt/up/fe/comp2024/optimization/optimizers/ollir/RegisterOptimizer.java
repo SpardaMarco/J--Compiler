@@ -20,8 +20,18 @@ public class RegisterOptimizer {
         this.numRegisters = numRegisters;
     }
 
-    public void optimize() {
+    public boolean optimize() {
 
+        if (numRegisters == 0) {
+            while(!optimize(++numRegisters));
+            return true;
+        }
+        else {
+            return optimize(numRegisters);
+        }
+    }
+
+    public boolean optimize(int numRegisters) {
         for (Method method : ollirClass.getMethods()) {
             HashSet<String> declaredRegisters = new HashSet<>();
             HashMap<String, Pair<Integer, Integer>> liveRanges = new HashMap<>();
@@ -44,10 +54,12 @@ public class RegisterOptimizer {
             }
             ColorGraph colorGraph = new ColorGraph(liveRanges);
             HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
-            if (allocation != null) {
-                replaceRegisters(method, allocation);
+            if (allocation == null) {
+                return false;
             }
+            replaceRegisters(method, allocation);
         }
+        return true;
     }
 
     private void replaceRegisters(Method method, HashMap<Integer, HashSet<String>> allocation) {

@@ -3,6 +3,8 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.optimization.optimizers.ast.ASTOptimizer;
 import pt.up.fe.comp2024.optimization.optimizers.ollir.RegisterOptimizer;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
@@ -27,7 +29,15 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         if (numRegisters == null || numRegisters.equals("-1")) return ollirResult;
 
-        new RegisterOptimizer(ollirResult, Integer.parseInt(numRegisters)).optimize();
+        if (!new RegisterOptimizer(ollirResult, Integer.parseInt(numRegisters)).optimize()) {
+            ollirResult.getReports().add(Report.newError(
+                    Stage.OPTIMIZATION,
+                    -1,
+                    -1,
+                    "Register allocation failed for " + numRegisters + " registers",
+                    null
+            ));
+        }
 
         return ollirResult;
     }
