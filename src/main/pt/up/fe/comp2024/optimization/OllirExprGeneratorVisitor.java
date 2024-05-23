@@ -258,6 +258,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 code.append(result.getCode());
                 code.append(END_STMT);
 
+                parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
+
                 code.append(parentName);
                 code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
                 code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
