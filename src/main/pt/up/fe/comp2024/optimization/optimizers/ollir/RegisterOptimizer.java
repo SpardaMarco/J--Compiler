@@ -1,6 +1,8 @@
 package pt.up.fe.comp2024.optimization.optimizers.ollir;
 
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 public class RegisterOptimizer {
@@ -18,16 +20,16 @@ public class RegisterOptimizer {
         String optimizedCode = optimizeCode(ollirResult.getOllirCode());
 
         if (optimizedCode == null) {
-//            return new OllirResult(null, ollirResult.getOllirCode(), List.of(
-//                    new Report(
-//                            ReportType.ERROR,
-//                            OPTIMIZATION,
-//                            0,
-//                            0,
-//                            "Register allocation failed for " + numRegisters + " registers."
-//                    )
-//            ));
-            throw new RuntimeException("Register allocation failed for " + numRegisters + " registers.");
+            ollirResult.getReports().add(
+                    Report.newError(
+                            Stage.OPTIMIZATION,
+                            -1,
+                            -1,
+                            "Register allocation failed for " + numRegisters + " registers.",
+                            null
+                    )
+            );
+            return ollirResult;
         }
         return new OllirResult(optimizedCode, ollirResult.getConfig());
     }

@@ -1,6 +1,5 @@
-import io;
-
 class VarargsAndArrayInit {
+
     //int[] p;
 
     //int foo(int ar, int... a) {
@@ -12,8 +11,6 @@ class VarargsAndArrayInit {
         int[] t;
         t = new int[3];
         //p = new int[3];
-
-        //res = this.foo((t[1]), []);
         return t.length;
     }
 }
