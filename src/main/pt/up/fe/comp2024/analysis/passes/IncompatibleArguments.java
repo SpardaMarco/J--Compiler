@@ -1,7 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -58,7 +56,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
             checkArgumentsIndividually(arguments, parameters, methodName);
         } else {
-            if (arguments.size() < parameters.size() - 1){
+            if (arguments.size() < parameters.size() - 1) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(methodCall),
@@ -80,7 +78,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
                 ParamSymbol vararg = parameters.get(parameters.size() - 1);
                 String varargType = vararg.getType().getName();
 
-                if (hasArrayToVarargCorrespondence(arguments, parameters)){
+                if (hasArrayToVarargCorrespondence(arguments, parameters)) {
 
                     JmmNode array = arguments.get(arguments.size() - 1);
                     String arrayType = array.get("type");
@@ -105,7 +103,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
                     int leftoverArguments = arguments.size() - (parameters.size() - 1);
 
-                    for (int j = 0; j < leftoverArguments; j++){
+                    for (int j = 0; j < leftoverArguments; j++) {
 
                         int argumentIndex = (parameters.size() - 1) + j;
                         JmmNode argument = arguments.get(argumentIndex);
@@ -131,7 +129,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
 
     private boolean invalidArguments(List<JmmNode> arguments) {
 
-        for (JmmNode argument: arguments) {
+        for (JmmNode argument : arguments) {
             if (argument.get("type").equals("invalid"))
                 return true;
         }
@@ -139,6 +137,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
     }
 
     private boolean hasArrayToVarargCorrespondence(List<JmmNode> arguments, List<ParamSymbol> parameters) {
+        if (arguments.isEmpty()) return false;
         JmmNode lastArgument = arguments.get(arguments.size() - 1);
         boolean isLastArgumentArray = lastArgument.get("isArray").equals("true");
 
@@ -159,7 +158,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
             if (argument.get("type").equals("empty_array") && parameter.getType().isArray())
                 return;
 
-            if (!parameterType.equals(argumentType)){
+            if (!parameterType.equals(argumentType)) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(argument),
@@ -180,7 +179,7 @@ public class IncompatibleArguments extends AnalysisVisitor {
     }
 
     private boolean wrongVarargUse(List<ParamSymbol> parameters) {
-        for (int i = 0; i < parameters.size() - 1; i++){
+        for (int i = 0; i < parameters.size() - 1; i++) {
             if (parameters.get(i).isVararg()) {
                 return true;
             }
