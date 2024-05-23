@@ -609,6 +609,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                         .append(ASSIGN).append(tempType).append(SPACE);
                 computation.append(lhs.getCode());
                 lhsToAppend = temp + tempType;
+            } else if (!lhs.getComputation().isEmpty()) {
+                computation.append(lhs.getComputation());
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(binExprNode.getJmmChild(0), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(lhs.getCode());
+                lhsToAppend = temp + tempType;
             } else {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(TypeUtils.getExprType(binExprNode.getJmmChild(0), table));
@@ -629,7 +637,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         isNotParam = params.stream().noneMatch(p -> p.getName().equals(secondChildValue));
         isIntLiteral = isNodeType(INTEGER_LITERAL.toString(), binExprNode.getJmmChild(1));
         isBoolLiteral = isNodeType(BOOLEAN_LITERAL.toString(), binExprNode.getJmmChild(1));
-
+// isNotLocal && naofor param && nao for literal == field || methodcall
         if (!(!isNotLocal || !isNotParam || isIntLiteral || isBoolLiteral)) {
             if (rhsIsBinExpr) {
                 computation.append(rhs.getComputation());
@@ -638,6 +646,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 computation.append(rhs.getComputation());
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(TypeUtils.getExprType(binExprNode.getJmmChild(0), table));
+                computation.append(temp).append(tempType).append(SPACE)
+                        .append(ASSIGN).append(tempType).append(SPACE);
+                computation.append(rhs.getCode());
+                rhsToAppend = temp + tempType;
+            } else if (!rhs.getComputation().isEmpty()) {
+                computation.append(rhs.getComputation());
+                var temp = OptUtils.getTemp();
+                var tempType = OptUtils.toOllirType(TypeUtils.getExprType(binExprNode.getJmmChild(1), table));
                 computation.append(temp).append(tempType).append(SPACE)
                         .append(ASSIGN).append(tempType).append(SPACE);
                 computation.append(rhs.getCode());

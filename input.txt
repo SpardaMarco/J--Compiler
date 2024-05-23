@@ -24,10 +24,12 @@ class VarargsAndArrayInit {
     }
 
     int bar() {
-        int res;
+        int c;
+        c = 1;
         b = new int[5];
-        b[0] = b[a];
-        return res;
+        //b[0] = b[0] + b[0];
+        b[b[0]+this.foo()] = b[a*5+c+b[0]] + b[this.foo()*a];
+        return 1;
     }
 
 }
