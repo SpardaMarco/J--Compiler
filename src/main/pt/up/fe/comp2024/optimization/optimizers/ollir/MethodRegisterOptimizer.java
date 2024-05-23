@@ -1,6 +1,7 @@
 package pt.up.fe.comp2024.optimization.optimizers.ollir;
 
 import org.antlr.v4.runtime.misc.Pair;
+import pt.up.fe.comp2024.symboltable.JmmSymbolTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,12 +12,17 @@ import java.util.regex.Pattern;
 
 public class MethodRegisterOptimizer {
 
+    private final String methodName;
     private final String method;
+
+    private final JmmSymbolTable table;
 
     private final HashMap<String, Pair<Integer, Integer>> liveRanges = new HashMap<>();
 
-    public MethodRegisterOptimizer(String method) {
+    public MethodRegisterOptimizer(String methodName, String method, JmmSymbolTable table) {
+        this.methodName = methodName;
         this.method = method;
+        this.table = table;
     }
 
     public String optimize(int numRegisters) {
@@ -28,28 +34,26 @@ public class MethodRegisterOptimizer {
                 numRegisters++;
                 HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
                 if (allocation != null) {
-                    String optimizedMethod = method;
-                    for (Integer optRegIndex : allocation.keySet()) {
-                        for (String reg : allocation.get(optRegIndex)) {
-                            optimizedMethod = optimizedMethod.replace(reg, "tmp" + optRegIndex);
-                        }
-                    }
-                    return optimizedMethod;
+                    return replaceRegisters(allocation);
                 }
             }
         } else {
             HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
-            if (allocation == null) {
-                return null;
+            if (allocation != null) {
+                return replaceRegisters(allocation);
             }
-            String optimizedMethod = method;
-            for (Integer optRegIndex : allocation.keySet()) {
-                for (String reg : allocation.get(optRegIndex)) {
-                    optimizedMethod = optimizedMethod.replace(reg, "tmp" + optRegIndex);
-                }
-            }
-            return optimizedMethod;
         }
+        return null;
+    }
+
+    private String replaceRegisters(HashMap<Integer, HashSet<String>> allocation) {
+        String optimizedMethod = method;
+        for (Integer optRegIndex : allocation.keySet()) {
+            for (String reg : allocation.get(optRegIndex)) {
+                optimizedMethod = optimizedMethod.replace(reg + ".", "tmp" + optRegIndex + ".");
+            }
+        }
+        return optimizedMethod;
     }
 
     private void buildLiveRanges() {
@@ -80,6 +84,10 @@ public class MethodRegisterOptimizer {
 //            statement = statement.substring(registerBegin + registerEnd);
 //        }
 
+        int assignIndex = statement.indexOf(":=");
+        if (assignIndex != -1)
+            statement = statement.substring(assignIndex + 2);
+
         String regex = "\\b([a-zA-Z][a-zA-Z0-9]*)\\.[a-zA-Z0-9_]+\\b";
         Pattern pattern = Pattern.compile(regex);
 
@@ -87,23 +95,33 @@ public class MethodRegisterOptimizer {
         ArrayList<String> registerNames = new ArrayList<>();
 
         while (matcher.find()) {
-            // Group 1 is the register name
+
             String registerName = matcher.group(1);
-            if (!registerName.startsWith("new") && !registerName.startsWith("ret"))
+            if (validRegister(registerName))
                 registerNames.add(registerName);
         }
 
-        // Print the extracted register names for the current statement
-        System.out.println("Statement: " + statement);
-        System.out.println("Register Names: " + registerNames);
-
         return registerNames;
+    }
+
+    private boolean validRegister(String registerName) {
+        if (registerName.startsWith("new"))
+            return false;
+        if (registerName.startsWith("ret"))
+            return false;
+        if (registerName.startsWith("array"))
+            return false;
+        // TODO
+//        if (table.getMethodSymbol(methodName).getParams().stream().anyMatch(param -> param.getName().equals(registerName)))
+//            return false;
+
+        return true;
     }
 
     private void updateLiveRanges(String register, Integer line) {
 
         if (liveRanges.get(register) == null) {
-            liveRanges.put(register, new Pair<>(line + 1, line + 1));
+            liveRanges.put(register, new Pair<>(line, line));
         } else {
             liveRanges.put(register, new Pair<>(liveRanges.get(register).a, line));
         }
