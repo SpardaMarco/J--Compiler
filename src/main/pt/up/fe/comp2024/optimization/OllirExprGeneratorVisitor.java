@@ -514,7 +514,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         String falseLabel = "falseLabel" + (OptUtils.getCurrentTempNum() + 1);
         String endLabel = "endLabel" + (OptUtils.getCurrentTempNum() + 1);
-        String conditionLabel = "conditionLabel" + (OptUtils.getCurrentTempNum() + 1);
+        String conditionLabel = "condition" + (OptUtils.getCurrentTempNum() + 1) + "Label";
         String result = OptUtils.getTemp() + ".bool";
         var methodName = (binExprNode.getAncestor(METHOD_DECLARATION).isPresent()) ?
                 binExprNode.getAncestor(METHOD_DECLARATION).get().get("name") :
@@ -565,7 +565,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             }
             String nextJump = conditionLabel + i;
             computation.append("if (").append(childResultToAppend).append(") goto ").append(nextJump).append(END_STMT);
-            computation.append("goto ").append(falseLabel).append(END_STMT);
+            computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
+            computation.append("goto ").append(endLabel).append(END_STMT);
             computation.append(nextJump).append(":").append('\n');
         }
 
@@ -576,9 +577,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append(lastChildResult.getCode());
         if (!computation.toString().endsWith(END_STMT))
             computation.append(END_STMT);
-        computation.append("goto ").append(endLabel).append(END_STMT);
-        computation.append(falseLabel).append(":").append('\n');
-        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
+//        computation.append("goto ").append(endLabel).append(END_STMT);
+//        computation.append(falseLabel).append(":").append('\n');
+//        computation.append(result).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("0.bool").append(END_STMT);
         computation.append(endLabel).append(":").append('\n');
         code.append(result);
 
