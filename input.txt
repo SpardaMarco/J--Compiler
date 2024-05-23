@@ -1,7 +1,8 @@
 import ioPlus;
 class ArrayAccess {
+    int k;
 
-	public int foo(int... a) {
+	public int foo(int[] a, int b) {
 		int result;
 
 		result = a[0];
@@ -9,11 +10,11 @@ class ArrayAccess {
 		result = result + a[3];
 		result = 1 + a[4];
 
+		a[k] = 5;
 	    a[0] = 1;
 		a[1] = 2;
 		a[2] = 3;
 		a[3] = 4;
-		a[this.foo(1,2,3)] = 5;
 
 
 		return result;
