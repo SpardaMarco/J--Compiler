@@ -1,0 +1,19 @@
+import ioPlus;
+class SimpleIfElseStat {
+    int[] b;
+    int a;
+    boolean c;
+    boolean foo() {
+    return true;
+
+    }
+
+    int bar() {
+        b = new int[10];
+        a = b[0];
+        b[0] = a;
+
+        return 1;
+    }
+
+}

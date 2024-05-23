@@ -583,6 +583,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             var isMethodCall = isNodeType(METHOD_CALL.toString(), child);
             var isArrayDecl = isNodeType(ARRAY_DECLARATION.toString(), child);
             var isIdentifier = isNodeType(IDENTIFIER.toString(), child);
+            var isArrayAccess = isNodeType(ARRAY_ACCESS_OP.toString(), child);
             var isNotLocalId = true;
             var isNotParamId = true;
 
@@ -591,7 +592,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 isNotParamId = params.stream().noneMatch(p -> p.getName().equals(child.get("value")));
             }
 
-            if (isMethodCall || isArrayDecl || (isNotLocalId && isNotParamId && isIdentifier)) {
+            if (isMethodCall || isArrayDecl || (isNotLocalId && isNotParamId && isIdentifier) || isArrayAccess) {
                 var temp = OptUtils.getTemp();
                 var tempType = OptUtils.toOllirType(thisType);
                 code.append(rhs.getComputation());
