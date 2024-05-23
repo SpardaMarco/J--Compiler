@@ -1,10 +1,7 @@
 package pt.up.fe.comp2024.optimization.optimizers.ollir;
 
 import org.antlr.v4.runtime.misc.Pair;
-import org.specs.comp.ollir.ClassUnit;
-import org.specs.comp.ollir.Descriptor;
-import org.specs.comp.ollir.Instruction;
-import org.specs.comp.ollir.Method;
+import org.specs.comp.ollir.*;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 
 import java.util.HashMap;
@@ -23,10 +20,9 @@ public class RegisterOptimizer {
     public boolean optimize() {
 
         if (numRegisters == 0) {
-            while(!optimize(++numRegisters));
+            while (!optimize(++numRegisters)) ;
             return true;
-        }
-        else {
+        } else {
             return optimize(numRegisters);
         }
     }
@@ -36,6 +32,12 @@ public class RegisterOptimizer {
             HashSet<String> declaredRegisters = new HashSet<>();
             HashMap<String, Pair<Integer, Integer>> liveRanges = new HashMap<>();
             for (String register : method.getVarTable().keySet()) {
+                if (method.getVarTable().get(register).getScope().equals(VarScope.PARAMETER)) {
+                    continue;
+                }
+                if (method.getVarTable().get(register).getVarType().getTypeOfElement().equals(ElementType.THIS)) {
+                    continue;
+                }
                 String type = method.getVarTable().get(register).getVarType().toString();
                 String registerName = register + "." + type;
                 int line = 0;
