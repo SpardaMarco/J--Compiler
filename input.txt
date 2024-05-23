@@ -4,11 +4,14 @@ class Main {
     int[] bar(int a) {
         return new int[10];
     }
+    int boo(int a) {
+        return a;
+    }
 
 	int foo() {
         int y;
-        //y = (this.bar(1+1))[0];
-        x = (this.bar(1+1))[0];
+        //y = [0,1][0];
+        x = this.boo(new int[10][[0,1][0]]);
 
         return x;
 	}
