@@ -1,7 +1,15 @@
 class RegAlloc {
-
-    public boolean soManyRegisters(int... x){
-
-       return [!true][0];
+    public int soManyRegisters(int arg){
+       int a;
+       int b;
+       int c;
+       int d;
+       a = 0;
+       b = (a + 1) + (2 + 3);
+       c = b;
+       d = c;
+       return d;
     }
+
+
 }
