@@ -31,13 +31,24 @@ public class RegisterOptimizer {
     public boolean optimize(int numRegisters) {
 
         for (Method method : ollirClass.getMethods()) {
-            HashSet<String> declaredRegisters = new HashSet<>();
-            HashMap<String, Pair<Integer, Integer>> liveRanges = new HashMap<>();
+            HashSet<String> registers = new HashSet<>();
+            int preAllocatedRegisters = 1;
 
             HashMap<Integer, HashSet<String>> liveIns = new HashMap<>();
             HashMap<Integer, HashSet<String>> liveOuts = new HashMap<>();
             HashMap<Integer, HashSet<String>> defs = new HashMap<>();
             HashMap<Integer, HashSet<String>> uses = new HashMap<>();
+
+            for (String register : method.getVarTable().keySet()) {
+                Descriptor descriptor = method.getVarTable().get(register);
+                if (descriptor.getScope().equals(VarScope.PARAMETER)) {
+                    preAllocatedRegisters++;
+                } else if (descriptor.getVarType().getTypeOfElement().equals(ElementType.THIS)) {
+                    preAllocatedRegisters++;
+                } else {
+                    registers.add(register);
+                }
+            }
 
             for (int i = 0; i < method.getInstructions().size(); i++) {
                 liveIns.put(i, new HashSet<>());
@@ -133,23 +144,22 @@ public class RegisterOptimizer {
                 }
             }
 
-            HashSet<String> registers = new HashSet<>(method.getVarTable().keySet());
 
             ColorGraph colorGraph = new ColorGraph(registers, interferences);
             HashMap<Integer, HashSet<String>> allocation = colorGraph.paintWithColors(numRegisters);
             if (allocation == null) {
                 return false;
             }
-            replaceRegisters(method, allocation);
+            replaceRegisters(method, allocation, preAllocatedRegisters);
         }
         return true;
     }
 
-    private void replaceRegisters(Method method, HashMap<Integer, HashSet<String>> allocation) {
+    private void replaceRegisters(Method method, HashMap<Integer, HashSet<String>> allocation, Integer regOffset) {
         for (Integer optRegIndex : allocation.keySet()) {
             for (String reg : allocation.get(optRegIndex)) {
                 Descriptor descriptor = method.getVarTable().get(reg);
-                descriptor.setVirtualReg(optRegIndex + 1);
+                descriptor.setVirtualReg(optRegIndex + regOffset);
             }
         }
     }
