@@ -95,8 +95,8 @@ public class RegisterOptimizer {
                     previousOut.removeAll(defs.get(line));
                     newLiveIn.addAll(previousOut);
                     newLiveIn.addAll(uses.get(line));
-                    for (int i = line + 1; i < method.getInstructions().size(); i++) {
-                        newLiveOut.addAll(liveIns.get(i));
+                    if (line + 1 < method.getInstructions().size()) {
+                        newLiveOut.addAll(liveIns.get(line + 1));
                     }
 
                     if (!oldLiveIn.equals(newLiveIn) || !oldLiveOut.equals(newLiveOut)) {
@@ -107,36 +107,6 @@ public class RegisterOptimizer {
                     liveOuts.put(line, newLiveOut);
                 }
             }
-
-            System.out.println("Defs: " + defs);
-            System.out.println("Uses: " + uses);
-            System.out.println("Live Ins: " + liveIns);
-            System.out.println("Live Outs: " + liveOuts);
-
-
-//            for (String register : method.getVarTable().keySet()) {
-//                if (method.getVarTable().get(register).getScope().equals(VarScope.PARAMETER)) {
-//                    continue;
-//                }
-//                if (method.getVarTable().get(register).getVarType().getTypeOfElement().equals(ElementType.THIS)) {
-//                    continue;
-//                }
-//                String type = method.getVarTable().get(register).getVarType().toString();
-//                String registerName = register + "." + type;
-//                int line = 0;
-//                for (Instruction instruction : method.getInstructions()) {
-//                    String instructionString = instruction.toString();
-//                    if (instructionString.contains(registerName)) {
-//                        if (!declaredRegisters.contains(register)) {
-//                            declaredRegisters.add(register);
-//                        } else {
-//                            liveRanges.putIfAbsent(register, new Pair<>(line, line));
-//                            liveRanges.put(register, new Pair<>(liveRanges.get(register).a, line));
-//                        }
-//                    }
-//                    line++;
-//                }
-//            }
 
             HashSet<Pair<String, String>> interferences = new HashSet<>();
 
