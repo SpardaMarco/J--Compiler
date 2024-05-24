@@ -232,10 +232,21 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var hasName = child.hasAttribute("name");
         var id = (hasValue) ? child.get("value") : ((hasName) ? child.get("name") : "");
 
-        if (id.isEmpty()) {
+        var isMethodCall = isNodeType(METHOD_CALL.toString(), child);
+
+        if (id.isEmpty() || isMethodCall) {
             var result = visit(child);
             code.append(result.getComputation());
+
+            if (isMethodCall) {
+                code.append("tmp").append(OptUtils.getCurrentTempNum() + 1);
+                var type = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
+                code.append(type).append(SPACE).append(ASSIGN).append(type).append(SPACE);
+                //code.append(result.getCode());
+            }
+
             code.append(result.getCode());
+
 
             var prevTemp = OptUtils.getTemp();
             var nextTempNum = OptUtils.getCurrentTempNum() + 1;
@@ -249,7 +260,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             var thisType = attributeNode.get("type");
             var type = OptUtils.toOllirType(new Type(thisType, false));
             code.append(type);
-
 
             return new OllirExprResult(code.toString(), "");
         }

@@ -265,6 +265,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
 
             if (isMethodCall || isArrExpr || isArrDecl || isAttr || isUnaryOp) {
+                var child = returnNode.getJmmChild(0);
+                var nextChildIsMethodCall = false;
+
+                if (child.getNumChildren() > 0) {
+                    nextChildIsMethodCall = isNodeType(METHOD_CALL.toString(), child.getJmmChild(0));
+                }
+
                 var temp = "tmp" + (OptUtils.getCurrentTempNum());
                 var tempType = ".array.i32";
 
@@ -274,8 +281,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 }
 
                 code.append(expr.getComputation());
+
                 if (!isArrExpr) {
-                    code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE).append(expr.getCode());
+                    if (!(isAttr && nextChildIsMethodCall)) {
+                        code.append(temp).append(tempType).append(SPACE).append(ASSIGN).append(tempType).append(SPACE);
+                    }
+                    code.append(expr.getCode());
                     if (!code.toString().endsWith(END_STMT))
                         code.append(END_STMT);
                 } else {
