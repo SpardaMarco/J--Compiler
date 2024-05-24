@@ -287,6 +287,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 var isChildParenExpr = child.getKind().equals(PAREN_EXPR.toString());
                 var isChildBinaryOp = child.getKind().equals(BINARY_OP.toString());
                 var isChildArrayAccessOp = child.getKind().equals(ARRAY_ACCESS_OP.toString());
+                var isChildUnaryOp = child.getKind().equals(UNARY_OP.toString());
 
                 var result = visit(arrayExpression.getChild(i));
 
@@ -297,6 +298,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 }
 
                 if (isChildBinaryOp) {
+                    computation.append(result.getComputation());
+
+                    parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
+
+                    code.append(parentName);
+                    code.append("[").append(i).append(".i32").append("]").append(childrenOllirType);
+                    code.append(SPACE).append(ASSIGN).append(childrenOllirType).append(SPACE);
+                    code.append(result.getCode());
+                    code.append(END_STMT);
+
+                    continue;
+                } else if (isChildUnaryOp) {
                     computation.append(result.getComputation());
 
                     parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
