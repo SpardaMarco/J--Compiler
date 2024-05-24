@@ -229,7 +229,31 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var child = attributeNode.getChild(0);
 
         var hasValue = child.hasAttribute("value");
-        var id = (hasValue) ? child.get("value") : child.get("name");
+        var hasName = child.hasAttribute("name");
+        var id = (hasValue) ? child.get("value") : ((hasName) ? child.get("name") : "");
+
+        if (id.isEmpty()) {
+            var result = visit(child);
+            code.append(result.getComputation());
+            code.append(result.getCode());
+
+            var prevTemp = OptUtils.getTemp();
+            var nextTempNum = OptUtils.getCurrentTempNum() + 1;
+            var temp = "tmp" + nextTempNum;
+            var tempType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
+
+            code.append(temp).append(".i32").append(SPACE).append(ASSIGN).append(".i32").append(SPACE);
+            code.append(ARRAY_LENGTH);
+            code.append("(").append(prevTemp).append(tempType).append(")");
+
+            var thisType = attributeNode.get("type");
+            var type = OptUtils.toOllirType(new Type(thisType, false));
+            code.append(type);
+
+
+            return new OllirExprResult(code.toString(), "");
+        }
+
         var idType = OptUtils.toOllirType(TypeUtils.getExprType(child, table));
 
         code.append(ARRAY_LENGTH);
@@ -259,7 +283,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var parentName = "";
         if (parent.getKind().equals(METHOD_CALL.toString())
                 || parent.getKind().equals(RETURN.toString())
-                || parent.getKind().equals(ARRAY_ACCESS_OP.toString())) {
+                || parent.getKind().equals(ARRAY_ACCESS_OP.toString())
+                || parent.getKind().equals(ATTRIBUTE.toString())) {
             parentName = "tmp" + (OptUtils.getCurrentTempNum() + 1);
         } else {
             parentName = parent.get("name");
