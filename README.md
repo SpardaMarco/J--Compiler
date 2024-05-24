@@ -13,9 +13,3 @@
 ## Self-Assessment
 
 - We think our project deserves a 20 out of 20.
-
-## Extra Elements
-
-(Optional)
-
-- Our project supports...

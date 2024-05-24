@@ -12,10 +12,9 @@ public class ColorGraph {
 
     private final HashSet<Pair<String, String>> edges = new HashSet<>();
 
-    ColorGraph(HashMap<String, Pair<Integer, Integer>> liveRanges) {
-        registers.addAll(liveRanges.keySet());
-
-        setInterferenceEdges(liveRanges);
+    ColorGraph(HashSet<String> registers, HashSet<Pair<String, String>> edges) {
+        this.registers.addAll(registers);
+        this.edges.addAll(edges);
     }
 
     private void setInterferenceEdges(HashMap<String, Pair<Integer, Integer>> liveRanges) {
